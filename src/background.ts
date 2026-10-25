@@ -2,7 +2,7 @@ import { purgeOldTrash, saveBookmark } from './lib/bookmarks';
 import { db, type BookmarkSource } from './lib/db';
 import { captureScreenshot, enrichBookmark, readLiveHead } from './lib/enrich';
 import { setLastSave, type BackgroundRequest } from './lib/messages';
-import { isSaveableUrl, normalizeUrl } from './lib/normalize';
+import { isProtectedPage, isSaveableUrl, normalizeUrl } from './lib/normalize';
 import { processPending, recheckAll } from './lib/queue';
 
 const MENU_SAVE_LINK = 'save-link';
@@ -71,10 +71,12 @@ async function savePage(tab: chrome.tabs.Tab, source: BookmarkSource) {
   await setLastSave({ bookmarkId: bookmark.id, url: tab.url, created, at: Date.now() });
   if (tab.id !== undefined) flashBadge(tab.id, created);
 
+  // On protected pages both would fail; the background fetch still gets the page's details.
+  const isProtected = isProtectedPage(tab.url);
   const hasScreenshot = await db.previews.get([bookmark.id, 'screenshot']);
-  if (!hasScreenshot && tab.windowId !== undefined) await captureScreenshot(bookmark.id, tab.windowId);
+  if (!hasScreenshot && !isProtected && tab.windowId !== undefined) await captureScreenshot(bookmark.id, tab.windowId);
   if (created || !bookmark.enrichedAt) {
-    const liveHead = tab.id !== undefined ? await readLiveHead(tab.id) : undefined;
+    const liveHead = tab.id !== undefined && !isProtected ? await readLiveHead(tab.id) : undefined;
     await enrichBookmark(bookmark.id, { liveHead });
   }
 }

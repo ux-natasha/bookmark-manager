@@ -7,7 +7,7 @@ import { deleteBookmark, findByUrl, markOpened, updateBookmark } from '../lib/bo
 import type { Bookmark } from '../lib/db';
 import { formatDate, useBookmarks, useTagCounts, useToast } from '../lib/hooks';
 import { getLastSave, onLastSave, openLibrary, sendToBackground, type LastSave } from '../lib/messages';
-import { hostnameOf, isSaveableUrl } from '../lib/normalize';
+import { hostnameOf, isProtectedPage, isSaveableUrl } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { usePreviewUrl } from '../lib/previews';
 
@@ -81,7 +81,7 @@ export function SidePanel() {
   const retakeScreenshot = async (bookmark: Bookmark) => {
     if (tab.windowId === undefined) return;
     const result = (await sendToBackground({ type: 'retake-screenshot', bookmarkId: bookmark.id, windowId: tab.windowId })) as { ok: boolean };
-    showToast({ message: result.ok ? 'Screenshot updated' : "Couldn't take a screenshot of this page" });
+    showToast({ message: result.ok ? 'Screenshot updated' : "Edge didn't allow a screenshot of this page" });
   };
 
   const undoSave = async (bookmark: Bookmark) => {
@@ -221,9 +221,13 @@ function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot }: 
       </label>
 
       <div className="panel-actions">
-        <button className="link small" onClick={onRetakeScreenshot}>
-          Retake screenshot
-        </button>
+        {isProtectedPage(bookmark.url) ? (
+          <span className="small muted">Edge doesn't allow screenshots of extension store pages.</span>
+        ) : (
+          <button className="link small" onClick={onRetakeScreenshot}>
+            Retake screenshot
+          </button>
+        )}
         {!justCreated && (
           <button className="link small danger" onClick={onUndo}>
             Remove from library

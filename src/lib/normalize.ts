@@ -80,6 +80,21 @@ export function isSaveableUrl(input: string | undefined): input is string {
   }
 }
 
+// The browser blocks all extensions from screenshotting or reading the extension stores,
+// so we don't try (and don't offer "Retake screenshot") there.
+export function isProtectedPage(input: string): boolean {
+  try {
+    const { hostname, pathname } = new URL(input);
+    return (
+      hostname === 'chromewebstore.google.com' ||
+      (hostname === 'chrome.google.com' && pathname.startsWith('/webstore')) ||
+      (hostname === 'microsoftedge.microsoft.com' && pathname.startsWith('/addons'))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function hostnameOf(input: string): string {
   try {
     return new URL(input).hostname.replace(/^www\./, '');

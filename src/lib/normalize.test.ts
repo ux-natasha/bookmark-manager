@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeUrl } from './normalize';
+import { isProtectedPage, normalizeUrl } from './normalize';
 
 const same = (a: string, b: string) => expect(normalizeUrl(a)).toBe(normalizeUrl(b));
 const different = (a: string, b: string) => expect(normalizeUrl(a)).not.toBe(normalizeUrl(b));
@@ -28,6 +28,14 @@ describe('normalizeUrl', () => {
   it('matches youtu.be short links to youtube watch links', () => {
     same('https://youtu.be/dQw4w9WgXcQ?si=xyz', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
     different('https://youtube.com/watch?v=a', 'https://youtube.com/watch?v=b');
+  });
+
+  it('recognises extension store pages, which browsers protect from extensions', () => {
+    expect(isProtectedPage('https://chromewebstore.google.com/detail/abc/xyz')).toBe(true);
+    expect(isProtectedPage('https://chrome.google.com/webstore/detail/abc')).toBe(true);
+    expect(isProtectedPage('https://microsoftedge.microsoft.com/addons/detail/abc')).toBe(true);
+    expect(isProtectedPage('https://microsoftedge.microsoft.com/insider')).toBe(false);
+    expect(isProtectedPage('https://example.com')).toBe(false);
   });
 
   it('drops plain anchors but keeps single-page-app hash routes', () => {
