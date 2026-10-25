@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Manager",
+  "short_name": "Bookmarks",
+  "version": "0.2.0",
+  "description": "A visual bookmark manager that makes you want to look at your bookmarks.",
+  "minimum_chrome_version": "116",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Save to Bookmark Manager"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Save this page"
+    }
+  },
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "unlimitedStorage",
+    "bookmarks",
+    "contextMenus",
+    "tabs",
+    "favicon",
+    "alarms",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
