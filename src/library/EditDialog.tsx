@@ -103,6 +103,14 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
         <p className="small muted">
           Saved {formatDate(bookmark.createdAt)}
           {bookmark.importedFolder?.length ? ` · from favorites folder “${bookmark.importedFolder.join(' / ')}”` : ''}
+          {bookmark.foundInUrl && (
+            <>
+              {' · found in '}
+              <a href={bookmark.foundInUrl} target="_blank" rel="noreferrer">
+                {bookmark.foundInTitle || 'a post'}
+              </a>
+            </>
+          )}
           {' · '}
           {bookmark.openCount === 0
             ? 'never opened from here'

@@ -6,6 +6,8 @@ const TRACKING_PARAMS = new Set([
   'fbclid', 'gclid', 'dclid', 'gbraid', 'wbraid', 'msclkid', 'mc_cid', 'mc_eid',
   'igsh', 'igshid', 'si', 'ref_src', 'ref_url', 'utm_id', '_hsenc', '_hsmi',
   'mkt_tok', 'yclid',
+  // Affiliate codes ("mobbin.com/?via=someone"): the same page whoever shared it.
+  'via',
 ]);
 
 // Short param names that are tracking on some sites but real content elsewhere (e.g. ?s= search),
@@ -24,6 +26,26 @@ function hostTrackingParams(host: string): Set<string> {
     if (host === h || host.endsWith('.' + h)) return new Set(params);
   }
   return new Set();
+}
+
+function isTrackingParam(key: string, hostParams: Set<string>): boolean {
+  const k = key.toLowerCase();
+  return k.startsWith('utm_') || TRACKING_PARAMS.has(k) || hostParams.has(k);
+}
+
+// Removes tracking junk from a link but otherwise keeps it exactly as it was, for saving.
+// (Links found in posts usually carry "?utm_source=twitter" and the like.)
+export function stripTracking(input: string): string {
+  try {
+    const url = new URL(input);
+    const hostParams = hostTrackingParams(url.hostname.replace(/^(www\d*|m|mobile)\./, ''));
+    for (const key of [...url.searchParams.keys()]) {
+      if (isTrackingParam(key, hostParams) || key.toLowerCase() === 'trk') url.searchParams.delete(key);
+    }
+    return url.href;
+  } catch {
+    return input;
+  }
 }
 
 export function normalizeUrl(input: string): string {
@@ -50,10 +72,7 @@ export function normalizeUrl(input: string): string {
 
   const hostParams = hostTrackingParams(host);
   const params = [...url.searchParams.entries()]
-    .filter(([key]) => {
-      const k = key.toLowerCase();
-      return !k.startsWith('utm_') && !TRACKING_PARAMS.has(k) && !hostParams.has(k);
-    })
+    .filter(([key]) => !isTrackingParam(key, hostParams))
     .sort(([a], [b]) => a.localeCompare(b));
 
   const path = url.pathname.replace(/\/+$/, '');

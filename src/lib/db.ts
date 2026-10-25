@@ -1,7 +1,7 @@
 import Dexie, { type EntityTable } from 'dexie';
 
 // How a bookmark got into the library. Useful later for filters ("everything I imported").
-export type BookmarkSource = 'panel' | 'context-menu' | 'import' | 'backup';
+export type BookmarkSource = 'panel' | 'context-menu' | 'import' | 'backup' | 'post';
 
 // ok: page loaded. gone: the site says it doesn't exist (404/410).
 // unreachable: the site didn't answer at all (dead domain, or you were offline).
@@ -21,6 +21,9 @@ export interface Bookmark {
   source: BookmarkSource;
   // Folder path in Edge favorites, kept so imported structure isn't lost.
   importedFolder?: string[];
+  // The social post (or page) this link was found in, when it came from "Add from a post".
+  foundInUrl?: string;
+  foundInTitle?: string;
 
   // Details read from the page itself. Filled in automatically in the background.
   description?: string;

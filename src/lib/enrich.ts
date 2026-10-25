@@ -18,13 +18,14 @@ export function classifyStatus(status: number): LinkStatus {
   return 'restricted';
 }
 
-interface FetchedPage {
+export interface FetchedPage {
   status: LinkStatus;
   finalUrl: string;
   html?: string;
 }
 
-async function fetchPage(url: string): Promise<FetchedPage> {
+// Reads only the <head> unless `full` is set (finding links inside an article needs the body).
+export async function fetchPage(url: string, { full = false } = {}): Promise<FetchedPage> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -36,7 +37,7 @@ async function fetchPage(url: string): Promise<FetchedPage> {
     });
     const status = classifyStatus(response.status);
     const isHtml = (response.headers.get('content-type') ?? '').includes('html');
-    const html = isHtml && response.body ? await readHead(response.body) : undefined;
+    const html = isHtml && response.body ? await readHtml(response.body, full) : undefined;
     return { status, finalUrl: response.url || url, html };
   } catch {
     return { status: 'unreachable', finalUrl: url };
@@ -45,8 +46,8 @@ async function fetchPage(url: string): Promise<FetchedPage> {
   }
 }
 
-// Reads the response only until </head>, so a huge page doesn't get downloaded in full.
-async function readHead(body: ReadableStream<Uint8Array>): Promise<string> {
+// Reads the response only until </head> (or the size cap), so a huge page doesn't get downloaded in full.
+async function readHtml(body: ReadableStream<Uint8Array>, full: boolean): Promise<string> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let html = '';
@@ -55,7 +56,7 @@ async function readHead(body: ReadableStream<Uint8Array>): Promise<string> {
       const { done, value } = await reader.read();
       if (done) break;
       html += decoder.decode(value, { stream: true });
-      if (/<\/head\s*>/i.test(html)) break;
+      if (!full && /<\/head\s*>/i.test(html)) break;
     }
   } finally {
     reader.cancel().catch(() => {});
@@ -87,6 +88,25 @@ async function fetchXPost(url: string): Promise<Partial<PageMeta> | undefined> {
   } catch {
     return undefined;
   }
+}
+
+// YouTube sometimes answers a plain fetch with a cookie-consent page instead of the video.
+// Its embed service always gives the video's title and channel.
+async function fetchYouTubeVideo(url: string): Promise<Partial<PageMeta> | undefined> {
+  if (!/^https?:\/\/(?:(?:www\.|m\.)?youtube\.com\/(?:watch|shorts\/)|youtu\.be\/)/i.test(url)) return undefined;
+  try {
+    const response = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(url)}`, { credentials: 'omit' });
+    if (!response.ok) return undefined;
+    const data = (await response.json()) as { title?: string; author_name?: string };
+    return { title: data.title, author: data.author_name, siteName: 'YouTube' };
+  } catch {
+    return undefined;
+  }
+}
+
+// Details from the platforms whose pages don't give them to a plain fetch.
+export async function fetchKnownDetails(url: string): Promise<Partial<PageMeta> | undefined> {
+  return (await fetchXPost(url)) ?? (await fetchYouTubeVideo(url));
 }
 
 // Shrinks an image to a small WebP thumbnail so thousands of previews stay light.
@@ -141,9 +161,10 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
     ? { status: 'ok', finalUrl: bookmark.url, html: options.liveHead }
     : await fetchPage(bookmark.url);
 
-  let meta: Partial<PageMeta> = page.html ? parseHtmlMeta(page.html, page.finalUrl) : {};
-  const xPost = await fetchXPost(bookmark.url);
-  if (xPost) meta = { ...meta, ...Object.fromEntries(Object.entries(xPost).filter(([, v]) => v)) };
+  // Error and "checking your browser" pages have their own titles and descriptions; those aren't the page's.
+  let meta: Partial<PageMeta> = page.html && page.status === 'ok' ? parseHtmlMeta(page.html, page.finalUrl) : {};
+  const known = await fetchKnownDetails(bookmark.url);
+  if (known) meta = { ...meta, ...Object.fromEntries(Object.entries(known).filter(([, v]) => v)) };
 
   const platform = detectPlatform(page.finalUrl, meta as PageMeta) ?? detectPlatform(bookmark.url);
   const now = Date.now();

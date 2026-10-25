@@ -8,6 +8,8 @@ export interface NewBookmark {
   tags?: string[];
   note?: string;
   importedFolder?: string[];
+  foundInUrl?: string;
+  foundInTitle?: string;
   createdAt?: number;
 }
 
@@ -64,6 +66,8 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
       tags: cleanTags(input.tags ?? []),
       source: input.source,
       importedFolder: input.importedFolder,
+      foundInUrl: input.foundInUrl,
+      foundInTitle: input.foundInTitle,
       createdAt: input.createdAt ?? now,
       updatedAt: now,
       openCount: 0,

@@ -10,6 +10,7 @@ import { pickForgotten } from '../lib/resurface';
 import { BookmarkCard } from './BookmarkCard';
 import { EditDialog } from './EditDialog';
 import { ImportDialog } from './ImportDialog';
+import { PostDialog } from './PostDialog';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
 
@@ -46,6 +47,7 @@ export function Library() {
   const [deadOnly, setDeadOnly] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [addingFromPost, setAddingFromPost] = useState(false);
   const [resurfacedIds, setResurfacedIds] = useState<string[] | null>(null);
   const restoreInput = useRef<HTMLInputElement>(null);
 
@@ -60,7 +62,7 @@ export function Library() {
       if (!words.length) return true;
       const platformLabel = platformById(b.platform)?.label ?? '';
       const haystack =
-        `${b.title} ${b.url} ${b.note} ${b.tags.join(' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${platformLabel}`.toLowerCase();
+        `${b.title} ${b.url} ${b.note} ${b.tags.join(' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
       return words.every((w) => haystack.includes(w));
     });
 
@@ -145,6 +147,7 @@ export function Library() {
           Refresh my memory
         </button>
         <div className="library-menu">
+          <button onClick={() => setAddingFromPost(true)}>Add from a post</button>
           <button onClick={() => setImporting(true)}>Import favorites</button>
           <button onClick={exportBackup} disabled={!bookmarks?.length}>
             Back up
@@ -307,6 +310,7 @@ export function Library() {
         />
       )}
       {importing && <ImportDialog onClose={() => setImporting(false)} />}
+      {addingFromPost && <PostDialog allTags={tagCounts.map((t) => t.tag)} onClose={() => setAddingFromPost(false)} />}
       <ToastView toast={toast} onDone={hideToast} />
     </div>
   );

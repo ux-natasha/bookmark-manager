@@ -256,3 +256,97 @@ textarea {
   padding: 1px var(--space-2);
   border-radius: 999px;
 }
+
+/* Shared by the library and the side panel */
+.checkbox {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.section-heading {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  margin-bottom: var(--space-3);
+}
+
+.section-heading h2 {
+  margin: 0;
+  margin-right: auto;
+}
+
+/* Links found in a post */
+.found-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.found-links .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.found-links-heading {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.found-links p {
+  margin: 0;
+}
+
+.found-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.found-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.found-item {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.found-item .favicon {
+  margin-top: 2px;
+}
+
+.found-item.is-existing .found-item-text {
+  opacity: 0.7;
+}
+
+.found-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.found-item-status {
+  margin-top: 2px;
+}

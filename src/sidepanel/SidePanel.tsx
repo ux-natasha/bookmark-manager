@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { TagInput } from '../components/TagInput';
+import { FoundLinks } from '../components/FoundLinks';
 import { ToastView } from '../components/ToastView';
 import { Favicon } from '../components/Favicon';
 import { deleteBookmark, findByUrl, markOpened, updateBookmark } from '../lib/bookmarks';
@@ -8,10 +9,12 @@ import type { Bookmark } from '../lib/db';
 import { formatDate, useBookmarks, useTagCounts, useToast } from '../lib/hooks';
 import { getLastSave, onLastSave, openLibrary, sendToBackground, type LastSave } from '../lib/messages';
 import { hostnameOf, isProtectedPage, isSaveableUrl } from '../lib/normalize';
-import { platformById } from '../lib/platform';
+import { detectPlatform, platformById } from '../lib/platform';
+import { linksFromOpenTab, type PostLinks } from '../lib/posts';
 import { usePreviewUrl } from '../lib/previews';
 
 interface ActiveTab {
+  id?: number;
   url?: string;
   title?: string;
   windowId?: number;
@@ -29,7 +32,7 @@ function useActiveTab(): ActiveTab {
     const refresh = async () => {
       const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
       windowId = active?.windowId;
-      setTab({ url: active?.url, title: active?.title, windowId: active?.windowId });
+      setTab({ id: active?.id, url: active?.url, title: active?.title, windowId: active?.windowId });
     };
     refresh();
 
@@ -65,6 +68,16 @@ export function SidePanel() {
   const bookmarks = useBookmarks();
   const tagCounts = useTagCounts(bookmarks);
   const { toast, showToast, hideToast } = useToast();
+  // Links found in the open post, while reviewing them; null while they're being read.
+  const [found, setFound] = useState<PostLinks | null>();
+
+  // Switching tabs leaves the review, since it was about the previous page.
+  useEffect(() => setFound(undefined), [tab.url]);
+
+  const findLinks = async () => {
+    setFound(null);
+    setFound(await linksFromOpenTab(tab));
+  };
 
   const canSave = isSaveableUrl(tab.url);
   // lastSave is a dependency so the panel re-checks right after the background script saves.
@@ -99,10 +112,24 @@ export function SidePanel() {
       </header>
 
       <section className="panel-current">
-        {!canSave ? (
+        {found !== undefined ? (
+          <div className="page-card">
+            <div className="section-heading">
+              <h2>Links in this {detectPlatform(tab.url ?? '')?.social ? 'post' : 'page'}</h2>
+              <button className="link small" onClick={() => setFound(undefined)}>
+                Back
+              </button>
+            </div>
+            {found === null ? (
+              <p className="muted small">Reading the page…</p>
+            ) : (
+              <FoundLinks found={found} allTags={tagCounts.map((t) => t.tag)} onClose={() => setFound(undefined)} />
+            )}
+          </div>
+        ) : !canSave ? (
           <p className="muted">This page can't be saved. Only web pages (http/https) can.</p>
         ) : current === undefined ? null : current === null ? (
-          <UnsavedPage tab={tab} onSave={saveCurrent} />
+          <UnsavedPage tab={tab} onSave={saveCurrent} onFindLinks={findLinks} />
         ) : (
           <SavedPage
             key={current.id}
@@ -111,6 +138,7 @@ export function SidePanel() {
             allTags={tagCounts.map((t) => t.tag)}
             onUndo={() => undoSave(current)}
             onRetakeScreenshot={() => retakeScreenshot(current)}
+            onFindLinks={findLinks}
           />
         )}
       </section>
@@ -141,14 +169,23 @@ export function SidePanel() {
   );
 }
 
-function UnsavedPage({ tab, onSave }: { tab: ActiveTab; onSave: () => void }) {
+function UnsavedPage({ tab, onSave, onFindLinks }: { tab: ActiveTab; onSave: () => void; onFindLinks: () => void }) {
   return (
     <div className="page-card">
       <PageHeading url={tab.url!} title={tab.title || tab.url!} />
       <button className="primary full" onClick={onSave}>
         Save this page
       </button>
+      {!isProtectedPage(tab.url!) && <FindLinksButton url={tab.url!} onClick={onFindLinks} />}
     </div>
+  );
+}
+
+function FindLinksButton({ url, onClick }: { url: string; onClick: () => void }) {
+  return (
+    <button className="full" onClick={onClick}>
+      Find links in this {detectPlatform(url)?.social ? 'post' : 'page'}
+    </button>
   );
 }
 
@@ -158,9 +195,10 @@ interface SavedPageProps {
   allTags: string[];
   onUndo: () => void;
   onRetakeScreenshot: () => void;
+  onFindLinks: () => void;
 }
 
-function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot }: SavedPageProps) {
+function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot, onFindLinks }: SavedPageProps) {
   const previewUrl = usePreviewUrl(bookmark);
   const platform = platformById(bookmark.platform);
   const [title, setTitle] = useState(bookmark.title);
@@ -219,6 +257,8 @@ function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot }: 
           onBlur={() => note !== bookmark.note && updateBookmark(bookmark.id, { note })}
         />
       </label>
+
+      {!isProtectedPage(bookmark.url) && <FindLinksButton url={bookmark.url} onClick={onFindLinks} />}
 
       <div className="panel-actions">
         {isProtectedPage(bookmark.url) ? (

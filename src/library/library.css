@@ -250,18 +250,6 @@
   border-radius: var(--radius);
 }
 
-.section-heading {
-  display: flex;
-  gap: var(--space-3);
-  align-items: baseline;
-  margin-bottom: var(--space-3);
-}
-
-.section-heading h2 {
-  margin: 0;
-  margin-right: auto;
-}
-
 .show-more {
   display: block;
   margin: var(--space-5) auto;
@@ -292,6 +280,10 @@ kbd {
   padding: var(--space-5);
 }
 
+.dialog-wide {
+  width: min(680px, calc(100vw - 32px));
+}
+
 .dialog::backdrop {
   background: rgb(0 0 0 / 0.35);
 }
@@ -314,15 +306,6 @@ kbd {
   gap: var(--space-1);
 }
 
-.dialog-actions {
-  display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
-}
-
-.spacer {
-  flex: 1;
-}
 
 .import-stats {
   margin: 0;
@@ -333,12 +316,6 @@ kbd {
   max-height: 200px;
   overflow-y: auto;
   padding-left: var(--space-5);
-}
-
-.checkbox {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
 }
 
 .error {

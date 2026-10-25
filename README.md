@@ -22,8 +22,9 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 | *Open library ↗* in the side panel | Opens the full library in a tab |
 | *Refresh my memory* in the library | Shows a few old bookmarks you haven't opened in a long time |
 | *Import favorites* | Copies Edge favorites in, skipping duplicates. Edge's own favorites aren't changed |
+| *Add from a post* in the library | Paste a post's link or text; the sites it mentions are listed for you to tag and save |
+| *Find links in this post* in the side panel | Same, read straight from the post you have open (works for logged-in-only posts) |
 | *Back up* / *Restore* | Exports or merges a JSON backup |
-
 | *Check links* in the library | Re-checks every link in the background and flags ones that seem dead |
 
 **Back up regularly:** uninstalling the extension deletes its library.
@@ -36,12 +37,21 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 - **Platform** (Substack, X, YouTube, GitHub…) is detected from the address, and from clues in the page for platforms on custom domains (Substack, Medium, Ghost, WordPress).
 - **Dead links:** a link counts as dead if the site says the page doesn't exist (404/410), or if it doesn't answer in two checks at least six hours apart. Sites that block bots aren't flagged, because we can't tell.
 
+## Links from posts
+
+- **Pasting a post's link** reads it from each platform's public data: X (embed service), Bluesky, Mastodon, Reddit and Hacker News (their APIs), and LinkedIn's public post page. Threads, Instagram and Facebook hide posts from anyone not logged in, so for those open the post and use *Find links in this post* in the side panel.
+- **Pasting a post's text** finds full links and bare ones like `figma.com/community`. Addresses the post cut short (`figma.com/commu…`) become the site's home page, marked as such and left unticked.
+- **Short and redirect links** (t.co, bit.ly, lnkd.in, Instagram's and Threads' "leaving" links…) are followed to the real address, and tracking and affiliate tags (`utm_…`, `?via=`) are removed.
+- **Left out:** links back to the same platform (profiles, hashtags), the post's images and videos, and "share this" buttons.
+- **Review before saving:** each link shows its title and whether it's new or already saved. New links are ticked; links already in the library only change if you add tags. Each saved link remembers which post it came from (shown in *Edit*, and searchable).
+- On a page that isn't a post, *Find links on this page* reads the page's main article, or the whole page if it has none. Nothing is ticked there, since menus and ads get picked up too.
+
 ## Project layout
 
 - `src/background.ts`: icon click, shortcut and right-click saving
 - `src/sidepanel/`: the side panel
 - `src/library/`: the full library tab
-- `src/lib/`: data model (`db.ts`), saving and duplicate detection (`bookmarks.ts`, `normalize.ts`), import, backup and resurfacing
+- `src/lib/`: data model (`db.ts`), saving and duplicate detection (`bookmarks.ts`, `normalize.ts`), import, backup and resurfacing, links from posts (`posts.ts`, `linkfinder.ts`)
 - `src/styles/base.css`: design tokens. All colors, spacing and type sizes live here for the design pass
 
-`npm test` runs the unit tests for duplicate detection, saving, import and resurfacing.
+`npm test` runs the unit tests for duplicate detection, saving, page details and finding links in posts.

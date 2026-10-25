@@ -120,3 +120,7 @@ button.full {
   display: flex;
   justify-content: space-between;
 }
+
+.page-card .section-heading h2 {
+  font-size: var(--text-md);
+}
