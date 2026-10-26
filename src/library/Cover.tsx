@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { CoverSpec } from '../lib/covers';
+import { inkOf, type CoverSpec } from '../lib/covers';
 import { formatDate } from '../lib/hooks';
 
 // One cover in the Covers theme, drawn from a CoverSpec (src/lib/covers.ts) in HTML and CSS.
@@ -34,7 +34,7 @@ export function Cover({ spec, imageUrl, platformLabel, plate, createdAt, backInP
 
   const style = spec.background ? ({ '--cover-bg': spec.background, '--cover-ink': spec.ink } as CSSProperties) : undefined;
   return (
-    <div className={`cover cover--${spec.template}`} style={style} aria-hidden="true">
+    <div className={`cover cover--${spec.template}`} data-ink={inkOf(spec)} style={style} aria-hidden="true">
       {['article', 'post', 'repo'].includes(spec.template) && <span className="cover-spine" />}
       <div className="cover-fill">
         <CoverFace spec={spec} imageUrl={imageUrl} plate={plate} createdAt={createdAt} />
@@ -44,12 +44,19 @@ export function Cover({ spec, imageUrl, platformLabel, plate, createdAt, backInP
   );
 }
 
+// Characters in the longest word, so the masthead can be sized to fit it on one line.
+function longestWord(text: string | undefined): number {
+  return Math.max(1, ...(text ?? '').split(/\s+/).map((word) => word.length));
+}
+
 function CoverFace({ spec, imageUrl, plate, createdAt }: Omit<Props, 'platformLabel'>) {
   switch (spec.template) {
     case 'article':
       return (
         <>
-          <span className="cover-masthead">{spec.masthead}</span>
+          <span className="cover-masthead" style={{ '--mast-len': longestWord(spec.masthead) } as CSSProperties}>
+            {spec.masthead}
+          </span>
           <span className="cover-kicker">{spec.kicker}</span>
           <span className="cover-title">{spec.title}</span>
           {spec.dek && <span className="cover-dek">{spec.dek}</span>}

@@ -138,54 +138,61 @@
 }
 
 /* 5.1 The room */
+/* The room is 240px bigger than the window on every side, so each light's blur runs off the screen before
+   overflow clips it. Clipped at the window edge, the lower lights ended in a hard horizontal line. */
 .field-room {
   position: fixed;
-  inset: 0;
+  inset: -240px;
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
 }
 
+/* The room dims and greys as the library ages, and as Look ahead steps forward. */
 .field-light {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: var(--field-strength);
-  transition: background-color 1200ms ease-out;
+  opacity: calc(var(--field-strength) * (0.25 + 0.75 * var(--fresh, 1)));
+  filter: blur(100px) saturate(calc(0.2 + 0.8 * var(--fresh, 1)));
+  transition:
+    background-color 1200ms ease-out,
+    opacity 1200ms ease-out,
+    filter 1200ms ease-out;
 }
 
-/* Top-left, top-right, middle, lower-left, lower-right. The top centre stays dark for the headline. */
+/* Top-left, top-right, middle, lower-left, lower-right. The top centre stays dark for the headline.
+   Every offset is moved in by the room's 240px overscan, so the composition on screen is unchanged. */
 .field-light:nth-child(1) {
-  top: -220px;
-  left: -160px;
+  top: 20px;
+  left: 80px;
   width: 620px;
   height: 620px;
 }
 
 .field-light:nth-child(2) {
-  top: -160px;
-  right: -200px;
+  top: 80px;
+  right: 40px;
   width: 680px;
   height: 560px;
 }
 
 .field-light:nth-child(3) {
-  top: 48%;
-  left: 30%;
+  top: calc(48% + 10px);
+  left: calc(30% + 96px);
   width: 720px;
   height: 520px;
 }
 
 .field-light:nth-child(4) {
-  bottom: -260px;
-  left: -220px;
+  bottom: -20px;
+  left: 20px;
   width: 560px;
   height: 560px;
 }
 
 .field-light:nth-child(5) {
-  bottom: -240px;
-  right: -140px;
+  bottom: 0;
+  right: 100px;
   width: 600px;
   height: 600px;
 }
@@ -309,7 +316,10 @@ button.swatch {
   border: 2px solid var(--bg);
   border-radius: 50%;
   background: var(--swatch);
-  box-shadow: 0 0 0 1px var(--glass-edge);
+  /* An outer ring, and an inner highlight so a near-black swatch still reads against the dark room. */
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--text) 32%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent);
   transition:
     transform 200ms ease-out,
     box-shadow 200ms ease-out;
@@ -323,7 +333,8 @@ button.swatch:hover:not(:disabled) {
 button.swatch[aria-pressed='true'] {
   box-shadow:
     0 0 0 2px var(--text),
-    0 0 26px var(--swatch);
+    0 0 26px var(--swatch),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent);
 }
 
 .colour-search-status {
@@ -333,6 +344,13 @@ button.swatch[aria-pressed='true'] {
   text-align: right;
   font: 13px var(--font-sans);
   color: var(--text-muted);
+}
+
+/* Loading: soft glass blanks with a 1px edge, and no colour until it's real. */
+.loading-field .loading-block {
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* 5.6 Cards */
@@ -490,7 +508,8 @@ button.swatch[aria-pressed='true'] {
 /* Quote: glass tinted with its page's colour. */
 [data-theme='field'] .card-kind-quote .card-link {
   padding: 22px 20px 16px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--glow, transparent) 42%, transparent), transparent 70%), var(--glass);
+  /* The tint drains with age like everything else on the card. */
+  background: linear-gradient(160deg, color-mix(in srgb, var(--glow, transparent) calc(42% * (1 - var(--t, 0))), transparent), transparent 70%), var(--glass);
 }
 
 [data-theme='field'] .card-quote {
@@ -934,16 +953,6 @@ button.meter-hit:focus-visible {
 
 [data-theme='field'] .dust-button:hover:not(:disabled) {
   background: var(--glass-hover);
-}
-
-/* The room dims and greys as the library ages, and as Look ahead steps forward. */
-.field-light {
-  opacity: calc(var(--field-strength) * (0.25 + 0.75 * var(--fresh, 1)));
-  filter: blur(100px) saturate(calc(0.2 + 0.8 * var(--fresh, 1)));
-  transition:
-    background-color 1200ms ease-out,
-    opacity 1200ms ease-out,
-    filter 1200ms ease-out;
 }
 
 /* Undo's toast: a dot glowing in the colour of what came back. */

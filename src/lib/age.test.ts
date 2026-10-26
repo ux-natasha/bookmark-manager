@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, FADED, isFaded, lastTouched, MONTH, monthsUntouched, patina } from './age';
+import { addMonths, ageLabel, FADED, isFaded, lastTouched, MONTH, monthsUntouched, patina, sourcePrefix } from './age';
 import type { Bookmark } from './db';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -105,6 +105,50 @@ describe('patina', () => {
     const b = make({ createdAt: NOW });
     expect(patina(b, addMonths(NOW, 6))).toBeGreaterThan(0.2);
     expect(patina(b, addMonths(NOW, 12))).toBeGreaterThanOrEqual(FADED - 0.02);
+  });
+});
+
+describe('ageLabel', () => {
+  it('says opened this week inside seven days', () => {
+    expect(ageLabel(make({ createdAt: NOW - 3 * DAY }), NOW).text).toBe('opened this week');
+    expect(ageLabel(make({ kind: 'note', url: '', createdAt: NOW - 3 * DAY, updatedAt: NOW - 3 * DAY }), NOW).text).toBe('written this week');
+  });
+
+  it('says opened this month inside a month', () => {
+    expect(ageLabel(make({ createdAt: NOW - 20 * DAY }), NOW).text).toBe('opened this month');
+    expect(ageLabel(make({ kind: 'note', url: '', createdAt: NOW - 20 * DAY, updatedAt: NOW - 20 * DAY }), NOW).text).toBe('written this month');
+  });
+
+  it('says never opened for links that were never opened', () => {
+    expect(ageLabel(make({ createdAt: NOW - 14 * MONTH, openCount: 0 }), NOW).text).toBe('never opened, 14 mo.');
+  });
+
+  it('says untouched once something was opened, and for notes', () => {
+    expect(ageLabel(make({ createdAt: NOW - 14 * MONTH, openCount: 2, lastOpenedAt: NOW - 9 * MONTH }), NOW).text).toBe('untouched 9 mo.');
+    expect(ageLabel(make({ kind: 'note', url: '', createdAt: NOW - 14 * MONTH, updatedAt: NOW - 14 * MONTH }), NOW).text).toBe('untouched 14 mo.');
+  });
+
+  it('moves when looking ahead', () => {
+    const b = make({ createdAt: NOW, openCount: 1 });
+    expect(ageLabel(b, NOW).text).toBe('opened this week');
+    expect(ageLabel(b, addMonths(NOW, 12)).text).toBe('untouched 12 mo.');
+  });
+
+  it('is red text for dead links, with the date of the last check when known', () => {
+    const gone = make({ linkStatus: 'gone' });
+    expect(ageLabel(gone, NOW)).toEqual({ text: 'stopped answering', danger: true });
+    const withDate = ageLabel({ ...gone, lastCheckedAt: NOW - DAY }, NOW);
+    expect(withDate.text).toMatch(/^stopped answering \S+/);
+    expect(withDate.danger).toBe(true);
+  });
+});
+
+describe('sourcePrefix', () => {
+  it('names where each kind came from', () => {
+    expect(sourcePrefix(make({ url: 'https://www.slowtravel.blog/a' }))).toBe('slowtravel.blog');
+    expect(sourcePrefix(make({ kind: 'image', url: 'https://slowtravel.blog/a' }))).toBe('picture from slowtravel.blog');
+    expect(sourcePrefix(make({ kind: 'quote' }))).toBe('quote');
+    expect(sourcePrefix(make({ kind: 'note', url: '' }))).toBe('your note');
   });
 });
 

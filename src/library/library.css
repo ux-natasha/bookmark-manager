@@ -92,8 +92,9 @@
   padding-top: 18px;
 }
 
+/* Wide basis, so the Look ahead panel beside it doesn't take the room the headline needs. */
 .hero-main {
-  flex: 1 1 460px;
+  flex: 1 1 560px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -362,6 +363,31 @@
   padding: 0 18px;
 }
 
+/* Loading (LibraryLoading.tsx): nothing for 200ms, then blank blocks. No shimmer. */
+.loading {
+  opacity: 0;
+  animation: loading-show 1ms linear 200ms forwards;
+}
+
+@keyframes loading-show {
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: var(--grid-gap-y) var(--grid-gap-x);
+  align-items: start;
+}
+
+.loading-block {
+  aspect-ratio: var(--ratio, 4 / 3);
+  border-radius: var(--radius-media);
+  background: var(--hover);
+}
+
 /* Masonry (Masonry.tsx positions the items; the gaps are read from here). */
 .grid {
   position: relative;
@@ -410,20 +436,59 @@
   }
 }
 
-/* Cards (restyled in phase 2) */
+/* 6.10 Cards: no box of their own. The media, quote and note carry the look. */
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
 }
 
 .card-link {
+  position: relative;
   color: inherit;
   text-decoration: none;
   flex: 1;
+}
+
+/* The media, its halo and the dead stamp lift together on hover or focus. */
+.card-lift {
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+:root:not([data-theme]) .card:is(:hover, :focus-within) .card-lift {
+  transform: translateY(-4px);
+}
+
+:root:not([data-theme]) .card-link:active .card-lift {
+  transform: translateY(-2px);
+}
+
+/* The glow behind the media, in its colour. */
+:root:not([data-theme]) .card-halo-media {
+  position: absolute;
+  inset: 12% 6% -8%;
+  border-radius: var(--radius-media);
+  background: var(--glow);
+  filter: blur(24px);
+  opacity: var(--halo-strength);
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+:root:not([data-theme]) .card:is(:hover, :focus-within) .card-halo-media {
+  opacity: calc(var(--halo-strength) * 2.2);
+}
+
+@media (hover: none) {
+  .card-lift {
+    transition: none;
+  }
+
+  :root:not([data-theme]) .card:is(:hover, :focus-within) .card-lift,
+  :root:not([data-theme]) .card-link:active .card-lift {
+    transform: none;
+  }
 }
 
 .card-link:hover .card-title {
@@ -435,7 +500,19 @@
   /* The image's own shape once it has loaded, clamped between 4:5 and 2:1. */
   aspect-ratio: var(--ratio, 16 / 9);
   background: var(--surface-muted);
+  border-radius: var(--radius-media);
   overflow: hidden;
+}
+
+/* An inset 1px ring, drawn over the image so the edge reads on any picture. */
+:is(.card-preview, .card-picture)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--border);
+  pointer-events: none;
 }
 
 .card-preview-image {
@@ -446,31 +523,34 @@
   display: block;
 }
 
+/* No preview: the site's colour, its name bottom-left and the title over it. The colours are set inline,
+   with the ink chosen by the same contrast rule as Covers. */
 .card-fallback {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 6px;
   height: 100%;
-  color: #fff;
-}
-
-.card-fallback-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: rgb(255 255 255 / 0.9);
-  padding: 4px;
+  padding: 16px;
 }
 
 .card-fallback-name {
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
-  max-width: 90%;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font: 11px var(--font-mono);
+  opacity: 0.8;
+}
+
+.card-fallback-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 500 19px / 1.15 var(--font-serif);
+  text-wrap: pretty;
 }
 
 /* Video platforms: a play badge in the middle of the preview. */
@@ -495,20 +575,24 @@
   border-color: transparent transparent transparent #15171a;
 }
 
+/* A stamp, top right, over the greyed media. */
 .card-dead {
   position: absolute;
-  bottom: var(--space-2);
-  left: var(--space-2);
-  background: var(--danger);
-  color: var(--surface);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 1px var(--space-2);
-  border-radius: 999px;
+  top: 14px;
+  right: 12px;
+  z-index: 2;
+  padding: 3px 7px;
+  border: 1.5px solid var(--danger);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--danger);
+  font: 500 10px / 1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  transform: rotate(4deg);
 }
 
-.card.is-dead .card-preview {
-  opacity: 0.6;
+:root:not([data-theme]) .card.is-dead :is(.card-preview-image, .card-fallback, .card-picture img) {
+  filter: grayscale(1) opacity(0.65);
 }
 
 .card-description {
@@ -520,7 +604,7 @@
 }
 
 .card-body {
-  padding: var(--space-3);
+  padding: var(--space-3) 0 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -559,7 +643,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: 0 var(--space-3) var(--space-3);
+  padding: var(--space-1) 0 0;
 }
 
 .card-tags {
@@ -735,8 +819,7 @@ button.card-link:hover {
 
 .card-quote {
   margin: 0 0 var(--space-1);
-  padding-left: var(--space-3);
-  border-left: 3px solid var(--accent);
+  padding-top: 30px;
   font-size: var(--text-lg);
   line-height: 1.5;
   white-space: pre-line;
@@ -748,7 +831,24 @@ button.card-link:hover {
 
 .card-quote-title {
   margin: 0;
-  font-weight: 600;
+  font: italic 15px var(--font-serif);
+  color: var(--text-muted);
+}
+
+/* A large opening quote mark hangs at the top left. */
+:root:not([data-theme]) .card-kind-quote .card-body {
+  position: relative;
+  padding-top: 0;
+}
+
+:root:not([data-theme]) .card-kind-quote .card-body::before {
+  content: '\201C';
+  position: absolute;
+  top: -10px;
+  left: -4px;
+  font: 70px / 1 var(--font-serif);
+  color: var(--accent);
+  pointer-events: none;
 }
 
 
@@ -887,6 +987,28 @@ button.card-link:hover {
 .card-meta {
   align-items: center;
   gap: 8px;
+  min-height: 30px;
+}
+
+/* Edit shows on hover or focus; on touch it's always there, a little quieter. */
+.card-meta .link {
+  font: 12px var(--font-sans);
+  opacity: 0;
+  transition: opacity 150ms;
+}
+
+.card:is(:hover, :focus-within) .card-meta .link {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .card-meta .link {
+    opacity: 0.7;
+  }
+}
+
+.card-age.is-danger {
+  color: var(--danger);
 }
 
 .card-age {
@@ -910,11 +1032,39 @@ button.card-link:hover {
 }
 
 :root:not([data-theme]) .card-kind-note {
+  transition: transform var(--dur-age) ease-out;
+}
+
+/* The paper is the link itself: the note's box. */
+:root:not([data-theme]) .card-kind-note .card-link {
+  flex: none;
+  padding: 18px 18px 16px;
+  border-radius: var(--radius-note);
   background: color-mix(in srgb, var(--aged-paper) calc(var(--t, 0) * 100%), var(--note-paper));
+  box-shadow: inset 0 0 0 1px var(--border);
   transition:
-    transform var(--dur-age) ease-out,
     background-color var(--dur-age) ease-out,
     color var(--dur-age) ease-out;
+}
+
+:root:not([data-theme]) .card-kind-note button.card-link:hover {
+  background: color-mix(in srgb, var(--aged-paper) calc(var(--t, 0) * 100%), var(--note-paper));
+}
+
+:root:not([data-theme]) .card-kind-note .card-body {
+  padding: 0;
+  gap: 10px;
+}
+
+.card-note-top {
+  margin: 0;
+  font: 11px var(--font-mono);
+  color: var(--text-muted);
+}
+
+:root:not([data-theme]) :is(.card-kind-note .card-title, .card-note-text) {
+  font: italic 19px / 1.35 var(--font-serif);
+  text-wrap: pretty;
 }
 
 /* Ink: quotes and notes drift from --text toward --aged-text. */
@@ -929,9 +1079,9 @@ button.card-link:hover {
 }
 
 /* The quote mark fades to 40%. */
-:root:not([data-theme]) .card-quote {
-  border-left-color: color-mix(in srgb, var(--accent) calc((1 - var(--t, 0) * 0.6) * 100%), transparent);
-  transition: border-left-color var(--dur-age) ease-out;
+:root:not([data-theme]) .card-kind-quote .card-body::before {
+  color: color-mix(in srgb, var(--accent) calc((1 - var(--t, 0) * 0.6) * 100%), transparent);
+  transition: color var(--dur-age) ease-out;
 }
 
 /* Media goes sepia, desaturated and softer. */
@@ -945,6 +1095,7 @@ button.card-link:hover {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   pointer-events: none;
   background:
     radial-gradient(circle at 20% 30%, rgb(92 70 36 / 0.42) 0 0.8px, transparent 1.3px) 0 0 / 23px 19px,

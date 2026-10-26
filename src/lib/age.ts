@@ -1,4 +1,7 @@
 import { isDeadLink, kindOf, type Bookmark } from './db';
+import { formatDate } from './formatDate';
+import { hostnameOf } from './normalize';
+import { platformById } from './platform';
 
 // How long things have gone untouched, and how aged that makes them look
 // (docs/design/library-interactions.md, 5.2). The tag index, cards and Look ahead all read it.
@@ -46,4 +49,32 @@ export function addMonths(date: number | Date, months: number): number {
   const lastDay = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
   result.setDate(Math.min(day, lastDay));
   return result.getTime();
+}
+
+// The age text on a card's meta row (docs/design/library-interactions.md, 6.10). Reads the page's `now`,
+// so it moves when Look ahead steps forward. "Revived this session" text is the theme's own and is handled by callers.
+export function ageLabel(b: Bookmark, now: number): { text: string; danger?: boolean } {
+  if (isDeadLink(b)) {
+    return { text: b.lastCheckedAt ? `stopped answering ${formatDate(b.lastCheckedAt)}` : 'stopped answering', danger: true };
+  }
+  const months = monthsUntouched(b, now);
+  const note = kindOf(b) === 'note';
+  if (months * 30.44 < 7) return { text: note ? 'written this week' : 'opened this week' };
+  if (months < 1) return { text: note ? 'written this month' : 'opened this month' };
+  const mo = `${Math.round(months)} mo.`;
+  return { text: b.openCount === 0 && !note ? `never opened, ${mo}` : `untouched ${mo}` };
+}
+
+// What leads the age text on a Default card: where the item came from.
+export function sourcePrefix(b: Bookmark): string {
+  switch (kindOf(b)) {
+    case 'link':
+      return platformById(b.platform)?.label ?? hostnameOf(b.url);
+    case 'image':
+      return b.url ? `picture from ${platformById(b.platform)?.label ?? hostnameOf(b.url)}` : 'picture';
+    case 'quote':
+      return 'quote';
+    case 'note':
+      return 'your note';
+  }
 }

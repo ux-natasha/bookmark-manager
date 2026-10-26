@@ -1,6 +1,8 @@
 import { useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
 import { Favicon } from '../components/Favicon';
+import { ageLabel, sourcePrefix } from '../lib/age';
 import { markOpened } from '../lib/bookmarks';
+import { coverColors } from '../lib/covers';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
 import { formatDate } from '../lib/hooks';
 import { hostnameOf } from '../lib/normalize';
@@ -36,6 +38,7 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving, side = 1 
   if (age.delay !== undefined) classes.push('is-reviving');
   // "dusted off just now" for the rest of the session, until the page looks ahead.
   const revivedText = age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : undefined;
+  const label = ageLabel(bookmark, age.now);
 
   return (
     <article
@@ -53,8 +56,8 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving, side = 1 
       <footer className="card-footer">
         {bookmark.tags.length > 0 && <FiledUnderLine tags={bookmark.tags} onTagClick={onTagClick} />}
         <div className="card-meta small muted">
-          <span className="card-age" title={`Saved ${new Date(bookmark.createdAt).toLocaleString()}`}>
-            {revivedText ?? formatDate(bookmark.createdAt)}
+          <span className={`card-age${!revivedText && label.danger ? ' is-danger' : ''}`} title={ageTitle(bookmark)}>
+            {revivedText ?? `${sourcePrefix(bookmark)} · ${label.text}`}
           </span>
           {age.canDust && (
             <button type="button" className="dust-button" onClick={age.dust}>
@@ -68,6 +71,13 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving, side = 1 
       </footer>
     </article>
   );
+}
+
+// "Saved Oct 3 · last opened Oct 20": the full dates behind the age text.
+function ageTitle(b: Bookmark): string {
+  const saved = `Saved ${formatDate(b.createdAt)}`;
+  if (kindOf(b) === 'note') return `${saved} · edited ${formatDate(b.updatedAt)}`;
+  return b.lastOpenedAt ? `${saved} · last opened ${formatDate(b.lastOpenedAt)}` : `${saved} · never opened`;
 }
 
 // Links, pictures and quotes open the page they're from; notes (and anything without a page) open for editing.
@@ -128,6 +138,12 @@ function useMediaRatio(bookmark: Bookmark, min: number, max: number) {
   return { style: ratio ? ({ '--ratio': ratio } as CSSProperties) : undefined, onLoad };
 }
 
+// The glow behind a link's or picture's media: its dominant colour, else the site's, else one from the hostname.
+// Colour field draws its own halo behind the whole card.
+function Halo({ bookmark }: { bookmark: Bookmark }) {
+  return <span className="card-halo card-halo-media" style={{ '--glow': bookmark.color || fallbackColor(bookmark) } as CSSProperties} aria-hidden="true" />;
+}
+
 function LinkContent({ bookmark }: { bookmark: Bookmark }) {
   const previewUrl = usePreviewUrl(bookmark);
   // Between 4:5 and 2:1, so a full-page screenshot doesn't make a card a column long.
@@ -137,34 +153,42 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
   const dead = isDeadLink(bookmark);
   const field = useTheme() === 'field';
 
+  // Designed fallback for pages with no image: the site's colour with its name and the title typeset on it.
+  const cover = coverColors(bookmark.color || fallbackColor(bookmark));
+  const previewStyle = previewUrl ? media.style : ({ '--ratio': 1.91 } as CSSProperties);
+
   return (
     <>
-      <div className="card-preview" style={previewUrl ? media.style : undefined}>
-        {previewUrl ? (
-          <img className="card-preview-image" src={previewUrl} alt="" loading="lazy" onLoad={media.onLoad} />
-        ) : (
-          // Designed fallback for pages with no image: site color, icon and name.
-          <div className="card-fallback" style={{ background: fallbackColor(bookmark) }}>
-            <Favicon className="card-fallback-icon" url={bookmark.url} size={64} />
-            <span className="card-fallback-name">{source}</span>
-          </div>
-        )}
-        {platform && <span className="card-platform">{platform.label}</span>}
-        {previewUrl && VIDEO_PLATFORMS.has(bookmark.platform ?? '') && <span className="card-play" aria-hidden="true" />}
+      <div className="card-lift">
+        {!field && !dead && <Halo bookmark={bookmark} />}
+        <div className="card-preview" style={previewStyle}>
+          {previewUrl ? (
+            <img className="card-preview-image" src={previewUrl} alt="" loading="lazy" onLoad={media.onLoad} />
+          ) : (
+            <div className="card-fallback" style={{ background: cover.background, color: cover.ink }}>
+              <span className="card-fallback-name">{source}</span>
+              <span className="card-fallback-title">{bookmark.title}</span>
+            </div>
+          )}
+          {platform && <span className="card-platform">{platform.label}</span>}
+          {previewUrl && VIDEO_PLATFORMS.has(bookmark.platform ?? '') && <span className="card-play" aria-hidden="true" />}
+        </div>
         {dead && (
           <span className="card-dead" title={bookmark.linkStatus === 'gone' ? 'The site says this page no longer exists' : "The site hasn't answered in two checks"}>
-            Link may be dead
+            MAY BE DEAD
           </span>
         )}
       </div>
       <div className="card-body">
         <h3 className="card-title">{bookmark.title}</h3>
-        <p className="small muted truncate card-host">
-          {field && <KindTag kind="link" word={dead ? 'may be dead' : linkKind(bookmark)} />}
-          <Favicon url={bookmark.url} />
-          {bookmark.siteName && bookmark.siteName !== platform?.label ? `${bookmark.siteName} · ` : ''}
-          {hostnameOf(bookmark.url)}
-        </p>
+        {field && (
+          <p className="small muted truncate card-host">
+            <KindTag kind="link" word={dead ? 'may be dead' : linkKind(bookmark)} />
+            <Favicon url={bookmark.url} />
+            {bookmark.siteName && bookmark.siteName !== platform?.label ? `${bookmark.siteName} · ` : ''}
+            {hostnameOf(bookmark.url)}
+          </p>
+        )}
         {bookmark.note ? (
           <p className="card-note small">{bookmark.note}</p>
         ) : (
@@ -178,21 +202,28 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
 function ImageContent({ bookmark }: { bookmark: Bookmark }) {
   const pictureUrl = usePreviewUrl(bookmark);
   const media = useMediaRatio(bookmark, 2 / 3, 2.5);
+  const field = useTheme() === 'field';
   return (
     <>
-      <div className="card-picture" style={pictureUrl ? media.style : undefined}>
-        {pictureUrl ? (
-          <img src={pictureUrl} alt={bookmark.title} loading="lazy" onLoad={media.onLoad} />
-        ) : (
-          <span className="small muted">Picture couldn't be downloaded</span>
-        )}
-        <span className="card-platform">Picture</span>
+      <div className="card-lift">
+        {!field && <Halo bookmark={bookmark} />}
+        <div className="card-picture" style={pictureUrl ? media.style : undefined}>
+          {pictureUrl ? (
+            <img src={pictureUrl} alt={bookmark.title} loading="lazy" onLoad={media.onLoad} />
+          ) : (
+            <span className="small muted">Picture couldn't be downloaded</span>
+          )}
+          {field && <span className="card-platform">Picture</span>}
+        </div>
       </div>
-      <div className="card-body">
-        <h3 className="card-title">{bookmark.title}</h3>
-        <SourceLine bookmark={bookmark} />
-        {bookmark.note && <p className="card-note small">{bookmark.note}</p>}
-      </div>
+      {(field || bookmark.note) && (
+        <div className="card-body">
+          {/* The meta line names the source in the other themes, so the title isn't repeated. */}
+          {field && <h3 className="card-title">{bookmark.title}</h3>}
+          {field && <SourceLine bookmark={bookmark} />}
+          {bookmark.note && <p className="card-note small">{bookmark.note}</p>}
+        </div>
+      )}
     </>
   );
 }
@@ -203,7 +234,7 @@ function QuoteContent({ bookmark }: { bookmark: Bookmark }) {
     <div className="card-body">
       <blockquote className="card-quote">{bookmark.text}</blockquote>
       <p className="small card-quote-title truncate">{bookmark.title}</p>
-      <SourceLine bookmark={bookmark} kindTag={field} />
+      {field && <SourceLine bookmark={bookmark} kindTag />}
       {bookmark.note && <p className="card-note small">{bookmark.note}</p>}
     </div>
   );
@@ -216,10 +247,12 @@ function NoteContent({ bookmark }: { bookmark: Bookmark }) {
   const field = useTheme() === 'field';
   return (
     <div className="card-body">
-      {field && (
+      {field ? (
         <p className="small muted card-host">
           <KindTag kind="note" word="note" />
         </p>
+      ) : (
+        <p className="card-note-top">your note · {formatDate(bookmark.createdAt)}</p>
       )}
       <h3 className="card-title">{bookmark.title}</h3>
       {body && <p className="card-note-text small">{body}</p>}

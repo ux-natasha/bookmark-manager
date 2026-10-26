@@ -1,7 +1,6 @@
 import { isDeadLink, kindOf, type Bookmark } from './db';
 import { hostnameOf } from './normalize';
 import { platformById } from './platform';
-import { fallbackColor } from './previews';
 
 // The Covers theme sets every item as a cover built from its own details (docs/design/theme-covers.md, 4).
 // Pure: the component renders whatever this returns.
@@ -56,7 +55,7 @@ const RECIPE_HOSTS = [
   'thekitchn.com',
 ];
 
-const LIGHT_INK = '#F1EDE3';
+export const LIGHT_INK = '#F1EDE3';
 const DARK_INK = '#15171A';
 const DEFAULT_COVER = '#24453B';
 
@@ -133,15 +132,56 @@ export function coverFor(b: Bookmark): CoverSpec {
     host,
     background,
     ink,
-    masthead: b.siteName ?? platformById(platform)?.label ?? host,
+    masthead: b.siteName ?? platformById(platform)?.label ?? mastheadFor(host),
     kicker: NEWSLETTER_PLATFORMS.has(platform) ? 'A NEWSLETTER' : host.toUpperCase(),
     dek: b.description ? firstSentence(b.description) : undefined,
   };
 }
 
-// The item's own colour. The Colour field theme will compute a better one; until then, the site's.
-function itemColor(b: Bookmark): string {
-  return fallbackColor(b);
+// Muted board colours, so a site with no colour of its own still gets a cover that sits on the shelf.
+// The same eight the Colour cycle uses (theme-covers.md).
+export const COVER_PALETTE = ['#24453B', '#2F3B8F', '#A3302A', '#7d9aa8', '#1E2129', '#b4893f', '#6f8a3e', '#c4688a'];
+
+// The item's own colour (read from its preview or picture), then its site's theme colour, then a board
+// colour chosen by the hostname. Not a free hue: that is Default's no-preview tile, and on a shelf it looks like candy.
+export function itemColor(b: Bookmark): string {
+  for (const candidate of [b.color, b.themeColor]) {
+    if (candidate && parseColor(candidate)) return candidate;
+  }
+  let hash = 0;
+  for (const ch of hostnameOf(b.url)) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
+  return COVER_PALETTE[Math.abs(hash) % COVER_PALETTE.length];
+}
+
+// Public suffixes made of two parts, so "bbc.co.uk" reads as "Bbc" and not "Co".
+const SECOND_LEVEL = new Set(['co', 'com', 'org', 'net', 'ac', 'gov', 'edu']);
+// Hosts where the name is the subdomain: "fieldnotes.substack.com" is Fieldnotes, not Substack.
+const SUBDOMAIN_HOSTS = new Set(['substack', 'medium', 'ghost', 'beehiiv', 'wordpress', 'blogspot', 'tumblr', 'github', 'bearblog', 'netlify', 'vercel']);
+
+// A masthead from a bare hostname: no "www.", no suffix, title-cased. "hugeicons.com" is "Hugeicons".
+// The full host stays in the kicker, so nothing is lost.
+export function mastheadFor(host: string): string {
+  const labels = host.toLowerCase().replace(/^www\./, '').split('.').filter(Boolean);
+  if (labels.length < 2) return titleCase(labels[0] ?? host);
+  labels.pop();
+  if (labels.length > 1 && SECOND_LEVEL.has(labels[labels.length - 1])) labels.pop();
+  const registrable = labels[labels.length - 1];
+  const name = labels.length > 1 && SUBDOMAIN_HOSTS.has(registrable) ? labels[labels.length - 2] : registrable;
+  return titleCase(name);
+}
+
+function titleCase(text: string): string {
+  return text
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Whether a cover's type is light on dark or dark on light. Ageing yellows the two differently (covers.css, 7).
+export function inkOf(spec: CoverSpec): 'light' | 'dark' {
+  if (spec.template === 'article') return spec.ink === LIGHT_INK ? 'light' : 'dark';
+  return spec.template === 'video' || spec.template === 'repo' ? 'light' : 'dark';
 }
 
 // "PLATE 3": each picture's number among pictures, in save order.
@@ -194,7 +234,11 @@ export function recipeLine(recipe: { totalTime?: string; yield?: string } | unde
 
 type Rgb = [number, number, number];
 
-// Background and text for a coloured cover: whichever ink contrasts more, and at least 4.5:1.
+// The kicker and dek are set in the ink mixed 85% into the ground (covers.css), so the ink itself needs more than
+// 4.5:1 for them to still pass: a sweep of grounds and tints puts the margin at 5.52, so 5.6 here.
+export const MIN_CONTRAST = 5.6;
+
+// Background and text for a coloured cover: whichever ink contrasts more, and at least MIN_CONTRAST.
 // When neither does (mid-tones), the background darkens by 6% lightness at a time until light ink passes.
 export function coverColors(color: string): { background: string; ink: string } {
   const rgb = parseColor(color) ?? parseColor(DEFAULT_COVER)!;
@@ -202,11 +246,11 @@ export function coverColors(color: string): { background: string; ink: string } 
   const dark = parseColor(DARK_INK)!;
   const onLight = contrast(rgb, light);
   const onDark = contrast(rgb, dark);
-  if (Math.max(onLight, onDark) >= 4.5) return { background: toHex(rgb), ink: onLight >= onDark ? LIGHT_INK : DARK_INK };
+  if (Math.max(onLight, onDark) >= MIN_CONTRAST) return { background: toHex(rgb), ink: onLight >= onDark ? LIGHT_INK : DARK_INK };
 
   let [h, s, l] = rgbToHsl(rgb);
   let current = rgb;
-  while (contrast(current, light) < 4.5 && l > 0) {
+  while (contrast(current, light) < MIN_CONTRAST && l > 0) {
     l = Math.max(0, l - 0.06);
     current = hslToRgb(h, s, l);
   }

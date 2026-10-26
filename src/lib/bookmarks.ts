@@ -22,6 +22,8 @@ export interface NewBookmark {
   foundInUrl?: string;
   foundInTitle?: string;
   createdAt?: number;
+  // Counts as touched for ageing without counting as opened (db.ts). Imports use it to start fresh.
+  dustedAt?: number;
 }
 
 export interface SaveResult {
@@ -96,6 +98,7 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
       createdAt: input.createdAt ?? now,
       updatedAt: now,
       openCount: 0,
+      dustedAt: input.dustedAt,
     };
     await db.bookmarks.add(bookmark);
     return { bookmark, created: true };

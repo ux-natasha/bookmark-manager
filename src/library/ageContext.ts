@@ -31,6 +31,8 @@ export const AgeContext = createContext<AgeState>({
 });
 
 export interface ItemAge {
+  // The page's `now`, which Look ahead moves. Age text reads it.
+  now: number;
   // 0 fresh … 1 fully aged (lib/age.ts).
   t: number;
   months: number;
@@ -53,6 +55,7 @@ export function useItemAge(bookmark: Bookmark): ItemAge {
   const faded = t >= FADED;
   const delay = playing.get(bookmark.id);
   return {
+    now,
     t,
     months: Math.round(monthsUntouched(bookmark, now)),
     faded,

@@ -1,5 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { GreasePencil } from '../components/GreasePencil';
+import { ageLabel } from '../lib/age';
 import { codeKind, itemCode, subKind } from '../lib/codes';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
 import { formatDate } from '../lib/hooks';
@@ -10,6 +11,7 @@ import { useTheme } from '../lib/theme';
 import { useItemAge, type ItemAge } from './ageContext';
 import { CardLink } from './BookmarkCard';
 import { copyFor } from './copy';
+import { FiledUnderLine } from './FiledUnderLine';
 import { useFinished, useFresh } from './useFresh';
 
 // The Contact sheet theme's grid: every item is a frame on one hairline sheet, in row order.
@@ -145,17 +147,29 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
           </>
         )}
 
-        {kind === 'quote' && <blockquote className="sheet-quote">“{bookmark.text}”</blockquote>}
+        {kind === 'quote' && (
+          <>
+            <blockquote className="sheet-quote" data-length={quoteLength(bookmark.text)}>
+              <span className="sheet-quote-text">“{bookmark.text}”</span>
+            </blockquote>
+            {/* The corner label gives the host; this is where it came from, for screen readers. */}
+            {bookmark.title && <span className="visually-hidden"> From {bookmark.title}</span>}
+          </>
+        )}
 
         {kind === 'note' && <NoteText bookmark={bookmark} />}
 
-        {kind === 'link' && <span className="sheet-title">{unexposed ? hostnameOf(bookmark.url) : bookmark.title}</span>}
+        {kind === 'link' && (
+          <span className="sheet-title" data-kind={codeKind(bookmark)}>
+            {unexposed ? hostnameOf(bookmark.url) : bookmark.title}
+          </span>
+        )}
       </CardLink>
 
       <div className="sheet-meta">
-        {bookmark.tags.length > 0 && <FiledTags tags={bookmark.tags} onTagClick={onTagClick} />}
+        {bookmark.tags.length > 0 && <FiledUnderLine variant="sheet" tags={bookmark.tags} onTagClick={onTagClick} />}
         <span className={`sheet-age ${dead ? 'is-accent' : ''}`}>
-          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, unexposed)}
+          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, unexposed, age.now)}
         </span>
         {age.canDust && (
           <button type="button" className="dust-button" onClick={age.dust}>
@@ -199,29 +213,10 @@ function NoteText({ bookmark }: { bookmark: Bookmark }) {
   );
 }
 
-// "FILED · WORK / READING +3". Nested tags show only their leaf.
-function FiledTags({ tags, onTagClick }: { tags: string[]; onTagClick: (tag: string) => void }) {
-  const [expanded, setExpanded] = useState(false);
-  const shown = expanded ? tags : tags.slice(0, 2);
-  return (
-    <span className="sheet-tags">
-      Filed ·{' '}
-      {shown.map((tag, i) => (
-        <span key={tag}>
-          {i > 0 && ' / '}
-          <button type="button" className="sheet-tag" aria-label={`Filter by ${tag}`} onClick={() => onTagClick(tag)}>
-            {tag.split('/').pop()}
-          </button>
-        </span>
-      ))}
-      {!expanded && tags.length > 2 && (
-        <button type="button" className="sheet-tag" aria-label={`Show ${tags.length - 2} more tags`} onClick={() => setExpanded(true)}>
-          {' '}
-          +{tags.length - 2}
-        </button>
-      )}
-    </span>
-  );
+// Quotes step down in size as they get longer, so a long one still fits its cell (contact.css, 4.4).
+function quoteLength(text: string | undefined): 'short' | 'long' | 'very-long' {
+  const length = text?.length ?? 0;
+  return length <= 90 ? 'short' : length <= 200 ? 'long' : 'very-long';
 }
 
 function cornerLabel(b: Bookmark, ratio: number | undefined, age: ItemAge): string {
@@ -241,11 +236,9 @@ function cornerLabel(b: Bookmark, ratio: number | undefined, age: ItemAge): stri
   }
 }
 
-function ageText(b: Bookmark, unexposed: boolean): string {
-  if (isDeadLink(b)) return b.lastCheckedAt ? `stopped ${formatDate(b.lastCheckedAt)}` : 'stopped answering';
-  if (unexposed) return 'details on the way';
-  if (kindOf(b) === 'note') return `written ${formatDate(b.updatedAt)}`;
-  return b.lastOpenedAt ? `opened ${formatDate(b.lastOpenedAt)}` : 'never opened';
+function ageText(b: Bookmark, unexposed: boolean, now: number): string {
+  if (unexposed && !isDeadLink(b)) return 'details on the way';
+  return ageLabel(b, now).text;
 }
 
 // "4 : 5", or "1.91 : 1" when the picture's sides don't reduce to small whole numbers.

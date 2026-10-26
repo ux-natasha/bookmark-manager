@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import { ageLabel } from '../lib/age';
 import { coverFor } from '../lib/covers';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
-import { formatDate } from '../lib/hooks';
 import { linkShows, useLinksShow } from '../lib/linksShow';
 import { platformById } from '../lib/platform';
 import { usePreviews, usePreviewUrlOfKind } from '../lib/previews';
@@ -39,8 +39,9 @@ export function Rack({ bookmarks, plates, arrivedIds, onEdit, onTagClick }: Prop
 
   return (
     <div className="rack" ref={ref} role="list" style={{ '--rack-columns': columns } as CSSProperties}>
-      {rows.map((row) => (
-        <div className="rack-shelf" key={row[0].id}>
+      {/* Keyed by position: keyed by its first item, a shelf would remount (and replay its animations) whenever that item moved. */}
+      {rows.map((row, i) => (
+        <div className="rack-shelf" key={i}>
           <div className="rack-row">
             {row.map((b) => (
               <RackItem key={b.id} bookmark={b} plate={plates.get(b.id)} pressing={pressing.has(b.id)} onEdit={onEdit} onTagClick={onTagClick} />
@@ -136,7 +137,7 @@ function RackItem({ bookmark, plate, pressing, onEdit, onTagClick }: ItemProps) 
       {bookmark.tags.length > 0 && <FiledUnderLine tags={bookmark.tags} onTagClick={onTagClick} />}
       <div className="rack-meta">
         <span className="rack-age">
-          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, spec.template === 'proof')}
+          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, spec.template === 'proof', age.now)}
         </span>
         {age.canDust && (
           <button type="button" className="dust-button" onClick={age.dust}>
@@ -151,11 +152,9 @@ function RackItem({ bookmark, plate, pressing, onEdit, onTagClick }: ItemProps) 
   );
 }
 
-function ageText(b: Bookmark, proof: boolean): string {
-  if (isDeadLink(b)) return b.lastCheckedAt ? `stopped answering ${formatDate(b.lastCheckedAt)}` : 'stopped answering';
-  if (proof) return 'details on the way';
-  if (kindOf(b) === 'note') return `written ${formatDate(b.updatedAt)}`;
-  return b.lastOpenedAt ? `opened ${formatDate(b.lastOpenedAt)}` : 'never opened';
+function ageText(b: Bookmark, proof: boolean, now: number): string {
+  if (proof && !isDeadLink(b)) return 'details on the way';
+  return ageLabel(b, now).text;
 }
 
 function truncate(text: string, max: number): string {

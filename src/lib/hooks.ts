@@ -51,12 +51,4 @@ export function useToast(durationMs = 5000) {
   return { toast, showToast: setToast, hideToast: () => setToast(null) };
 }
 
-export function formatDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  const sameYear = date.getFullYear() === new Date().getFullYear();
-  return date.toLocaleDateString(undefined, {
-    day: 'numeric',
-    month: 'short',
-    year: sameYear ? undefined : 'numeric',
-  });
-}
+export { formatDate } from './formatDate';

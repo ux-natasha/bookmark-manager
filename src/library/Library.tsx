@@ -35,6 +35,7 @@ import { LookAheadShelf } from './LookAheadShelf';
 import { Masonry } from './Masonry';
 import { MoreMenu } from './MoreMenu';
 import { PostDialog } from './PostDialog';
+import { LibraryLoading } from './LibraryLoading';
 import { Rack, RackLoading } from './Rack';
 import { Sheet } from './Sheet';
 import { lookupFor, slotStyle, TagLookContext, useTagLook } from './tagLook';
@@ -159,8 +160,15 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
     if (changes.length) applyColorSlots(changes);
   }, [bookmarks, stats, tagMeta]);
   // The page's one `now`. Cards, tags and the tidy-up step all read it, so Look ahead is just a later date.
-  // Measured when the library changes; ageing by the hour isn't worth a timer.
-  const now = useMemo(() => addMonths(Date.now(), lookAheadMonths), [stats, tagMeta, lookAheadMonths]);
+  // Measured when the library changes, and when the tab comes back to the front, so a tab left open for days
+  // still rolls "opened this week" over. Ageing by the hour isn't worth a timer.
+  const [visibleAgain, setVisibleAgain] = useState(0);
+  useEffect(() => {
+    const onVisible = () => document.visibilityState === 'visible' && setVisibleAgain((n) => n + 1);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+  const now = useMemo(() => addMonths(Date.now(), lookAheadMonths), [stats, tagMeta, lookAheadMonths, visibleAgain]);
   const lookingAhead = lookAheadMonths > 0;
   const tagIndex = useMemo(
     () => buildTagIndex({ stats, meta: tagMeta ?? [], selected: selectedTags, query: tagQuery, now, threshold }),
@@ -593,7 +601,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                 </button>
               </section>
             ) : !bookmarks ? (
-              covers && <RackLoading />
+              theme === 'covers' ? <RackLoading /> : <LibraryLoading theme={theme} />
             ) : (
               bookmarks && (
                 <main className="library-main">
@@ -904,10 +912,11 @@ function summaryLine(total: number, kindCounts: { kind: ItemKind; count: number 
   return [`${total} kept`, ...kinds].join(' · ');
 }
 
-// "VOL. 1 · OCTOBER 2026". The volume is the years since the first save, plus one.
+// "VOL. 1 · OCTOBER 2026". The volume is the years since the first save, plus one. Imports don't count:
+// their dates are Edge's, and a long-kept favourites list would start the library at Vol. 8.
 function volumeLine(bookmarks: Bookmark[] | undefined): string {
   const now = new Date();
-  const first = (bookmarks ?? []).reduce((min, b) => Math.min(min, b.createdAt), now.getTime());
+  const first = (bookmarks ?? []).reduce((min, b) => (b.source === 'import' ? min : Math.min(min, b.createdAt)), now.getTime());
   const volume = Math.floor((now.getTime() - first) / (365.25 * 24 * 3600 * 1000)) + 1;
   const month = now.toLocaleDateString('en', { month: 'long', year: 'numeric' });
   return `Vol. ${volume} · ${month}`;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contrast, coverColors, coverFor, firstSentence, formatDuration, parseColor, plateNumbers, recipeLine } from './covers';
+import { contrast, COVER_PALETTE, coverColors, coverFor, firstSentence, formatDuration, inkOf, itemColor, LIGHT_INK, mastheadFor, parseColor, plateNumbers, recipeLine } from './covers';
 import type { Bookmark } from './db';
 
 const link = (fields: Partial<Bookmark> = {}): Bookmark => ({
@@ -42,9 +42,9 @@ describe('coverFor', () => {
     expect(coverFor(link({ enrichedAt: undefined })).template).toBe('proof');
   });
 
-  it('marks newsletters, and falls back to the hostname without a site name or description', () => {
+  it('marks newsletters, and falls back to the name in the hostname without a site name or description', () => {
     expect(coverFor(link({ platform: 'substack', siteName: 'Field Notes' }))).toMatchObject({ masthead: 'Field Notes', kicker: 'A NEWSLETTER' });
-    expect(coverFor(link())).toMatchObject({ masthead: 'example.com', kicker: 'EXAMPLE.COM', dek: undefined });
+    expect(coverFor(link())).toMatchObject({ masthead: 'Example', kicker: 'EXAMPLE.COM', dek: undefined });
   });
 
   it('takes the first sentence of the description as the dek', () => {
@@ -86,6 +86,17 @@ describe('coverColors', () => {
     }
   });
 
+  it('leaves room for the kicker and dek, which are set in the ink mixed 85% into the ground', () => {
+    const mixed = (ink: string, ground: string) =>
+      parseColor(ink)!.map((v, i) => Math.round(v * 0.85 + parseColor(ground)![i] * 0.15)) as [number, number, number];
+    for (let l = 0; l <= 100; l += 5) {
+      for (const hue of [0, 40, 120, 200, 280]) {
+        const { background, ink } = coverColors(`hsl(${hue} 45% ${l}%)`);
+        expect(contrast(parseColor(background)!, mixed(ink, background))).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
   it('reads hex, rgb and hsl, and falls back on anything else', () => {
     expect(parseColor('#fff')).toEqual([255, 255, 255]);
     expect(parseColor('#24453Bcc')).toEqual([36, 69, 59]);
@@ -121,5 +132,51 @@ describe('cover helpers', () => {
     expect(firstSentence('One. Two.')).toBe('One.');
     expect(firstSentence('No full stop here')).toBe('No full stop here');
     expect(firstSentence('Version 2.0 is out! Try it.')).toBe('Version 2.0 is out!');
+  });
+});
+
+describe('mastheadFor', () => {
+  it('drops www and the suffix, and title-cases the rest', () => {
+    expect(mastheadFor('hugeicons.com')).toBe('Hugeicons');
+    expect(mastheadFor('www.example.org')).toBe('Example');
+    expect(mastheadFor('bbc.co.uk')).toBe('Bbc');
+    expect(mastheadFor('my-field-notes.net')).toBe('My Field Notes');
+  });
+
+  it('takes the name from the subdomain on publishing platforms', () => {
+    expect(mastheadFor('fieldnotes.substack.com')).toBe('Fieldnotes');
+    expect(mastheadFor('someone.github.io')).toBe('Someone');
+    expect(mastheadFor('docs.hugeicons.com')).toBe('Hugeicons');
+  });
+
+  it("copes with hosts that aren't dotted", () => {
+    expect(mastheadFor('localhost')).toBe('Localhost');
+    expect(mastheadFor('')).toBe('');
+  });
+});
+
+describe('cover colours for sites with no colour of their own', () => {
+  it('prefer the colour read from the page, then the theme colour', () => {
+    expect(coverFor(link({ color: '#1d3557', themeColor: '#7a1f1f' })).background).toBe('#1d3557');
+    expect(coverFor(link({ themeColor: '#7a1f1f' })).background).toBe('#7a1f1f');
+  });
+
+  it('otherwise take a board colour chosen by the hostname, the same one every time', () => {
+    const a = coverFor(link({ url: 'https://hugeicons.com/x' })).background;
+    const b = coverFor(link({ url: 'https://hugeicons.com/y' })).background;
+    expect(a).toBe(b);
+    for (const host of ['a.com', 'b.org', 'c.net', 'd.io', 'e.dev', 'f.co']) {
+      expect(COVER_PALETTE).toContain(itemColor(link({ url: `https://${host}/` })));
+    }
+  });
+});
+
+describe('inkOf', () => {
+  it('follows the cover colours for articles, and is fixed for the other templates', () => {
+    expect(inkOf({ template: 'article', kindWord: 'article', title: '', host: '', ink: LIGHT_INK })).toBe('light');
+    expect(inkOf({ template: 'article', kindWord: 'article', title: '', host: '', ink: '#15171A' })).toBe('dark');
+    expect(inkOf({ template: 'video', kindWord: 'video', title: '', host: '' })).toBe('light');
+    expect(inkOf({ template: 'repo', kindWord: 'repository', title: '', host: '' })).toBe('light');
+    expect(inkOf({ template: 'quote', kindWord: 'quote', title: '', host: '' })).toBe('dark');
   });
 });

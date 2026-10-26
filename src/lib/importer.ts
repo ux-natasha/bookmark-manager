@@ -89,6 +89,9 @@ export async function runImport(
   onProgress?: (done: number, total: number) => void,
 ): Promise<number> {
   let added = 0;
+  // Imports start fresh and age from the day they arrive. Edge's date_added is kept as createdAt,
+  // but would otherwise make a long-kept favourites list arrive fully faded.
+  const importedAt = Date.now();
   const total = plan.toImport.length;
   for (const [i, item] of plan.toImport.entries()) {
     const { created } = await saveBookmark({
@@ -98,6 +101,7 @@ export async function runImport(
       importedFolder: item.folder,
       tags: options.foldersAsTags ? folderTags(item.folder) : [],
       createdAt: item.dateAdded,
+      dustedAt: importedAt,
     });
     if (created) added++;
     if (i % 25 === 0 || i === total - 1) onProgress?.(i + 1, total);

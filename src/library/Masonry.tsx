@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useReducer, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useReducer, useRef, useState, type ReactNode } from 'react';
 
 // Masonry columns (docs/design/library-interactions.md, 6.9). Each item goes to the shortest column in turn,
 // so the newest things run across the top, which CSS columns can't do. Items are positioned absolutely
@@ -57,17 +57,41 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
   }
   useLayoutEffect(() => () => observer.current?.disconnect(), []);
 
-  const measure = useCallback((el: HTMLDivElement | null) => {
-    if (!el) return;
-    heights.current.set(el.dataset.key!, el.offsetHeight);
-    observer.current?.observe(el);
-  }, []);
+  // One ref callback per item, kept so each can stop observing, and forget its height, when its item goes.
+  // Otherwise a long session of filtering would grow the height map and keep watching detached elements.
+  const nodes = useRef(new Map<string, HTMLDivElement>());
+  const refs = useRef(new Map<string, (el: HTMLDivElement | null) => void>());
+  // Bumped whenever an item is measured for the first time or changes height, so the layout effect below
+  // notices new measurements even when the number of measured items hasn't changed.
+  const version = useRef(0);
+  const laidOut = useRef(0);
+
+  const refFor = (key: string) => {
+    let ref = refs.current.get(key);
+    if (!ref) {
+      ref = (el) => {
+        if (el) {
+          nodes.current.set(key, el);
+          if (heights.current.get(key) !== el.offsetHeight) version.current++;
+          heights.current.set(key, el.offsetHeight);
+          observer.current?.observe(el);
+          return;
+        }
+        const node = nodes.current.get(key);
+        if (node) observer.current?.unobserve(node);
+        nodes.current.delete(key);
+        heights.current.delete(key);
+        refs.current.delete(key);
+      };
+      refs.current.set(key, ref);
+    }
+    return ref;
+  };
 
   // The first measurements arrive in the ref callbacks above, before paint; lay out again with them.
-  const measured = useRef(0);
   useLayoutEffect(() => {
-    if (heights.current.size !== measured.current) {
-      measured.current = heights.current.size;
+    if (version.current !== laidOut.current) {
+      laidOut.current = version.current;
       relayout();
     }
   });
@@ -92,7 +116,7 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
         placed.map(({ item, key, left, top, row }) => (
           <div
             key={key}
-            ref={measure}
+            ref={refFor(key)}
             data-key={key}
             className="grid-item"
             role="listitem"

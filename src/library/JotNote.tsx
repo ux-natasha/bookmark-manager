@@ -34,7 +34,8 @@ export function JotNote({ onSaved, onExpand }: Props) {
       <input
         type="text"
         aria-label="Jot a note"
-        placeholder="Jot a note, it lands with everything else"
+        placeholder="Jot a note…"
+        title="Jot a note, it lands with everything else"
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
