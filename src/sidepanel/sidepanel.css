@@ -124,3 +124,16 @@ button.full {
 .page-card .section-heading h2 {
   font-size: var(--text-md);
 }
+
+button.recent-item {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+}
+
+.panel-note h2 {
+  margin: 0;
+  font-size: var(--text-md);
+}

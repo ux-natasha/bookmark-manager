@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { db, type Bookmark, type Preview, type PreviewKind } from './db';
+import { hostnameOf } from './normalize';
 import { platformById } from './platform';
 
 export interface PreviewChoice {
@@ -49,6 +50,6 @@ export function usePreviewUrlOfKind(previews: Preview[] | undefined, kind: Previ
 export function fallbackColor(bookmark: Bookmark): string {
   if (bookmark.themeColor && /^#[0-9a-f]{3,8}$|^rgb/i.test(bookmark.themeColor)) return bookmark.themeColor;
   let hash = 0;
-  for (const ch of new URL(bookmark.url).hostname) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
+  for (const ch of hostnameOf(bookmark.url)) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
   return `hsl(${Math.abs(hash) % 360} 45% 55%)`;
 }

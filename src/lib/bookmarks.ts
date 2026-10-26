@@ -1,8 +1,14 @@
-import { db, type Bookmark, type BookmarkSource, type PreviewKind } from './db';
+import { db, kindOf, type Bookmark, type BookmarkSource, type ItemKind, type PreviewKind } from './db';
 import { normalizeUrl } from './normalize';
 
 export interface NewBookmark {
+  // Unset means a link.
+  kind?: ItemKind;
+  // Optional for notes.
   url: string;
+  text?: string;
+  imageUrl?: string;
+  platform?: string;
   title?: string;
   source: BookmarkSource;
   tags?: string[];
@@ -30,16 +36,34 @@ export function cleanTags(tags: string[]): string[] {
   return [...seen];
 }
 
+// The saved link for a page. Pictures and quotes from that page don't count.
 export async function findByUrl(url: string): Promise<Bookmark | undefined> {
   const matches = await db.bookmarks.where('normalizedUrl').equals(normalizeUrl(url)).toArray();
-  return matches.find((b) => !b.deletedAt);
+  return matches.find((b) => !b.deletedAt && kindOf(b) === 'link');
+}
+
+// Pictures and quotes are duplicates when the same one is saved again; notes never are.
+function isSameItem(b: Bookmark, input: NewBookmark, kind: ItemKind): boolean {
+  if (kindOf(b) !== kind) return false;
+  if (kind === 'image') return !!input.imageUrl && b.imageUrl === input.imageUrl;
+  if (kind === 'quote') return b.text === input.text?.trim();
+  return kind === 'link';
+}
+
+function firstLine(text: string | undefined): string {
+  const line = text?.trim().split('\n')[0].trim() ?? '';
+  return line.length > 80 ? `${line.slice(0, 80)}…` : line;
 }
 
 export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
-  const normalizedUrl = normalizeUrl(input.url);
+  const kind = input.kind ?? 'link';
+  const normalizedUrl = input.url ? normalizeUrl(input.url) : '';
 
   return db.transaction('rw', db.bookmarks, async () => {
-    const matches = await db.bookmarks.where('normalizedUrl').equals(normalizedUrl).toArray();
+    const matches =
+      kind === 'note'
+        ? []
+        : (await db.bookmarks.where('normalizedUrl').equals(normalizedUrl).toArray()).filter((b) => isSameItem(b, input, kind));
     const live = matches.find((b) => !b.deletedAt);
     if (live) return { bookmark: live, created: false };
 
@@ -59,9 +83,14 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
 
     const bookmark: Bookmark = {
       id: crypto.randomUUID(),
+      // Saved only for the new kinds, so older records and backups stay as they were.
+      ...(kind !== 'link' && { kind }),
       url: input.url,
       normalizedUrl,
-      title: input.title?.trim() || input.url,
+      title: input.title?.trim() || input.url || firstLine(input.text) || 'Untitled note',
+      text: input.text?.trim() || undefined,
+      imageUrl: input.imageUrl,
+      platform: input.platform,
       note: input.note ?? '',
       tags: cleanTags(input.tags ?? []),
       source: input.source,
@@ -79,7 +108,7 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
 
 export async function updateBookmark(
   id: string,
-  patch: Partial<Pick<Bookmark, 'title' | 'note' | 'tags'>>,
+  patch: Partial<Pick<Bookmark, 'title' | 'note' | 'tags' | 'text'>>,
 ): Promise<void> {
   const changes: Partial<Bookmark> = { ...patch, updatedAt: Date.now() };
   if (patch.tags) changes.tags = cleanTags(patch.tags);

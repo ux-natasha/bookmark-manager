@@ -19,6 +19,9 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 |---|---|
 | Click the icon, or `Alt+Shift+S` | Saves the current page and opens the side panel to add tags or a note |
 | Right-click a link → *Save link to Bookmark Manager* | Saves the link without opening it. A ✓ flashes on the icon (`=` if it was already saved) |
+| Right-click a picture → *Save picture to Bookmark Manager* | Keeps a copy of the picture, linked to the page it was on |
+| Select text, right-click → *Save quote to Bookmark Manager* | Saves the text as a quote, linked to the page it was on |
+| *New note* in the library, or *Write a note* in the side panel | A note of your own, with tags. The first line is its title unless you give one. `Ctrl+Enter` saves |
 | *Open library ↗* in the side panel | Opens the full library in a tab |
 | *Refresh my memory* in the library | Shows a few old bookmarks you haven't opened in a long time |
 | *Import favorites* | Copies Edge favorites in, skipping duplicates. Edge's own favorites aren't changed |
@@ -28,6 +31,13 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 | *Check links* in the library | Re-checks every link in the background and flags ones that seem dead |
 
 **Back up regularly:** uninstalling the extension deletes its library.
+
+## Pictures, quotes and notes
+
+- They live in the library with your links. *Show* in the sidebar filters by kind, and search covers quote and note text.
+- Clicking a picture or quote opens the page it came from; clicking a note opens it for editing.
+- Saving the same picture or quote twice doesn't make a copy. Saving a quote or picture from a page doesn't count as saving the page.
+- **Backups** keep everything except the picture files themselves. After a restore, pictures are downloaded again from their original address; pictures that only existed inside the page (`blob:` or `data:` addresses) can't be, and show a placeholder.
 
 ## Previews and details
 

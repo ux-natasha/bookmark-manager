@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { TagInput } from '../components/TagInput';
 import { setPreviewPreference, updateBookmark } from '../lib/bookmarks';
-import { isDeadLink, type Bookmark, type PreviewKind } from '../lib/db';
+import { isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind } from '../lib/db';
 import { formatDate } from '../lib/hooks';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
-import { pickPreview, usePreviews, usePreviewUrlOfKind } from '../lib/previews';
+import { pickPreview, usePreviews, usePreviewUrl, usePreviewUrlOfKind } from '../lib/previews';
 
 interface Props {
   bookmark: Bookmark;
@@ -19,11 +19,20 @@ const PREVIEW_LABELS: Record<PreviewKind, string> = {
   image: "Site's image",
 };
 
+const HEADINGS: Record<ItemKind, string> = {
+  link: 'Edit bookmark',
+  image: 'Edit picture',
+  quote: 'Edit quote',
+  note: 'Edit note',
+};
+
 export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [title, setTitle] = useState(bookmark.title);
   const [tags, setTags] = useState(bookmark.tags);
   const [note, setNote] = useState(bookmark.note);
+  const [text, setText] = useState(bookmark.text ?? '');
+  const kind = kindOf(bookmark);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -31,7 +40,13 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
   }, []);
 
   const save = async () => {
-    await updateBookmark(bookmark.id, { title: title.trim() || bookmark.url, tags, note });
+    const hasText = kind === 'quote' || kind === 'note';
+    await updateBookmark(bookmark.id, {
+      title: title.trim() || bookmark.url || bookmark.title,
+      tags,
+      note,
+      ...(hasText && { text: text.trim() }),
+    });
     onClose();
   };
 
@@ -57,12 +72,15 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
           save();
         }}
       >
-        <h2>Edit bookmark</h2>
-        <p className="small muted truncate">
-          <a href={bookmark.url} target="_blank" rel="noreferrer">
-            {bookmark.url}
-          </a>
-        </p>
+        <h2>{HEADINGS[kind]}</h2>
+        {bookmark.url && (
+          <p className="small muted truncate">
+            {kind !== 'link' && 'From '}
+            <a href={bookmark.url} target="_blank" rel="noreferrer">
+              {bookmark.url}
+            </a>
+          </p>
+        )}
 
         {isDeadLink(bookmark) && (
           <p className="dead-notice small">
@@ -72,7 +90,8 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
           </p>
         )}
 
-        <PreviewPicker bookmark={bookmark} />
+        {kind === 'link' && <PreviewPicker bookmark={bookmark} />}
+        {kind === 'image' && <Picture bookmark={bookmark} />}
 
         {(details.length > 0 || bookmark.description) && (
           <div className="page-details small">
@@ -83,22 +102,31 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
 
         <label className="field">
           <span className="small muted">Title</span>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus={kind !== 'note'} />
         </label>
+
+        {(kind === 'quote' || kind === 'note') && (
+          <label className="field">
+            <span className="small muted">{kind === 'quote' ? 'Quote' : 'Note'}</span>
+            <textarea className="text-field" value={text} onChange={(e) => setText(e.target.value)} autoFocus={kind === 'note'} />
+          </label>
+        )}
 
         <div className="field">
           <span className="small muted">Tags</span>
           <TagInput tags={tags} allTags={allTags} onChange={setTags} />
         </div>
 
-        <label className="field">
-          <span className="small muted">Note</span>
-          <textarea
-            value={note}
-            placeholder="Why did you save this? (optional)"
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </label>
+        {kind !== 'note' && (
+          <label className="field">
+            <span className="small muted">Note</span>
+            <textarea
+              value={note}
+              placeholder="Why did you save this? (optional)"
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </label>
+        )}
 
         <p className="small muted">
           Saved {formatDate(bookmark.createdAt)}
@@ -111,10 +139,14 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
               </a>
             </>
           )}
-          {' · '}
-          {bookmark.openCount === 0
-            ? 'never opened from here'
-            : `opened ${bookmark.openCount}× · last ${formatDate(bookmark.lastOpenedAt!)}`}
+          {kind !== 'note' && (
+            <>
+              {' · '}
+              {bookmark.openCount === 0
+                ? 'never opened from here'
+                : `opened ${bookmark.openCount}× · last ${formatDate(bookmark.lastOpenedAt!)}`}
+            </>
+          )}
           {bookmark.lastCheckedAt ? ` · link checked ${formatDate(bookmark.lastCheckedAt)}` : ''}
         </p>
 
@@ -122,9 +154,11 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
           <button type="button" className="danger" onClick={() => onDelete(bookmark)}>
             Delete
           </button>
-          <button type="button" onClick={refreshDetails} disabled={refreshing}>
-            {refreshing ? 'Refreshing…' : 'Refresh details'}
-          </button>
+          {kind === 'link' && (
+            <button type="button" onClick={refreshDetails} disabled={refreshing}>
+              {refreshing ? 'Refreshing…' : 'Refresh details'}
+            </button>
+          )}
           <span className="spacer" />
           <button type="button" onClick={onClose}>
             Cancel
@@ -167,5 +201,15 @@ function PreviewPicker({ bookmark }: { bookmark: Bookmark }) {
         </label>
       ))}
     </fieldset>
+  );
+}
+
+function Picture({ bookmark }: { bookmark: Bookmark }) {
+  const url = usePreviewUrl(bookmark);
+  if (!url) return null;
+  return (
+    <a href={url} target="_blank" rel="noreferrer" title="Open the picture full size">
+      <img className="edit-picture" src={url} alt="" />
+    </a>
   );
 }

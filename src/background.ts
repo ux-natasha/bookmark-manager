@@ -1,12 +1,15 @@
 import { purgeOldTrash, saveBookmark } from './lib/bookmarks';
 import { db, type BookmarkSource } from './lib/db';
-import { captureScreenshot, enrichBookmark, readLiveHead } from './lib/enrich';
+import { captureScreenshot, enrichBookmark, readLiveHead, savePicture } from './lib/enrich';
 import { setLastSave, type BackgroundRequest } from './lib/messages';
 import { isProtectedPage, isSaveableUrl, normalizeUrl } from './lib/normalize';
+import { detectPlatform } from './lib/platform';
 import { processPending, recheckAll } from './lib/queue';
 
 const MENU_SAVE_LINK = 'save-link';
 const MENU_SAVE_PAGE = 'save-page';
+const MENU_SAVE_IMAGE = 'save-image';
+const MENU_SAVE_QUOTE = 'save-quote';
 const ENRICH_ALARM = 'enrich';
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -23,6 +26,16 @@ chrome.runtime.onInstalled.addListener(() => {
       id: MENU_SAVE_PAGE,
       title: 'Save this page to Bookmark Manager',
       contexts: ['page'],
+    });
+    chrome.contextMenus.create({
+      id: MENU_SAVE_IMAGE,
+      title: 'Save picture to Bookmark Manager',
+      contexts: ['image'],
+    });
+    chrome.contextMenus.create({
+      id: MENU_SAVE_QUOTE,
+      title: 'Save quote to Bookmark Manager',
+      contexts: ['selection'],
     });
   });
 
@@ -61,8 +74,94 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (created) enrichBookmark(bookmark.id);
   } else if (info.menuItemId === MENU_SAVE_PAGE && tab) {
     savePage(tab, 'context-menu');
+  } else if (info.menuItemId === MENU_SAVE_IMAGE && info.srcUrl && tab?.id !== undefined) {
+    saveImage(info.srcUrl, info, tab);
+  } else if (info.menuItemId === MENU_SAVE_QUOTE && tab?.id !== undefined) {
+    saveQuote(info, tab);
   }
 });
+
+// The page a picture or quote came from, so its card can link back to it.
+function sourcePage(info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
+  const url = info.pageUrl ?? tab.url;
+  return isSaveableUrl(url)
+    ? { url, title: tab.title, platform: detectPlatform(url)?.id }
+    : { url: '', title: tab.title, platform: undefined };
+}
+
+async function saveImage(srcUrl: string, info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
+  const page = sourcePage(info, tab);
+  const target = { tabId: tab.id!, frameIds: [info.frameId ?? 0] };
+  const alt = await runInPage(target, (src: string) => {
+    const image = [...document.images].find((img) => img.currentSrc === src || img.src === src);
+    return image?.alt.trim() ?? '';
+  }, srcUrl);
+
+  const { bookmark, created } = await saveBookmark({
+    kind: 'image',
+    url: page.url,
+    title: alt || page.title,
+    // data: and blob: addresses only work inside the page, so there's nothing to keep for those.
+    imageUrl: isSaveableUrl(srcUrl) ? srcUrl : undefined,
+    platform: page.platform,
+    source: 'context-menu',
+  });
+  flashBadge(tab.id!, created);
+  if (!created) return;
+
+  const blob = await downloadPicture(srcUrl, target);
+  if (blob) {
+    await savePicture(bookmark.id, blob);
+    await db.bookmarks.update(bookmark.id, { enrichedAt: Date.now() });
+  } else {
+    // Leaves it for the background queue to try once more.
+    processPending();
+  }
+}
+
+async function downloadPicture(srcUrl: string, target: chrome.scripting.InjectionTarget): Promise<Blob | undefined> {
+  try {
+    const response = await fetch(srcUrl);
+    const blob = await response.blob();
+    if (response.ok && !blob.type.includes('html')) return blob;
+  } catch {
+    // Falls through to reading it from the page.
+  }
+  // Pictures only the page can read (logged-in sites, blob: addresses): fetch them from inside the page.
+  const dataUrl = await runInPage(target, async (src: string) => {
+    const blob = await (await fetch(src)).blob();
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  }, srcUrl);
+  return dataUrl ? (await fetch(dataUrl)).blob() : undefined;
+}
+
+async function saveQuote(info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
+  // Read from the page, because the menu's copy of the selection loses its line breaks.
+  const selected = await runInPage({ tabId: tab.id!, frameIds: [info.frameId ?? 0] }, () => window.getSelection()?.toString() ?? '');
+  const text = selected?.trim() || info.selectionText?.trim();
+  if (!text) return;
+  const page = sourcePage(info, tab);
+  const { created } = await saveBookmark({ kind: 'quote', text, ...page, source: 'context-menu' });
+  flashBadge(tab.id!, created);
+}
+
+// Runs a small function in the page. Fails quietly on pages extensions can't touch.
+async function runInPage<Args extends unknown[], Result>(
+  target: chrome.scripting.InjectionTarget,
+  func: (...args: Args) => Result | Promise<Result>,
+  ...args: Args
+): Promise<Result | undefined> {
+  try {
+    const [result] = await chrome.scripting.executeScript({ target, func, args });
+    return (result?.result as Result | undefined) || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // Saves the page in a tab you're looking at: screenshot it, and read its details from the live page.
 async function savePage(tab: chrome.tabs.Tab, source: BookmarkSource) {

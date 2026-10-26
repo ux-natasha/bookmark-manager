@@ -1,7 +1,7 @@
 // Works through every bookmark that still needs details, a few at a time, in the background script.
 // Big imports can take a while, so progress is published for the library to show.
 
-import { db, type Bookmark } from './db';
+import { db, kindOf, type Bookmark } from './db';
 import { enrichBookmark } from './enrich';
 import { setEnrichProgress } from './messages';
 import { hostnameOf } from './normalize';
@@ -14,7 +14,10 @@ const RETRY_UNREACHABLE_AFTER_MS = 6 * 60 * 60 * 1000;
 
 export function needsEnrichment(b: Bookmark, now = Date.now()): boolean {
   if (b.deletedAt) return false;
+  const kind = kindOf(b);
+  if (kind === 'quote' || kind === 'note') return false;
   if (!b.enrichedAt) return true;
+  if (kind === 'image') return false;
   return (
     b.linkStatus === 'unreachable' &&
     (b.checkFailures ?? 0) < 2 &&
@@ -99,7 +102,7 @@ async function processBatch(items: Bookmark[]): Promise<void> {
 // Failure counts are kept, so a link that was already dead and still fails stays flagged.
 export async function recheckAll(): Promise<void> {
   await db.bookmarks.toCollection().modify((b) => {
-    if (!b.deletedAt) b.enrichedAt = undefined;
+    if (!b.deletedAt && kindOf(b) === 'link') b.enrichedAt = undefined;
   });
   await processPending();
 }

@@ -42,6 +42,38 @@ describe('saveBookmark', () => {
   });
 });
 
+describe('pictures, quotes and notes', () => {
+  it("don't count as the page being saved, and the page doesn't count as them", async () => {
+    await saveBookmark({ kind: 'quote', url: 'https://example.com/post', text: 'Less, but better.', source: 'context-menu' });
+    expect(await findByUrl('https://example.com/post')).toBeUndefined();
+
+    const page = await saveBookmark({ url: 'https://example.com/post', source: 'panel' });
+    expect(page.created).toBe(true);
+    expect((await findByUrl('https://example.com/post'))?.id).toBe(page.bookmark.id);
+  });
+
+  it('keeps different quotes and pictures from one page, but not the same one twice', async () => {
+    const url = 'https://example.com/post';
+    const quote = (text: string) => saveBookmark({ kind: 'quote', url, text, source: 'context-menu' });
+    const picture = (imageUrl: string) => saveBookmark({ kind: 'image', url, imageUrl, source: 'context-menu' });
+    expect((await quote('First')).created).toBe(true);
+    expect((await quote('Second')).created).toBe(true);
+    expect((await quote(' First ')).created).toBe(false);
+    expect((await picture('https://cdn.example.com/a.jpg')).created).toBe(true);
+    expect((await picture('https://cdn.example.com/b.jpg')).created).toBe(true);
+    expect((await picture('https://cdn.example.com/a.jpg')).created).toBe(false);
+    expect(await liveBookmarks()).toHaveLength(4);
+  });
+
+  it('saves notes without a link, titled by their first line', async () => {
+    const a = await saveBookmark({ kind: 'note', url: '', text: 'Call the printer\nAsk about paper stock', source: 'library' });
+    const b = await saveBookmark({ kind: 'note', url: '', text: 'Call the printer', source: 'library' });
+    expect(a.bookmark.title).toBe('Call the printer');
+    expect(b.created).toBe(true);
+    expect(await liveBookmarks()).toHaveLength(2);
+  });
+});
+
 describe('planImport', () => {
   const item = (url: string, folder: string[] = []): FavoriteItem => ({
     url,

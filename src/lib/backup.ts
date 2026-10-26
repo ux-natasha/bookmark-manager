@@ -1,4 +1,4 @@
-import { db, type Bookmark } from './db';
+import { db, kindOf, type Bookmark } from './db';
 import { cleanTags } from './bookmarks';
 import { normalizeUrl } from './normalize';
 
@@ -45,12 +45,14 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
   let merged = 0;
   await db.transaction('rw', db.bookmarks, async () => {
     for (const incoming of incomingList) {
-      if (!incoming.url) continue;
-      const normalizedUrl = normalizeUrl(incoming.url);
+      // Notes have no link; everything else does.
+      if (!incoming.url && kindOf(incoming) !== 'note') continue;
+      const normalizedUrl = incoming.url ? normalizeUrl(incoming.url) : '';
       const sameId = incoming.id ? await db.bookmarks.get(incoming.id) : undefined;
-      const sameUrl = sameId
+      // Only links are matched by address: one page can have many saved pictures and quotes.
+      const sameUrl = sameId || kindOf(incoming) !== 'link'
         ? undefined
-        : (await db.bookmarks.where('normalizedUrl').equals(normalizedUrl).toArray()).find((b) => !b.deletedAt);
+        : (await db.bookmarks.where('normalizedUrl').equals(normalizedUrl).toArray()).find((b) => !b.deletedAt && kindOf(b) === 'link');
       const current = sameId ?? sameUrl;
 
       if (!current) {
@@ -58,13 +60,15 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
           ...incoming,
           id: incoming.id ?? crypto.randomUUID(),
           normalizedUrl,
-          title: incoming.title || incoming.url,
+          title: incoming.title || incoming.url || 'Untitled note',
           note: incoming.note ?? '',
           tags: cleanTags(incoming.tags ?? []),
           openCount: incoming.openCount ?? 0,
           createdAt: incoming.createdAt ?? Date.now(),
           updatedAt: incoming.updatedAt ?? Date.now(),
           source: incoming.source ?? 'backup',
+          // Backups don't include pictures, so saved pictures are downloaded again.
+          enrichedAt: kindOf(incoming) === 'image' ? undefined : incoming.enrichedAt,
           deletedAt: undefined,
         });
         added++;
@@ -76,6 +80,7 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
         ...current,
         title: newer.title || current.title,
         note: newer.note || current.note,
+        text: newer.text || current.text,
         tags: cleanTags([...current.tags, ...(incoming.tags ?? [])]),
         openCount: Math.max(current.openCount, incoming.openCount ?? 0),
         lastOpenedAt: Math.max(current.lastOpenedAt ?? 0, incoming.lastOpenedAt ?? 0) || undefined,

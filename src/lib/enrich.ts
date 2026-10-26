@@ -1,7 +1,7 @@
 // Fills in a bookmark's details (description, site, platform, preview image, link status)
 // by fetching the page in the background. Runs in the background script.
 
-import { db, type Bookmark, type LinkStatus, type PreviewKind } from './db';
+import { db, kindOf, type Bookmark, type LinkStatus, type PreviewKind } from './db';
 import { decodeEntities, MAX_HTML_BYTES, parseHtmlMeta, type PageMeta } from './metadata';
 import { detectPlatform } from './platform';
 
@@ -9,6 +9,8 @@ const FETCH_TIMEOUT_MS = 15_000;
 const THUMBNAIL_WIDTH = 640;
 // Images narrower than this are usually logos or avatars, not real previews.
 const MIN_PREVIEW_WIDTH = 200;
+// Saved pictures are the thing itself, so they're kept larger than previews.
+const PICTURE_WIDTH = 1600;
 
 export function classifyStatus(status: number): LinkStatus {
   // 202 is what bot-protection services answer with while they "check your browser".
@@ -110,10 +112,10 @@ export async function fetchKnownDetails(url: string): Promise<Partial<PageMeta> 
 }
 
 // Shrinks an image to a small WebP thumbnail so thousands of previews stay light.
-export async function makeThumbnail(blob: Blob, width = THUMBNAIL_WIDTH): Promise<Blob | undefined> {
+export async function makeThumbnail(blob: Blob, width = THUMBNAIL_WIDTH, minWidth = MIN_PREVIEW_WIDTH): Promise<Blob | undefined> {
   try {
     const bitmap = await createImageBitmap(blob);
-    if (bitmap.width < MIN_PREVIEW_WIDTH) return undefined;
+    if (bitmap.width < minWidth) return undefined;
     const scale = Math.min(1, width / bitmap.width);
     const canvas = new OffscreenCanvas(Math.round(bitmap.width * scale), Math.round(bitmap.height * scale));
     canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
@@ -143,6 +145,26 @@ export async function savePreview(bookmarkId: string, kind: PreviewKind, blob: B
   await db.previews.put({ bookmarkId, kind, blob, createdAt: Date.now() });
 }
 
+// Stores a saved picture, shrunk if it's huge. Pictures that can't be decoded here (SVGs) are kept as they are.
+export async function savePicture(bookmarkId: string, blob: Blob): Promise<void> {
+  const resized = blob.size > 300_000 ? await makeThumbnail(blob, PICTURE_WIDTH, 0) : undefined;
+  await savePreview(bookmarkId, 'image', resized ?? blob);
+}
+
+// Downloads a saved picture again, e.g. after restoring a backup (backups don't include images).
+async function refetchPicture(bookmark: Bookmark): Promise<void> {
+  if (bookmark.imageUrl && !(await db.previews.get([bookmark.id, 'image']))) {
+    try {
+      const response = await fetch(bookmark.imageUrl);
+      const blob = await response.blob();
+      if (response.ok && blob.type.startsWith('image/')) await savePicture(bookmark.id, blob);
+    } catch {
+      // The card shows its placeholder; the picture's page link still works.
+    }
+  }
+  await db.bookmarks.update(bookmark.id, { enrichedAt: Date.now() });
+}
+
 function looksUntitled(b: Bookmark): boolean {
   return !b.title.trim() || b.title === b.url || /^https?:\/\//.test(b.title);
 }
@@ -156,6 +178,9 @@ export interface EnrichOptions {
 export async function enrichBookmark(id: string, options: EnrichOptions = {}): Promise<void> {
   const bookmark = await db.bookmarks.get(id);
   if (!bookmark || bookmark.deletedAt) return;
+  if (kindOf(bookmark) === 'image') return refetchPicture(bookmark);
+  // Quotes and notes are your own words: nothing to fetch.
+  if (kindOf(bookmark) !== 'link') return;
 
   const page: FetchedPage = options.liveHead
     ? { status: 'ok', finalUrl: bookmark.url, html: options.liveHead }

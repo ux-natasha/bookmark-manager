@@ -1,4 +1,4 @@
-import { db } from './db';
+import { db, kindOf } from './db';
 import { saveBookmark } from './bookmarks';
 import { isSaveableUrl, normalizeUrl } from './normalize';
 
@@ -53,7 +53,7 @@ export async function readFavorites(): Promise<FavoriteItem[]> {
 
 export async function planImport(items: FavoriteItem[]): Promise<ImportPlan> {
   const existing = await db.bookmarks.toArray();
-  const savedKeys = new Set(existing.filter((b) => !b.deletedAt).map((b) => b.normalizedUrl));
+  const savedKeys = new Set(existing.filter((b) => !b.deletedAt && kindOf(b) === 'link').map((b) => b.normalizedUrl));
 
   const groups = new Map<string, FavoriteItem[]>();
   const skipped: FavoriteItem[] = [];

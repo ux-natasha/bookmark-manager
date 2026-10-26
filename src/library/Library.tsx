@@ -1,8 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { NoteForm } from '../components/NoteForm';
 import { ToastView } from '../components/ToastView';
 import { exportBackup, restoreBackup } from '../lib/backup';
 import { deleteBookmark, restoreBookmark } from '../lib/bookmarks';
-import { isDeadLink, type Bookmark } from '../lib/db';
+import { isDeadLink, kindOf, type Bookmark, type ItemKind } from '../lib/db';
 import { useBookmarks, useEnrichProgress, useTagCounts, useToast } from '../lib/hooks';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
@@ -19,10 +20,27 @@ const RESURFACE_COUNT = 6;
 const UNTAGGED = '__untagged__';
 const OTHER_SITES = '__other__';
 
+const KIND_LABELS: Record<ItemKind, [singular: string, plural: string]> = {
+  link: ['link', 'Links'],
+  image: ['picture', 'Pictures'],
+  quote: ['quote', 'Quotes'],
+  note: ['note', 'Notes'],
+};
+
+function useKindCounts(bookmarks: Bookmark[] | undefined) {
+  return useMemo(() => {
+    const counts = new Map<ItemKind, number>();
+    for (const b of bookmarks ?? []) counts.set(kindOf(b), (counts.get(kindOf(b)) ?? 0) + 1);
+    return (Object.keys(KIND_LABELS) as ItemKind[]).filter((k) => counts.has(k)).map((kind) => ({ kind, count: counts.get(kind)! }));
+  }, [bookmarks]);
+}
+
 function usePlatformCounts(bookmarks: Bookmark[] | undefined) {
   return useMemo(() => {
     const counts = new Map<string, number>();
+    // Notes aren't from any site.
     for (const b of bookmarks ?? []) {
+      if (!b.url) continue;
       const key = b.platform ?? OTHER_SITES;
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
@@ -36,6 +54,7 @@ export function Library() {
   const bookmarks = useBookmarks();
   const tagCounts = useTagCounts(bookmarks);
   const platformCounts = usePlatformCounts(bookmarks);
+  const kindCounts = useKindCounts(bookmarks);
   const progress = useEnrichProgress();
   const { toast, showToast, hideToast } = useToast();
 
@@ -45,6 +64,8 @@ export function Library() {
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [platformFilter, setPlatformFilter] = useState<string | null>(null);
   const [deadOnly, setDeadOnly] = useState(false);
+  const [kindFilter, setKindFilter] = useState<ItemKind | null>(null);
+  const [writingNote, setWritingNote] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [addingFromPost, setAddingFromPost] = useState(false);
@@ -57,12 +78,13 @@ export function Library() {
     const result = bookmarks.filter((b) => {
       if (selectedTags.includes(UNTAGGED) && b.tags.length > 0) return false;
       if (!selectedTags.every((t) => t === UNTAGGED || b.tags.includes(t))) return false;
-      if (platformFilter && (b.platform ?? OTHER_SITES) !== platformFilter) return false;
+      if (kindFilter && kindOf(b) !== kindFilter) return false;
+      if (platformFilter && (!b.url || (b.platform ?? OTHER_SITES) !== platformFilter)) return false;
       if (deadOnly && !isDeadLink(b)) return false;
       if (!words.length) return true;
       const platformLabel = platformById(b.platform)?.label ?? '';
       const haystack =
-        `${b.title} ${b.url} ${b.note} ${b.tags.join(' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
+        `${b.title} ${b.url} ${b.note} ${b.text ?? ''} ${b.tags.join(' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
       return words.every((w) => haystack.includes(w));
     });
 
@@ -76,14 +98,15 @@ export function Library() {
       default:
         return result;
     }
-  }, [bookmarks, query, selectedTags, platformFilter, deadOnly, sort]);
+  }, [bookmarks, query, selectedTags, kindFilter, platformFilter, deadOnly, sort]);
 
   // Looked up from the live list so the dialog updates when details are refreshed.
   const editing = editingId ? bookmarks?.find((b) => b.id === editingId) : undefined;
   const deadCount = useMemo(() => bookmarks?.filter(isDeadLink).length ?? 0, [bookmarks]);
-  const filtersActive = selectedTags.length > 0 || platformFilter !== null || deadOnly;
+  const filtersActive = selectedTags.length > 0 || kindFilter !== null || platformFilter !== null || deadOnly;
   const clearFilters = () => {
     setSelectedTags([]);
+    setKindFilter(null);
     setPlatformFilter(null);
     setDeadOnly(false);
   };
@@ -136,7 +159,7 @@ export function Library() {
         <input
           type="search"
           className="library-search"
-          placeholder="Search titles, links, notes, tags…"
+          placeholder="Search titles, links, quotes, notes, tags…"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -147,6 +170,7 @@ export function Library() {
           Refresh my memory
         </button>
         <div className="library-menu">
+          <button onClick={() => setWritingNote(true)}>New note</button>
           <button onClick={() => setAddingFromPost(true)}>Add from a post</button>
           <button onClick={() => setImporting(true)}>Import favorites</button>
           <button onClick={exportBackup} disabled={!bookmarks?.length}>
@@ -202,7 +226,8 @@ export function Library() {
           <h2>Nothing saved yet</h2>
           <p className="muted">
             Click the extension icon or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> on any page to save it.
-            Right-click a link to save it without opening it.
+            Right-click a link to save it without opening it, a picture to keep it, or selected text to save it as a
+            quote.
           </p>
           <button className="primary" onClick={() => setImporting(true)}>
             Import your Edge favorites
@@ -216,6 +241,28 @@ export function Library() {
                 <span>Links that may be dead</span>
                 <span className="muted small">{deadCount}</span>
               </button>
+            )}
+
+            {kindCounts.length > 1 && (
+              <>
+                <h2>Show</h2>
+                <ul>
+                  {kindCounts.map(({ kind, count }) => (
+                    <li key={kind}>
+                      <button
+                        className={`tag-filter ${kindFilter === kind ? 'is-selected' : ''}`}
+                        onClick={() => {
+                          setKindFilter((current) => (current === kind ? null : kind));
+                          setVisible(PAGE_SIZE);
+                        }}
+                      >
+                        <span>{KIND_LABELS[kind][1]}</span>
+                        <span className="muted small">{count}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
 
             {platformCounts.length > 1 && (
@@ -267,7 +314,7 @@ export function Library() {
           <main>
             <div className="toolbar">
               <span className="muted small">
-                {filtered.length} {filtered.length === 1 ? 'bookmark' : 'bookmarks'}
+                {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1)}
                 {filtersActive && (
                   <>
                     {' · '}
@@ -309,9 +356,40 @@ export function Library() {
           onDelete={handleDelete}
         />
       )}
+      {writingNote && (
+        <NoteDialog
+          allTags={tagCounts.map((t) => t.tag)}
+          onClose={(saved) => {
+            setWritingNote(false);
+            if (saved) showToast({ message: 'Note saved' });
+          }}
+        />
+      )}
       {importing && <ImportDialog onClose={() => setImporting(false)} />}
       {addingFromPost && <PostDialog allTags={tagCounts.map((t) => t.tag)} onClose={() => setAddingFromPost(false)} />}
       <ToastView toast={toast} onDone={hideToast} />
     </div>
+  );
+}
+
+function countNoun(count: number, kind: ItemKind | null, mixed: boolean): string {
+  if (kind) {
+    const [singular, plural] = KIND_LABELS[kind];
+    return count === 1 ? singular : plural.toLowerCase();
+  }
+  if (mixed) return count === 1 ? 'item' : 'items';
+  return count === 1 ? 'bookmark' : 'bookmarks';
+}
+
+function NoteDialog({ allTags, onClose }: { allTags: string[]; onClose: (saved: boolean) => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    dialogRef.current?.showModal();
+  }, []);
+  return (
+    <dialog ref={dialogRef} className="dialog" onClose={() => onClose(false)}>
+      <h2>New note</h2>
+      <NoteForm allTags={allTags} source="library" onDone={onClose} />
+    </dialog>
   );
 }

@@ -4,8 +4,9 @@ import { TagInput } from '../components/TagInput';
 import { FoundLinks } from '../components/FoundLinks';
 import { ToastView } from '../components/ToastView';
 import { Favicon } from '../components/Favicon';
+import { NoteForm } from '../components/NoteForm';
 import { deleteBookmark, findByUrl, markOpened, updateBookmark } from '../lib/bookmarks';
-import type { Bookmark } from '../lib/db';
+import { kindOf, type Bookmark } from '../lib/db';
 import { formatDate, useBookmarks, useTagCounts, useToast } from '../lib/hooks';
 import { getLastSave, onLastSave, openLibrary, sendToBackground, type LastSave } from '../lib/messages';
 import { hostnameOf, isProtectedPage, isSaveableUrl } from '../lib/normalize';
@@ -70,6 +71,7 @@ export function SidePanel() {
   const { toast, showToast, hideToast } = useToast();
   // Links found in the open post, while reviewing them; null while they're being read.
   const [found, setFound] = useState<PostLinks | null>();
+  const [writingNote, setWritingNote] = useState(false);
 
   // Switching tabs leaves the review, since it was about the previous page.
   useEffect(() => setFound(undefined), [tab.url]);
@@ -143,22 +145,33 @@ export function SidePanel() {
         )}
       </section>
 
+      <section className="panel-note">
+        {writingNote ? (
+          <div className="page-card">
+            <h2>New note</h2>
+            <NoteForm
+              allTags={tagCounts.map((t) => t.tag)}
+              source="panel"
+              onDone={(saved) => {
+                setWritingNote(false);
+                if (saved) showToast({ message: 'Note saved' });
+              }}
+            />
+          </div>
+        ) : (
+          <button className="full" onClick={() => setWritingNote(true)}>
+            Write a note
+          </button>
+        )}
+      </section>
+
       <section className="panel-recent">
         <h2>Recently saved</h2>
         {bookmarks && bookmarks.length === 0 && <p className="muted small">Nothing saved yet.</p>}
         <ul>
           {bookmarks?.slice(0, RECENT_COUNT).map((b) => (
             <li key={b.id}>
-              <a
-                href={b.url}
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => markOpened(b.id)}
-                className="recent-item"
-              >
-                <Favicon url={b.url} />
-                <span className="truncate">{b.title}</span>
-              </a>
+              <RecentItem bookmark={b} />
             </li>
           ))}
         </ul>
@@ -287,5 +300,26 @@ function PageHeading({ url, title }: { url: string; title: string }) {
         <span className="small muted truncate">{hostnameOf(url)}</span>
       </div>
     </div>
+  );
+}
+
+const RECENT_PREFIX = { link: '', image: 'Picture · ', quote: '', note: 'Note · ' } as const;
+
+function RecentItem({ bookmark }: { bookmark: Bookmark }) {
+  const kind = kindOf(bookmark);
+  const label = kind === 'quote' ? `“${bookmark.text}”` : RECENT_PREFIX[kind] + bookmark.title;
+  // Notes have no page to open, so they open in the library instead.
+  if (!bookmark.url) {
+    return (
+      <button className="recent-item" onClick={openLibrary}>
+        <span className="truncate">{label}</span>
+      </button>
+    );
+  }
+  return (
+    <a href={bookmark.url} target="_blank" rel="noreferrer" onClick={() => markOpened(bookmark.id)} className="recent-item">
+      <Favicon url={bookmark.url} />
+      <span className="truncate">{label}</span>
+    </a>
   );
 }

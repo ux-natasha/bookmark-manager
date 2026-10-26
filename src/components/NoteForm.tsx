@@ -1,0 +1,72 @@
+import { useEffect, useRef, useState } from 'react';
+import { saveBookmark } from '../lib/bookmarks';
+import type { BookmarkSource } from '../lib/db';
+import { TagInput } from './TagInput';
+
+interface Props {
+  allTags: string[];
+  source: BookmarkSource;
+  onDone: (saved: boolean) => void;
+}
+
+// Writing a new note. The title is optional: without one, the note's first line is used.
+export function NoteForm({ allTags, source, onDone }: Props) {
+  const [title, setTitle] = useState('');
+  const [text, setText] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+
+  // Focus goes to the note itself, after a dialog opening around this form has moved focus to the first field.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => textRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const save = async () => {
+    if (!text.trim() && !title.trim()) return;
+    await saveBookmark({ kind: 'note', url: '', title, text, tags, source });
+    onDone(true);
+  };
+
+  return (
+    <form
+      className="note-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save();
+      }}
+    >
+      <label className="field">
+        <span className="small muted">Title</span>
+        <input type="text" value={title} placeholder="Optional" onChange={(e) => setTitle(e.target.value)} />
+      </label>
+
+      <label className="field">
+        <span className="small muted">Note</span>
+        <textarea
+          className="text-field"
+          ref={textRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          // Ctrl+Enter saves, since Enter is a new line here.
+          onKeyDown={(e) => e.key === 'Enter' && (e.ctrlKey || e.metaKey) && save()}
+        />
+      </label>
+
+      <div className="field">
+        <span className="small muted">Tags</span>
+        <TagInput tags={tags} allTags={allTags} onChange={setTags} />
+      </div>
+
+      <div className="dialog-actions">
+        <span className="spacer" />
+        <button type="button" onClick={() => onDone(false)}>
+          Cancel
+        </button>
+        <button type="submit" className="primary" disabled={!text.trim() && !title.trim()}>
+          Save note
+        </button>
+      </div>
+    </form>
+  );
+}

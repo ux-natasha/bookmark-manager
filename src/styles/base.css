@@ -350,3 +350,24 @@ textarea {
 .found-item-status {
   margin-top: 2px;
 }
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.note-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.note-form .dialog-actions {
+  margin-top: 0;
+}
+
+.text-field {
+  min-height: 140px;
+  resize: vertical;
+}
