@@ -96,7 +96,7 @@ export function SidePanel() {
   const retakeScreenshot = async (bookmark: Bookmark) => {
     if (tab.windowId === undefined) return;
     const result = (await sendToBackground({ type: 'retake-screenshot', bookmarkId: bookmark.id, windowId: tab.windowId })) as { ok: boolean };
-    showToast({ message: result.ok ? 'Screenshot updated' : "Edge didn't allow a screenshot of this page" });
+    showToast({ message: result.ok ? 'Screenshot updated' : "Your browser didn't allow a screenshot of this page" });
   };
 
   const undoSave = async (bookmark: Bookmark) => {
@@ -275,7 +275,7 @@ function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot, on
 
       <div className="panel-actions">
         {isProtectedPage(bookmark.url) ? (
-          <span className="small muted">Edge doesn't allow screenshots of extension store pages.</span>
+          <span className="small muted">Your browser doesn't allow screenshots of extension store pages.</span>
         ) : (
           <button className="link small" onClick={onRetakeScreenshot}>
             Retake screenshot

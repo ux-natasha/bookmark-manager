@@ -46,7 +46,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
     >
       <h2>Import favorites</h2>
       <p className="small muted">
-        Copies your Edge favorites into this library. Your favorites in Edge aren't changed.
+        Copies your browser's bookmarks into this library. Your browser's own bookmarks aren't changed.
       </p>
 
       {phase.name === 'reading' && <p>Reading your favorites…</p>}
