@@ -8,9 +8,12 @@ import { useBookmarks, useEnrichProgress, useTagCounts, useToast } from '../lib/
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { pickForgotten } from '../lib/resurface';
+import { AppearanceToggle, useAppearance } from './AppearanceToggle';
 import { BookmarkCard } from './BookmarkCard';
 import { EditDialog } from './EditDialog';
 import { ImportDialog } from './ImportDialog';
+import { JotNote } from './JotNote';
+import { MoreMenu } from './MoreMenu';
 import { PostDialog } from './PostDialog';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
@@ -19,6 +22,8 @@ const PAGE_SIZE = 120;
 const RESURFACE_COUNT = 6;
 const UNTAGGED = '__untagged__';
 const OTHER_SITES = '__other__';
+// The source select's option for dead links, which sets deadOnly rather than platformFilter.
+const DEAD_LINKS = '__dead__';
 
 const KIND_LABELS: Record<ItemKind, [singular: string, plural: string]> = {
   link: ['link', 'Links'],
@@ -57,6 +62,7 @@ export function Library() {
   const kindCounts = useKindCounts(bookmarks);
   const progress = useEnrichProgress();
   const { toast, showToast, hideToast } = useToast();
+  const { appearance, isDark, toggle: toggleAppearance, setAppearance } = useAppearance();
 
   const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -65,29 +71,42 @@ export function Library() {
   const [platformFilter, setPlatformFilter] = useState<string | null>(null);
   const [deadOnly, setDeadOnly] = useState(false);
   const [kindFilter, setKindFilter] = useState<ItemKind | null>(null);
-  const [writingNote, setWritingNote] = useState(false);
+  // null when closed; otherwise the text the New note dialog opens with.
+  const [writingNote, setWritingNote] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [addingFromPost, setAddingFromPost] = useState(false);
   const [resurfacedIds, setResurfacedIds] = useState<string[] | null>(null);
+  const [arrivedIds, setArrivedIds] = useState<Set<string>>(() => new Set());
   const restoreInput = useRef<HTMLInputElement>(null);
 
-  const filtered = useMemo(() => {
+  // Everything but the kind filter, so the kind pills can count what each kind would show.
+  const matching = useMemo(() => {
     if (!bookmarks) return [];
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-    const result = bookmarks.filter((b) => {
+    return bookmarks.filter((b) => {
       if (selectedTags.includes(UNTAGGED) && b.tags.length > 0) return false;
       if (!selectedTags.every((t) => t === UNTAGGED || b.tags.includes(t))) return false;
-      if (kindFilter && kindOf(b) !== kindFilter) return false;
       if (platformFilter && (!b.url || (b.platform ?? OTHER_SITES) !== platformFilter)) return false;
       if (deadOnly && !isDeadLink(b)) return false;
       if (!words.length) return true;
       const platformLabel = platformById(b.platform)?.label ?? '';
+      // Tags are searched with dashes read as spaces too, so "weeknight dinners" finds "weeknight-dinners".
+      const tagText = b.tags.join(' ');
       const haystack =
-        `${b.title} ${b.url} ${b.note} ${b.text ?? ''} ${b.tags.join(' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
+        `${b.title} ${b.url} ${b.note} ${b.text ?? ''} ${tagText} ${tagText.replace(/-/g, ' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
       return words.every((w) => haystack.includes(w));
     });
+  }, [bookmarks, query, selectedTags, platformFilter, deadOnly]);
 
+  const matchingKindCounts = useMemo(() => {
+    const counts = new Map<ItemKind, number>();
+    for (const b of matching) counts.set(kindOf(b), (counts.get(kindOf(b)) ?? 0) + 1);
+    return counts;
+  }, [matching]);
+
+  const filtered = useMemo(() => {
+    const result = kindFilter ? matching.filter((b) => kindOf(b) === kindFilter) : [...matching];
     switch (sort) {
       case 'oldest':
         return result.reverse();
@@ -98,7 +117,7 @@ export function Library() {
       default:
         return result;
     }
-  }, [bookmarks, query, selectedTags, kindFilter, platformFilter, deadOnly, sort]);
+  }, [matching, kindFilter, sort]);
 
   // Looked up from the live list so the dialog updates when details are refreshed.
   const editing = editingId ? bookmarks?.find((b) => b.id === editingId) : undefined;
@@ -109,6 +128,8 @@ export function Library() {
     setKindFilter(null);
     setPlatformFilter(null);
     setDeadOnly(false);
+    setQuery('');
+    setVisible(PAGE_SIZE);
   };
 
   // Looked up from the live list so edits and deletes show up in the resurfaced row too.
@@ -149,58 +170,103 @@ export function Library() {
     showToast({ message: 'Checking all links again in the background' });
   };
 
+  const sourceValue = deadOnly ? DEAD_LINKS : (platformFilter ?? '');
+  const pickSource = (value: string) => {
+    setDeadOnly(value === DEAD_LINKS);
+    setPlatformFilter(value && value !== DEAD_LINKS ? value : null);
+    setVisible(PAGE_SIZE);
+  };
+
   const cardProps = { onEdit: (b: Bookmark) => setEditingId(b.id), onTagClick: toggleTag };
   const isEmpty = bookmarks?.length === 0;
+  const searching = query.trim() !== '';
+  const allTags = tagCounts.map((t) => t.tag);
 
   return (
     <div className="library">
       <header className="library-header">
-        <h1>Bookmarks</h1>
+        <p className="wordmark">Bookmarks</p>
+        <MoreMenu
+          items={[
+            { label: 'New note', run: () => setWritingNote('') },
+            { label: 'Import favorites', run: () => setImporting(true) },
+            { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
+            { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
+            { label: 'Restore', run: () => restoreInput.current?.click() },
+            ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system') }] : []),
+          ]}
+        />
+        <AppearanceToggle isDark={isDark} onToggle={toggleAppearance} />
+        <button type="button" className="primary header-add" onClick={() => setAddingFromPost(true)}>
+          <span className="label-long">Add from a post</span>
+          <span className="label-short">Add from post</span>
+        </button>
         <input
-          type="search"
-          className="library-search"
-          placeholder="Search titles, links, quotes, notes, tags…"
-          value={query}
+          ref={restoreInput}
+          type="file"
+          accept="application/json,.json"
+          hidden
           onChange={(e) => {
-            setQuery(e.target.value);
-            setVisible(PAGE_SIZE);
+            handleRestore(e.target.files?.[0]);
+            e.target.value = '';
           }}
         />
-        <button className="primary" onClick={refreshMemory} disabled={!bookmarks?.length}>
-          Refresh my memory
-        </button>
-        <div className="library-menu">
-          <button onClick={() => setWritingNote(true)}>New note</button>
-          <button onClick={() => setAddingFromPost(true)}>Add from a post</button>
-          <button onClick={() => setImporting(true)}>Import favorites</button>
-          <button onClick={exportBackup} disabled={!bookmarks?.length}>
-            Back up
-          </button>
-          <button onClick={() => restoreInput.current?.click()}>Restore</button>
-          <button onClick={recheckLinks} disabled={!bookmarks?.length || progress?.running}>
-            Check links
-          </button>
-          <input
-            ref={restoreInput}
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={(e) => {
-              handleRestore(e.target.files?.[0]);
-              e.target.value = '';
-            }}
-          />
-        </div>
       </header>
 
-      {progress?.running && progress.total > 0 && (
-        <div className="enrich-progress small muted" role="status">
-          <span>
-            Fetching previews and details… {progress.done} of {progress.total}
-          </span>
-          <progress value={progress.done} max={progress.total} />
+      <section className="hero">
+        <div className="hero-main">
+          {!!bookmarks?.length && <p className="summary-line">{summaryLine(bookmarks.length, kindCounts)}</p>}
+          {progress?.running && progress.total > 0 && (
+            <div className="enrich-progress" role="status">
+              <span>
+                Fetching previews and details… {progress.done} of {progress.total}
+              </span>
+              <progress value={progress.done} max={progress.total} />
+            </div>
+          )}
+          <h1 className="headline">
+            Everything you <em>kept</em>.
+          </h1>
+          <div className="hero-fields">
+            <label className="search-field">
+              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              <input
+                type="search"
+                aria-label="Search everything you kept"
+                placeholder="Search links, quotes, pictures, notes…"
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setVisible(PAGE_SIZE);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Escape') return;
+                  e.preventDefault();
+                  if (query) {
+                    setQuery('');
+                    setVisible(PAGE_SIZE);
+                  } else e.currentTarget.blur();
+                }}
+              />
+            </label>
+            <JotNote
+              onSaved={(b) => setArrivedIds((ids) => new Set(ids).add(b.id))}
+              onExpand={(text) => setWritingNote(text)}
+            />
+          </div>
         </div>
-      )}
+        {/* Becomes the Look ahead panel in phase 3; until then it keeps today's "From a while ago" row. */}
+        {!isEmpty && (
+          <div className="hero-side">
+            <button type="button" className="ghost-button" onClick={refreshMemory} disabled={!bookmarks?.length}>
+              Refresh my memory
+            </button>
+          </div>
+        )}
+      </section>
 
       {resurfaced && resurfaced.length > 0 && (
         <section className="resurfaced">
@@ -234,142 +300,165 @@ export function Library() {
           </button>
         </section>
       ) : (
-        <div className="library-body">
-          <aside className="tag-sidebar">
-            {deadCount > 0 && (
-              <button className={`tag-filter dead-filter ${deadOnly ? 'is-selected' : ''}`} onClick={() => setDeadOnly((d) => !d)}>
-                <span>Links that may be dead</span>
-                <span className="muted small">{deadCount}</span>
-              </button>
+        bookmarks && (
+          <main className="library-main">
+            {selectedTags.length > 0 && (
+              <FiledUnder tags={selectedTags} onRemove={toggleTag} onClear={() => setSelectedTags([])} />
             )}
 
-            {kindCounts.length > 1 && (
-              <>
-                <h2>Show</h2>
-                <ul>
-                  {kindCounts.map(({ kind, count }) => (
-                    <li key={kind}>
-                      <button
-                        className={`tag-filter ${kindFilter === kind ? 'is-selected' : ''}`}
-                        onClick={() => {
-                          setKindFilter((current) => (current === kind ? null : kind));
-                          setVisible(PAGE_SIZE);
-                        }}
-                      >
-                        <span>{KIND_LABELS[kind][1]}</span>
-                        <span className="muted small">{count}</span>
-                      </button>
-                    </li>
+            <div className="filter-row">
+              {kindCounts.length > 1 && (
+                <div className="kind-pills" role="group" aria-label="Kinds">
+                  <KindPill label="Everything" count={matching.length} pressed={kindFilter === null} onClick={() => setKindFilter(null)} />
+                  {kindCounts.map(({ kind }) => (
+                    <KindPill
+                      key={kind}
+                      label={KIND_LABELS[kind][1]}
+                      count={matchingKindCounts.get(kind) ?? 0}
+                      pressed={kindFilter === kind}
+                      onClick={() => {
+                        setKindFilter(kind);
+                        setVisible(PAGE_SIZE);
+                      }}
+                    />
                   ))}
-                </ul>
-              </>
-            )}
-
-            {platformCounts.length > 1 && (
-              <>
-                <h2>Sources</h2>
-                <ul>
-                  {platformCounts.map(({ id, label, count }) => (
-                    <li key={id}>
-                      <button
-                        className={`tag-filter ${platformFilter === id ? 'is-selected' : ''}`}
-                        onClick={() => {
-                          setPlatformFilter((current) => (current === id ? null : id));
-                          setVisible(PAGE_SIZE);
-                        }}
-                      >
-                        <span className="truncate">{label}</span>
-                        <span className="muted small">{count}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-
-            <h2>Tags</h2>
-            <ul>
-              <li>
-                <button
-                  className={`tag-filter ${selectedTags.includes(UNTAGGED) ? 'is-selected' : ''}`}
-                  onClick={() => toggleTag(UNTAGGED)}
+                </div>
+              )}
+              <div className="filter-selects">
+                {/* Stands in for the tag strip and index until phase 4. Picking adds to the selection. */}
+                <select
+                  className="pill-select"
+                  aria-label="Filter by tag"
+                  value=""
+                  onChange={(e) => e.target.value && toggleTag(e.target.value)}
                 >
-                  <em>untagged</em>
-                </button>
-              </li>
-              {tagCounts.map(({ tag, count }) => (
-                <li key={tag}>
-                  <button
-                    className={`tag-filter ${selectedTags.includes(tag) ? 'is-selected' : ''}`}
-                    onClick={() => toggleTag(tag)}
-                  >
-                    <span className="truncate">{tag}</span>
-                    <span className="muted small">{count}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </aside>
-
-          <main>
-            <div className="toolbar">
-              <span className="muted small">
-                {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1)}
-                {filtersActive && (
-                  <>
-                    {' · '}
-                    <button className="link small" onClick={clearFilters}>
-                      clear filters
-                    </button>
-                  </>
+                  <option value="">Tags…</option>
+                  {!selectedTags.includes(UNTAGGED) && <option value={UNTAGGED}>untagged</option>}
+                  {tagCounts
+                    .filter(({ tag }) => !selectedTags.includes(tag))
+                    .map(({ tag, count }) => (
+                      <option key={tag} value={tag}>
+                        {tag} ({count})
+                      </option>
+                    ))}
+                </select>
+                {(platformCounts.length > 1 || deadCount > 0) && (
+                  <select className="pill-select" aria-label="Source" value={sourceValue} onChange={(e) => pickSource(e.target.value)}>
+                    <option value="">All sources</option>
+                    {platformCounts.map(({ id, label, count }) => (
+                      <option key={id} value={id}>
+                        {label} ({count})
+                      </option>
+                    ))}
+                    {deadCount > 0 && <option value={DEAD_LINKS}>Links that may be dead ({deadCount})</option>}
+                  </select>
                 )}
-              </span>
-              <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort">
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-                <option value="recently-opened">Recently opened</option>
-                <option value="never-opened">Never opened</option>
-              </select>
+                <select className="pill-select" value={sort} onChange={(e) => setSort(e.target.value as Sort)} aria-label="Sort">
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="recently-opened">Recently opened</option>
+                  <option value="never-opened">Never opened</option>
+                </select>
+              </div>
             </div>
 
-            <div className="grid">
-              {filtered.slice(0, visible).map((b) => (
-                <BookmarkCard key={b.id} bookmark={b} {...cardProps} />
-              ))}
-            </div>
+            {(filtersActive || searching) && filtered.length > 0 && (
+              <p className="result-count">
+                {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1)}
+                {' · '}
+                <button className="link" onClick={clearFilters}>
+                  clear filters
+                </button>
+              </p>
+            )}
+
+            {filtered.length === 0 ? (
+              <div className="no-results">
+                <p>Nothing you kept matches that, yet.</p>
+                <button className="link" onClick={clearFilters}>
+                  clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid">
+                {filtered.slice(0, visible).map((b) => (
+                  <BookmarkCard key={b.id} bookmark={b} arriving={arrivedIds.has(b.id)} {...cardProps} />
+                ))}
+              </div>
+            )}
 
             {filtered.length > visible && (
-              <button className="show-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-                Show more ({filtered.length - visible} left)
+              <button className="ghost-button show-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                Show more · {filtered.length - visible} left
               </button>
             )}
           </main>
-        </div>
+        )
       )}
 
       {editing && (
         <EditDialog
           key={editing.id}
           bookmark={editing}
-          allTags={tagCounts.map((t) => t.tag)}
+          allTags={allTags}
           onClose={() => setEditingId(null)}
           onDelete={handleDelete}
         />
       )}
-      {writingNote && (
+      {writingNote !== null && (
         <NoteDialog
-          allTags={tagCounts.map((t) => t.tag)}
+          allTags={allTags}
+          initialText={writingNote}
           onClose={(saved) => {
-            setWritingNote(false);
+            setWritingNote(null);
             if (saved) showToast({ message: 'Note saved' });
           }}
         />
       )}
       {importing && <ImportDialog onClose={() => setImporting(false)} />}
-      {addingFromPost && <PostDialog allTags={tagCounts.map((t) => t.tag)} onClose={() => setAddingFromPost(false)} />}
+      {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
       <ToastView toast={toast} onDone={hideToast} />
     </div>
   );
+}
+
+function KindPill({ label, count, pressed, onClick }: { label: string; count: number; pressed: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className="kind-pill" aria-pressed={pressed} onClick={onClick}>
+      {label}
+      <span className="kind-pill-count">{count}</span>
+    </button>
+  );
+}
+
+// "Showing things filed under WORK and READING  clear". Each name removes that tag.
+function FiledUnder({ tags, onRemove, onClear }: { tags: string[]; onRemove: (tag: string) => void; onClear: () => void }) {
+  return (
+    <p className="filed-under-filter" aria-live="polite">
+      Showing things filed under{' '}
+      {tags.map((tag, i) => (
+        <span key={tag}>
+          {i > 0 && (i === tags.length - 1 ? ' and ' : ', ')}
+          <button type="button" className="filed-under-tag" aria-label={`Remove filter: ${tagLabel(tag)}`} onClick={() => onRemove(tag)}>
+            {tagLabel(tag)}
+          </button>
+        </span>
+      ))}{' '}
+      <button type="button" className="link filed-under-clear" onClick={onClear}>
+        clear
+      </button>
+    </p>
+  );
+}
+
+function tagLabel(tag: string): string {
+  return tag === UNTAGGED ? 'untagged' : tag;
+}
+
+// "18 kept · 8 links · 3 quotes · 4 pictures · 3 notes", over the whole library. Kinds with nothing are left out.
+function summaryLine(total: number, kindCounts: { kind: ItemKind; count: number }[]): string {
+  const kinds = kindCounts.map(({ kind, count }) => `${count} ${count === 1 ? KIND_LABELS[kind][0] : KIND_LABELS[kind][1].toLowerCase()}`);
+  return [`${total} kept`, ...kinds].join(' · ');
 }
 
 function countNoun(count: number, kind: ItemKind | null, mixed: boolean): string {
@@ -381,7 +470,7 @@ function countNoun(count: number, kind: ItemKind | null, mixed: boolean): string
   return count === 1 ? 'bookmark' : 'bookmarks';
 }
 
-function NoteDialog({ allTags, onClose }: { allTags: string[]; onClose: (saved: boolean) => void }) {
+function NoteDialog({ allTags, initialText, onClose }: { allTags: string[]; initialText: string; onClose: (saved: boolean) => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -389,7 +478,7 @@ function NoteDialog({ allTags, onClose }: { allTags: string[]; onClose: (saved: 
   return (
     <dialog ref={dialogRef} className="dialog" onClose={() => onClose(false)}>
       <h2>New note</h2>
-      <NoteForm allTags={allTags} source="library" onDone={onClose} />
+      <NoteForm allTags={allTags} source="library" initialText={initialText} onDone={onClose} />
     </dialog>
   );
 }

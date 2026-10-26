@@ -1,17 +1,102 @@
-/* Functional placeholder styling. The real visual design comes in the design pass;
-   everything visual is driven by these tokens so it can be restyled in one place. */
+/* Design tokens for the Default theme (docs/design/library-interactions.md, section 4).
+   Everything visual is driven by these so a later theme can swap them on :root.
+   Appearance: <html data-appearance="light|dark"> forces a mode; anything else follows the system. */
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/newsreader-latin-opsz-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Newsreader';
+  font-style: italic;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url('/fonts/newsreader-latin-opsz-italic.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/geist-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
+}
 
 :root {
-  --bg: #fafaf9;
-  --surface: #ffffff;
-  --surface-muted: #f1f1ef;
-  --border: #e4e4e0;
-  --text: #1c1c1a;
-  --text-muted: #6b6b66;
-  --accent: #3b5bdb;
+  --bg: #f5f1e8;
+  --surface: #fffdf8;
+  --text: #1f1d1a;
+  --text-muted: #5f5a4f;
+  --border: rgba(31, 29, 26, 0.12);
+  --border-strong: rgba(31, 29, 26, 0.26);
+  --hover: rgba(31, 29, 26, 0.06);
+  --accent: #2f4a6b;
+  --solid-bg: #1f1d1a;
+  --solid-text: #f5f1e8;
+  --danger: #8a2f1c;
+  --note-paper: #fffdf8;
+  --aged-paper: #eadbb8;
+  --aged-text: #6b5c42;
+  --halo-strength: 0.22;
+  --stale-tint: rgba(201, 160, 80, 0.18);
+  --tidy-bar: rgba(201, 160, 80, 0.2);
+  --age-done: #c9a86a;
+
+  /* Kept for dialogs that aren't restyled yet. */
+  --surface-muted: var(--hover);
   --accent-text: #ffffff;
-  --danger: #c92a2a;
-  --success: #2f9e44;
+  --success: #2f7a3e;
+
+  --tag-1: #c47a52;
+  --tag-2: #4d6fa3;
+  --tag-3: #c4688a;
+  --tag-4: #5f98a8;
+  --tag-5: #b4893f;
+  --tag-6: #6f8a3e;
+  --tag-7: #8a857a;
+  --tag-8: #7b93c4;
+  --tag-1-text: #9a4f2b;
+  --tag-2-text: #2f5288;
+  --tag-3-text: #9c3e62;
+  --tag-4-text: #2e6e7e;
+  --tag-5-text: #80601e;
+  --tag-6-text: #4a6224;
+  --tag-7-text: #5c584f;
+  --tag-8-text: #4b63a0;
+
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font: var(--font-sans);
+
+  --gap-section: 26px;
+  --grid-gap-x: 28px;
+  --grid-gap-y: 34px;
+  --card-gap: 10px;
+  --control-h: 44px;
+  --pill-h: 38px;
+  --radius-media: 10px;
+  --radius-note: 12px;
+  --radius-panel: 18px;
+  --radius-bar: 12px;
+  --radius-pill: 999px;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-spring: cubic-bezier(0.3, 1.3, 0.5, 1);
+  --dur-fast: 220ms;
+  --dur-age: 600ms;
 
   --radius: 10px;
   --radius-sm: 6px;
@@ -22,27 +107,77 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
   --text-sm: 12px;
   --text-md: 14px;
   --text-lg: 16px;
   --text-xl: 20px;
 
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+/* Dark values, repeated for the forced and the system case: CSS can't share one declaration list
+   between an attribute selector and a media query. */
+:root[data-appearance='dark'] {
+  --bg: #0d121a;
+  --surface: #161d28;
+  --text: #e7ecf3;
+  --text-muted: #aeb8c6;
+  --border: rgba(231, 236, 243, 0.12);
+  --border-strong: rgba(231, 236, 243, 0.28);
+  --hover: rgba(231, 236, 243, 0.08);
+  --accent: #ede48a;
+  --solid-bg: #e7ecf3;
+  --solid-text: #0d121a;
+  --danger: #f2a08f;
+  --note-paper: #161d28;
+  --aged-paper: #2b2719;
+  --aged-text: #b6a784;
+  --halo-strength: 0.32;
+  --stale-tint: rgba(235, 212, 150, 0.1);
+  --tidy-bar: rgba(235, 212, 150, 0.12);
+  --accent-text: #0d121a;
+  --success: #8fd19e;
+  --tag-1-text: #e8a985;
+  --tag-2-text: #9db7e3;
+  --tag-3-text: #e79bb8;
+  --tag-4-text: #93c6d3;
+  --tag-5-text: #e0bd74;
+  --tag-6-text: #a9c77a;
+  --tag-7-text: #c2bcaf;
+  --tag-8-text: #a9bce6;
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #161615;
-    --surface: #1f1f1e;
-    --surface-muted: #2a2a28;
-    --border: #353532;
-    --text: #ececea;
-    --text-muted: #9a9a94;
-    --accent: #748ffc;
-    --accent-text: #10121a;
-    --danger: #ff8787;
-    --success: #69db7c;
+  :root:not([data-appearance='light']) {
+    --bg: #0d121a;
+    --surface: #161d28;
+    --text: #e7ecf3;
+    --text-muted: #aeb8c6;
+    --border: rgba(231, 236, 243, 0.12);
+    --border-strong: rgba(231, 236, 243, 0.28);
+    --hover: rgba(231, 236, 243, 0.08);
+    --accent: #ede48a;
+    --solid-bg: #e7ecf3;
+    --solid-text: #0d121a;
+    --danger: #f2a08f;
+    --note-paper: #161d28;
+    --aged-paper: #2b2719;
+    --aged-text: #b6a784;
+    --halo-strength: 0.32;
+    --stale-tint: rgba(235, 212, 150, 0.1);
+    --tidy-bar: rgba(235, 212, 150, 0.12);
+    --accent-text: #0d121a;
+    --success: #8fd19e;
+    --tag-1-text: #e8a985;
+    --tag-2-text: #9db7e3;
+    --tag-3-text: #e79bb8;
+    --tag-4-text: #93c6d3;
+    --tag-5-text: #e0bd74;
+    --tag-6-text: #a9c77a;
+    --tag-7-text: #c2bcaf;
+    --tag-8-text: #a9bce6;
+    color-scheme: dark;
   }
 }
 
@@ -55,6 +190,9 @@ body {
   background: var(--bg);
   color: var(--text);
   font: var(--text-md) / 1.45 var(--font);
+  transition:
+    background-color 380ms ease-out,
+    color 380ms ease-out;
 }
 
 button,
@@ -65,44 +203,50 @@ select {
   color: inherit;
 }
 
+/* Ghost button: the default for every button. */
 button {
   cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-pill);
   padding: var(--space-1) var(--space-3);
 }
 
 button:hover:not(:disabled) {
-  background: var(--surface-muted);
+  background: var(--hover);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.35;
   cursor: default;
 }
 
+/* Solid button */
 button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-text);
+  background: var(--solid-bg);
+  border-color: var(--solid-bg);
+  color: var(--solid-text);
+  font-weight: 500;
 }
 
 button.primary:hover:not(:disabled) {
-  background: var(--accent);
-  filter: brightness(1.08);
+  background: var(--solid-bg);
+  filter: brightness(1.07);
 }
 
 button.link {
   border: none;
   background: none;
+  border-radius: 0;
   padding: 0;
-  color: var(--accent);
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 button.link:hover:not(:disabled) {
   background: none;
-  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 button.danger {
@@ -114,7 +258,7 @@ input[type='search'],
 textarea,
 select {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
   background: var(--surface);
   border-radius: var(--radius-sm);
   padding: var(--space-2);
@@ -126,8 +270,37 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* Text-field focus shows on its container where one exists, so the pill doesn't get a box inside it. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   outline-offset: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .muted {
@@ -230,17 +403,18 @@ textarea {
   display: flex;
   gap: var(--space-3);
   align-items: center;
-  background: var(--text);
-  color: var(--bg);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius);
+  background: var(--solid-bg);
+  color: var(--solid-text);
+  font: 13px / 1.4 var(--font-sans);
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
   z-index: 100;
 }
 
 .toast button.link {
   color: inherit;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: underline;
 }
 

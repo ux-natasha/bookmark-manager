@@ -11,14 +11,16 @@ interface Props {
   bookmark: Bookmark;
   onEdit: (bookmark: Bookmark) => void;
   onTagClick: (tag: string) => void;
+  // Saved this session from the library, so it plays the arrive animation.
+  arriving?: boolean;
 }
 
-export function BookmarkCard({ bookmark, onEdit, onTagClick }: Props) {
+export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) {
   const kind = kindOf(bookmark);
   const dead = isDeadLink(bookmark);
 
   return (
-    <article className={`card card-kind-${kind} ${dead ? 'is-dead' : ''}`}>
+    <article className={`card card-kind-${kind} ${dead ? 'is-dead' : ''} ${arriving ? 'is-arriving' : ''}`}>
       <CardLink bookmark={bookmark} onEdit={onEdit}>
         {kind === 'link' && <LinkContent bookmark={bookmark} />}
         {kind === 'image' && <ImageContent bookmark={bookmark} />}

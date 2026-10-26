@@ -6,19 +6,25 @@ import { TagInput } from './TagInput';
 interface Props {
   allTags: string[];
   source: BookmarkSource;
+  // Text carried over from somewhere shorter, such as the library's Jot a note field.
+  initialText?: string;
   onDone: (saved: boolean) => void;
 }
 
 // Writing a new note. The title is optional: without one, the note's first line is used.
-export function NoteForm({ allTags, source, onDone }: Props) {
+export function NoteForm({ allTags, source, initialText = '', onDone }: Props) {
   const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialText);
   const [tags, setTags] = useState<string[]>([]);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   // Focus goes to the note itself, after a dialog opening around this form has moved focus to the first field.
   useEffect(() => {
-    const frame = requestAnimationFrame(() => textRef.current?.focus());
+    const frame = requestAnimationFrame(() => {
+      const field = textRef.current;
+      field?.focus();
+      field?.setSelectionRange(field.value.length, field.value.length);
+    });
     return () => cancelAnimationFrame(frame);
   }, []);
 

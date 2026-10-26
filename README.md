@@ -34,7 +34,7 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 
 ## Pictures, quotes and notes
 
-- They live in the library with your links. *Show* in the sidebar filters by kind, and search covers quote and note text.
+- They live in the library with your links. The kind pills above the grid filter by kind, and search covers quote and note text.
 - Clicking a picture or quote opens the page it came from; clicking a note opens it for editing.
 - Saving the same picture or quote twice doesn't make a copy. Saving a quote or picture from a page doesn't count as saving the page.
 - **Backups** keep everything except the picture files themselves. After a restore, pictures are downloaded again from their original address; pictures that only existed inside the page (`blob:` or `data:` addresses) can't be, and show a placeholder.
