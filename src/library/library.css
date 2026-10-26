@@ -1,7 +1,8 @@
 /* Library layout (docs/design/library-interactions.md, sections 3 and 6). One centred column. */
 
 .library {
-  max-width: 1280px;
+  /* Wide enough that a big monitor isn't mostly margin; the masonry adds columns to fill it. */
+  max-width: 1760px;
   margin: 0 auto;
   padding: 20px clamp(16px, 3vw, 36px) 64px;
   display: flex;

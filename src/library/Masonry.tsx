@@ -6,7 +6,7 @@ import { useCallback, useLayoutEffect, useReducer, useRef, useState, type ReactN
 // changes and keyboard order follows the list.
 
 const MIN_COLUMN = 230;
-const MAX_COLUMNS = 4;
+const MAX_COLUMNS = 6;
 // Before an item has been measured. Close enough that the first paint doesn't jump much.
 const ESTIMATE = 280;
 
