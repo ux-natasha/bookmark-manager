@@ -36,6 +36,8 @@ export function useEnrichProgress(): EnrichProgress | undefined {
 
 export interface Toast {
   message: string;
+  // A small dot glowing in this colour before the message (Colour field: the item that came back).
+  dot?: string;
   action?: { label: string; run: () => void };
 }
 

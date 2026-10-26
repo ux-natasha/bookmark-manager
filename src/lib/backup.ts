@@ -89,6 +89,7 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
         color: current.color ?? incoming.color,
         openCount: Math.max(current.openCount, incoming.openCount ?? 0),
         lastOpenedAt: Math.max(current.lastOpenedAt ?? 0, incoming.lastOpenedAt ?? 0) || undefined,
+        dustedAt: Math.max(current.dustedAt ?? 0, incoming.dustedAt ?? 0) || undefined,
         createdAt: Math.min(current.createdAt, incoming.createdAt ?? current.createdAt),
         updatedAt: Math.max(current.updatedAt, incoming.updatedAt ?? 0),
         deletedAt: undefined,

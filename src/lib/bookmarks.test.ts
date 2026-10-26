@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { patina } from './age';
 import { db } from './db';
-import { deleteBookmark, findByUrl, liveBookmarks, saveBookmark, updateBookmark } from './bookmarks';
+import { deleteBookmark, dustOff, findByUrl, liveBookmarks, markOpened, saveBookmark, undoDustOff, updateBookmark } from './bookmarks';
 import { planImport, type FavoriteItem } from './importer';
 import { normalizeUrl } from './normalize';
 import { pickForgotten } from './resurface';
@@ -96,6 +97,58 @@ describe('planImport', () => {
     expect(plan.duplicateGroups).toHaveLength(1);
     expect(plan.alreadySaved).toHaveLength(1);
     expect(plan.skipped).toHaveLength(1);
+  });
+});
+
+describe('dustOff', () => {
+  const old = Date.now() - 400 * 24 * 60 * 60 * 1000;
+  const saveOld = (url: string) => saveBookmark({ url, source: 'import', createdAt: old }).then((r) => r.bookmark);
+
+  it('sets dustedAt on every item without touching openCount or lastOpenedAt', async () => {
+    const a = await saveOld('https://a.com');
+    const b = await saveOld('https://b.com');
+    await markOpened(b.id);
+    const openedAt = (await db.bookmarks.get(b.id))!.lastOpenedAt;
+
+    const before = Date.now();
+    await dustOff([a.id, b.id]);
+
+    const [afterA, afterB] = await Promise.all([db.bookmarks.get(a.id), db.bookmarks.get(b.id)]);
+    expect(afterA!.dustedAt).toBeGreaterThanOrEqual(before);
+    expect(afterB!.dustedAt).toBeGreaterThanOrEqual(before);
+    expect(afterA!.openCount).toBe(0);
+    expect(afterA!.lastOpenedAt).toBeUndefined();
+    expect(afterB!.openCount).toBe(1);
+    expect(afterB!.lastOpenedAt).toBe(openedAt);
+  });
+
+  it('makes the item fresh again for ageing', async () => {
+    const a = await saveOld('https://a.com');
+    expect(patina(a, Date.now())).toBeGreaterThan(0.5);
+    await dustOff([a.id]);
+    expect(patina((await db.bookmarks.get(a.id))!, Date.now())).toBeLessThan(0.001);
+  });
+
+  it('puts the old values back on undo, or clears them', async () => {
+    const fresh = await saveOld('https://fresh.com');
+    const previous = await saveOld('https://previous.com');
+    await db.bookmarks.update(previous.id, { dustedAt: old + 1000 });
+
+    const snapshot = await dustOff([fresh.id, previous.id]);
+    expect((await db.bookmarks.get(fresh.id))!.dustedAt).toBeGreaterThan(old);
+    await undoDustOff(snapshot);
+
+    const restored = await db.bookmarks.get(fresh.id);
+    expect(restored!.dustedAt).toBeUndefined();
+    expect('dustedAt' in restored!).toBe(false);
+    expect((await db.bookmarks.get(previous.id))!.dustedAt).toBe(old + 1000);
+    expect(restored!.openCount).toBe(0);
+  });
+
+  it('skips ids that are no longer in the library', async () => {
+    const a = await saveOld('https://a.com');
+    const snapshot = await dustOff([a.id, 'missing']);
+    expect(snapshot.map((s) => s.id)).toEqual([a.id]);
   });
 });
 

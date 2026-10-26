@@ -5,7 +5,10 @@ import { formatDate } from '../lib/hooks';
 import { linkShows, useLinksShow } from '../lib/linksShow';
 import { platformById } from '../lib/platform';
 import { usePreviews, usePreviewUrlOfKind } from '../lib/previews';
+import { useTheme } from '../lib/theme';
+import { useItemAge } from './ageContext';
 import { CardLink } from './BookmarkCard';
+import { copyFor } from './copy';
 import { Cover } from './Cover';
 import { FiledUnderLine } from './FiledUnderLine';
 import { useFinished, useFresh } from './useFresh';
@@ -105,16 +108,20 @@ function RackItem({ bookmark, plate, pressing, onEdit, onTagClick }: ItemProps) 
   const imageUrl = usePreviewUrlOfKind(previews, usesPreview ? shows : undefined);
   // A proof is replaced by the real cover with the press animation.
   const printed = useFinished(spec.template === 'proof', PRESS_MS);
+  const age = useItemAge(bookmark);
+  const ageing = copyFor(useTheme()).ageing;
 
   const classes = ['rack-item', `rack-item-${kind}`];
   if (spec.template === 'dead') classes.push('is-dead');
   if (spec.template === 'proof') classes.push('is-proof');
   if (pressing || printed) classes.push('is-pressing');
+  // Taken down: the lean and fading clear, then the red band slides in.
+  if (age.delay !== undefined) classes.push('is-reviving');
 
   const name = kind === 'link' ? (spec.template === 'proof' ? spec.host : bookmark.title) : truncate(spec.title || bookmark.title, 140);
 
   return (
-    <article className={classes.join(' ')} role="listitem">
+    <article className={classes.join(' ')} role="listitem" data-item-id={bookmark.id} style={age.style}>
       <CardLink bookmark={bookmark} onEdit={onEdit} className="rack-link" ariaLabel={`${name}, ${spec.kindWord}`}>
         <Cover
           spec={spec}
@@ -122,12 +129,20 @@ function RackItem({ bookmark, plate, pressing, onEdit, onTagClick }: ItemProps) 
           platformLabel={platformById(bookmark.platform)?.label}
           plate={plate}
           createdAt={bookmark.createdAt}
+          backInPrint={!!age.revived}
         />
         {kind === 'link' && <span className="rack-title">{spec.template === 'proof' ? 'Details on the way' : bookmark.title}</span>}
       </CardLink>
       {bookmark.tags.length > 0 && <FiledUnderLine tags={bookmark.tags} onTagClick={onTagClick} />}
       <div className="rack-meta">
-        <span className="rack-age">{ageText(bookmark, spec.template === 'proof')}</span>
+        <span className="rack-age">
+          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, spec.template === 'proof')}
+        </span>
+        {age.canDust && (
+          <button type="button" className="dust-button" onClick={age.dust}>
+            {ageing.dust}
+          </button>
+        )}
         <button type="button" className="rack-edit" onClick={() => onEdit(bookmark)}>
           Edit
         </button>

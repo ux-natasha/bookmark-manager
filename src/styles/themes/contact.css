@@ -414,14 +414,6 @@
   text-transform: uppercase;
 }
 
-[data-theme='contact'] .resurfaced {
-  border: 1px solid var(--border);
-}
-
-[data-theme='contact'] .resurfaced .section-heading h2 {
-  font: italic 22px var(--font-serif);
-}
-
 /* 4.4 The sheet */
 .sheet {
   display: grid;
@@ -1065,5 +1057,202 @@ button.sheet-link:hover:not(:disabled) {
 @media (prefers-reduced-motion: reduce) {
   .grease-pencil path {
     animation: none;
+  }
+}
+
+/* Look ahead as a strip of film (4.5): one frame per month, each a preview of the bleaching. */
+[data-theme='contact'] .look-ahead {
+  align-items: stretch;
+  gap: 16px;
+  padding: 22px 24px 18px;
+  border-radius: 0;
+  text-align: left;
+}
+
+[data-theme='contact'] .look-ahead-lead {
+  font-size: 19px;
+}
+
+.film-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.film-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+}
+
+[data-theme='contact'] .look-ahead-month {
+  min-width: 0;
+  font: 500 54px / 1 var(--font-serif);
+}
+
+.film-steps {
+  display: flex;
+  gap: 8px;
+}
+
+[data-theme='contact'] .look-ahead-step {
+  border-radius: 0;
+}
+
+.film-strip {
+  position: relative;
+  padding: 14px 12px 8px;
+  background: var(--film);
+}
+
+/* Sprocket holes along the top and bottom edges. */
+.film-sprockets {
+  display: block;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, transparent 0 8px, var(--bg) 8px 14px, transparent 14px 20px);
+}
+
+.film-sprockets.top {
+  margin-bottom: 14px;
+}
+
+.film-sprockets.bottom {
+  margin-top: 6px;
+}
+
+.film-frames {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  /* Narrow screens scroll the strip sideways, with the chosen frame kept in view. */
+  overflow-x: auto;
+  padding: 10px 0 2px;
+  scrollbar-width: none;
+}
+
+.film-frames::-webkit-scrollbar {
+  display: none;
+}
+
+.film-slot {
+  flex: 1 0 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+button.film-frame {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 1px;
+  background: none;
+}
+
+button.film-frame:hover:not(:disabled) {
+  background: none;
+  outline: 1px solid rgb(255 255 255 / 0.5);
+}
+
+/* The frame's fill: a print left in the sun, from blue to bleached paper by month. */
+button.film-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, #d8cdb4 calc(var(--m) * 100%), #3e6ca8);
+}
+
+button.film-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(215deg, rgb(255 251 240 / 0.95) 0%, rgb(255 251 240 / 0.4) 38%, transparent 68%);
+  opacity: calc(var(--m) * var(--sun-strength));
+}
+
+button.film-frame:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* The chosen frame is circled, 9px outside. */
+.film-frame .grease-pencil {
+  inset: -9px;
+  width: calc(100% + 18px);
+  height: calc(100% + 18px);
+  z-index: 1;
+}
+
+.film-number {
+  font: 8.5px var(--font-mono);
+  color: #fff;
+  opacity: 0.6;
+}
+
+.film-slot[data-chosen='true'] .film-number {
+  opacity: 1;
+}
+
+[data-theme='contact'] .look-ahead-footer {
+  justify-content: space-between;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 6.1 Faded frames get a square bordered REPRINT button. */
+[data-theme='contact'] .dust-button {
+  border: 1px solid var(--text);
+  border-radius: 0;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Reprinted: the cell is circled in grease pencil and lit as new paper, for the session. */
+.sheet-cell.is-reprinted {
+  background: color-mix(in srgb, var(--aged-paper) calc(var(--t, 0) * 90%), var(--surface));
+}
+
+.sheet-cell.is-reprinted:hover {
+  background: var(--hover);
+}
+
+.sheet-cell > .grease-pencil-cell {
+  inset: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  z-index: 3;
+  stroke-width: 1.4px;
+}
+
+.sheet-cell .grease-pencil-cell path {
+  stroke-dasharray: none;
+  animation: none;
+}
+
+/* Drawn on after the image is 60% developed (6.2). */
+.sheet-cell.is-developing .grease-pencil-cell path {
+  stroke-dasharray: var(--length, 1000);
+  animation: pencil-draw 450ms var(--ease-out) both;
+  animation-delay: calc(840ms + var(--delay, 0ms));
+}
+
+/* Several frames reprinted together develop a beat apart. */
+.sheet-cell.is-developing .sheet-media,
+.sheet-cell.is-developing :is(.sheet-title, .sheet-quote, .sheet-note) {
+  animation-delay: var(--delay, 0ms);
+}
+
+@media (max-width: 720px) {
+  .film-slot {
+    flex-basis: 38px;
   }
 }

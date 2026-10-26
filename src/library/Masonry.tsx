@@ -10,11 +10,16 @@ const MAX_COLUMNS = 4;
 // Before an item has been measured. Close enough that the first paint doesn't jump much.
 const ESTIMATE = 280;
 
+// Where an item landed: how many items sit above it in its column. Cards use it to tilt in turns.
+export interface Placement {
+  row: number;
+}
+
 interface Props<T> {
   className?: string;
   items: T[];
   keyOf: (item: T) => string;
-  render: (item: T) => ReactNode;
+  render: (item: T, placement: Placement) => ReactNode;
 }
 
 export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
@@ -70,20 +75,21 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
   const columns = width ? Math.max(1, Math.min(MAX_COLUMNS, Math.floor((width + gap.x) / (MIN_COLUMN + gap.x)))) : 1;
   const columnWidth = width ? (width - (columns - 1) * gap.x) / columns : 0;
   const tops = new Array<number>(columns).fill(0);
+  const rows = new Array<number>(columns).fill(0);
   const placed = items.map((item) => {
     const key = keyOf(item);
     let column = 0;
     for (let c = 1; c < columns; c++) if (tops[c] < tops[column] - 1) column = c;
     const top = tops[column];
     tops[column] += (heights.current.get(key) ?? ESTIMATE) + gap.y;
-    return { item, key, left: column * (columnWidth + gap.x), top };
+    return { item, key, left: column * (columnWidth + gap.x), top, row: rows[column]++ };
   });
   const height = Math.max(0, ...tops) - (items.length ? gap.y : 0);
 
   return (
     <div className={className ? `grid ${className}` : 'grid'} ref={ref} role="list" style={{ height }}>
       {width > 0 &&
-        placed.map(({ item, key, left, top }) => (
+        placed.map(({ item, key, left, top, row }) => (
           <div
             key={key}
             ref={measure}
@@ -92,7 +98,7 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
             role="listitem"
             style={{ width: columnWidth, transform: `translate(${left}px, ${top}px)` }}
           >
-            {render(item)}
+            {render(item, { row })}
           </div>
         ))}
     </div>

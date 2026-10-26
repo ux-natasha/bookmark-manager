@@ -103,7 +103,6 @@
 [data-theme='field'] .card-link,
 [data-theme='field'] .colour-search,
 [data-theme='field'] .tag-index,
-[data-theme='field'] .resurfaced,
 [data-theme='field'] .more-menu-list,
 [data-theme='field'] .toast {
   background: var(--glass);
@@ -233,11 +232,6 @@
   justify-content: center;
   width: 100%;
   max-width: 960px;
-}
-
-[data-theme='field'] .hero-side {
-  flex: none;
-  max-width: none;
 }
 
 /* Kind pills: coloured outlines; filled and glowing when pressed (5.5). */
@@ -781,4 +775,183 @@ button.swatch[aria-pressed='true'] {
   .colour-search-status {
     text-align: left;
   }
+}
+
+/* Look ahead as a light meter (5.3): a bar of the library's colours draining to grey across 24 months. */
+[data-theme='field'] .look-ahead {
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 22px;
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+[data-theme='field'] .look-ahead-month {
+  font-size: 52px;
+}
+
+[data-theme='field'] .look-ahead-step {
+  border-color: var(--glass-edge);
+  background: var(--glass);
+}
+
+.meter {
+  width: 100%;
+  max-width: 860px;
+}
+
+.meter-track {
+  position: relative;
+  height: 44px;
+}
+
+/* The bar is 26px; the buttons over it are the full 44px, so it's an easy target. */
+.meter-bar {
+  position: absolute;
+  inset: 9px 0;
+  display: flex;
+  overflow: hidden;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--glass-edge);
+}
+
+.meter-segment {
+  flex: 1;
+}
+
+.meter-hits {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(25, 1fr);
+}
+
+button.meter-hit {
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+button.meter-hit:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.14);
+}
+
+button.meter-hit:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.meter-knob {
+  position: absolute;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  margin: -21px 0 0 -21px;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+  box-shadow: 0 0 28px var(--glow);
+  pointer-events: none;
+  transition:
+    left 400ms var(--ease-spring),
+    box-shadow 400ms ease-out;
+}
+
+.meter-scale {
+  position: relative;
+  height: 14px;
+  margin-top: 6px;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.meter-scale span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* 6 Ageing: colour drains, the glow shrinks to nothing, and the glass edge and pill turn dashed. */
+[data-theme='field'] :is(.card-preview-image, .card-fallback, .card-picture img) {
+  filter: saturate(calc(1 - var(--t, 0) * 0.92)) brightness(calc(1 - var(--t, 0) * 0.08));
+  transition: filter var(--dur-age) ease-out;
+}
+
+[data-theme='field'] .card-halo {
+  opacity: calc(var(--halo-strength) * (1 - var(--t, 0)));
+  transition:
+    opacity var(--dur-age) ease-out,
+    transform 260ms ease-out;
+}
+
+[data-theme='field'] .card:hover .card-halo,
+[data-theme='field'] .card:focus-within .card-halo {
+  opacity: calc(var(--halo-strength) * 1.7 * (1 - var(--t, 0)));
+}
+
+[data-theme='field'] :is(.card-title, .card-quote) {
+  color: color-mix(in srgb, var(--aged-text) calc(var(--t, 0) * 100%), var(--text));
+  transition: color var(--dur-age) ease-out;
+}
+
+/* From 12 months: a second cue that doesn't rely on colour. */
+[data-theme='field'] .card.is-faded .card-link {
+  border-style: dashed;
+}
+
+[data-theme='field'] .card.is-faded .kind-tag {
+  --kind: var(--text-muted);
+  border-style: dashed;
+}
+
+/* Bring back: the colour blooms out from the centre, a beat apart when several come back (7, Bloom). */
+[data-theme='field'] .card.is-reviving {
+  animation: none;
+}
+
+[data-theme='field'] .card.is-reviving :is(.card-preview, .card-picture, .card-link) {
+  animation: field-bloom-media 1300ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms) backwards;
+}
+
+[data-theme='field'] .card.is-reviving .card-halo {
+  animation: field-bloom-halo 1300ms cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms) backwards;
+}
+
+[data-theme='field'] .dust-button {
+  height: 28px;
+  min-height: 28px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+[data-theme='field'] .dust-button:hover:not(:disabled) {
+  background: var(--glass-hover);
+}
+
+/* The room dims and greys as the library ages, and as Look ahead steps forward. */
+.field-light {
+  opacity: calc(var(--field-strength) * (0.25 + 0.75 * var(--fresh, 1)));
+  filter: blur(100px) saturate(calc(0.2 + 0.8 * var(--fresh, 1)));
+  transition:
+    background-color 1200ms ease-out,
+    opacity 1200ms ease-out,
+    filter 1200ms ease-out;
+}
+
+/* Undo's toast: a dot glowing in the colour of what came back. */
+.toast-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 10px var(--dot);
 }

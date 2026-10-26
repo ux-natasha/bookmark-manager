@@ -1,11 +1,15 @@
 import { useEffect, useState, type CSSProperties } from 'react';
+import { GreasePencil } from '../components/GreasePencil';
 import { codeKind, itemCode, subKind } from '../lib/codes';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
 import { formatDate } from '../lib/hooks';
 import { hostnameOf } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { fallbackColor, usePreviewUrl } from '../lib/previews';
+import { useTheme } from '../lib/theme';
+import { useItemAge, type ItemAge } from './ageContext';
 import { CardLink } from './BookmarkCard';
+import { copyFor } from './copy';
 import { useFinished, useFresh } from './useFresh';
 
 // The Contact sheet theme's grid: every item is a frame on one hairline sheet, in row order.
@@ -73,16 +77,20 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
   // A link waiting for its details is an unexposed frame; it develops in when they arrive.
   const unexposed = kind === 'link' && !bookmark.enrichedAt && !previewUrl;
   const exposedNow = useFinished(unexposed, DEVELOP_MS);
+  const age = useItemAge(bookmark);
+  const ageing = copyFor(useTheme()).ageing;
 
   const classes = ['sheet-cell', `sheet-cell-${kind}`];
   if (kind === 'quote') classes.push('span2');
   if (dead) classes.push('is-dead');
-  if (developing || exposedNow) classes.push('is-developing');
+  // A reprint develops back in like a new frame, and stays circled for the session.
+  if (developing || exposedNow || age.delay !== undefined) classes.push('is-developing');
+  if (age.revived) classes.push('is-reprinted');
 
   const onImageLoad = (img: HTMLImageElement) => img.naturalHeight && setRatio(img.naturalWidth / img.naturalHeight);
 
   return (
-    <article className={classes.join(' ')} role="listitem">
+    <article className={classes.join(' ')} role="listitem" data-item-id={bookmark.id} style={age.style}>
       <svg aria-hidden="true" className="sheet-plus" viewBox="0 0 13 13">
         <path d="M6.5 0v13M0 6.5h13" stroke="currentColor" strokeWidth="1" />
       </svg>
@@ -92,7 +100,7 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
           <span className="sheet-code" aria-hidden="true">
             {itemCode(bookmark, sequence)}
           </span>
-          <span className={`sheet-corner ${dead ? 'is-accent' : ''}`}>{cornerLabel(bookmark, ratio)}</span>
+          <span className={`sheet-corner ${dead || age.faded || age.revived ? 'is-accent' : ''}`}>{cornerLabel(bookmark, ratio, age)}</span>
         </span>
 
         {kind === 'link' &&
@@ -146,11 +154,19 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
 
       <div className="sheet-meta">
         {bookmark.tags.length > 0 && <FiledTags tags={bookmark.tags} onTagClick={onTagClick} />}
-        <span className={`sheet-age ${dead ? 'is-accent' : ''}`}>{ageText(bookmark, unexposed)}</span>
+        <span className={`sheet-age ${dead ? 'is-accent' : ''}`}>
+          {age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : ageText(bookmark, unexposed)}
+        </span>
+        {age.canDust && (
+          <button type="button" className="dust-button" onClick={age.dust}>
+            {ageing.dust}
+          </button>
+        )}
         <button type="button" className="sheet-edit" onClick={() => onEdit(bookmark)}>
           Edit
         </button>
       </div>
+      {age.revived && <GreasePencil shape="cell" />}
     </article>
   );
 }
@@ -208,8 +224,11 @@ function FiledTags({ tags, onTagClick }: { tags: string[]; onTagClick: (tag: str
   );
 }
 
-function cornerLabel(b: Bookmark, ratio: number | undefined): string {
+function cornerLabel(b: Bookmark, ratio: number | undefined, age: ItemAge): string {
   if (isDeadLink(b)) return b.linkStatus === 'gone' ? 'Gone' : `No answer ×${b.checkFailures ?? 2}`;
+  // Red is the only colour left on a faded frame (5, Label).
+  if (age.faded) return `Faded · ${age.months} mo.`;
+  if (age.revived) return 'Reprinted';
   switch (kindOf(b)) {
     case 'link':
       return platformById(b.platform)?.label ?? b.siteName ?? hostnameOf(b.url);

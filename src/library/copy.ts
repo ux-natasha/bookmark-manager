@@ -11,6 +11,27 @@ interface Copy {
   noResults: string;
   itemNoun: [singular: string, plural: string];
   index: IndexCopy;
+  ageing: AgeingCopy;
+}
+
+// Look ahead, and bringing faded things back (docs/design/library-interactions.md 6.3, 6.4; each theme's copy table).
+interface AgeingCopy {
+  // "Your library now," / "Your library as it'll look in"
+  leadNow: string;
+  leadAhead: string;
+  // How many things have faded, at the previewed date. `total` is the whole library.
+  status: (faded: number, total: number, ahead: boolean) => string;
+  // The panel's button at month 0 ("Refresh my memory") and while looking ahead.
+  refresh: string;
+  back: string;
+  // The refresh button's title when there is nothing to bring back.
+  nothing: string;
+  // The button on a faded item.
+  dust: string;
+  // The card's age text after it was brought back this session. `months` is how long it had gone untouched.
+  revived: (months: number, batch: boolean) => string;
+  // The toast; `batch` is Refresh my memory rather than one item.
+  toast: (count: number, batch: boolean) => string;
 }
 
 // The tag strip and index (docs/design/library-interactions.md 6.5–6.7; Contact sheet 4.6, 4.8; Covers 5, 6.5, 6.6).
@@ -57,6 +78,20 @@ const DEFAULT_INDEX: IndexCopy = {
   allArchived: 'Every tag is archived. Bring them back below.',
 };
 
+const NOTHING_TO_BRING_BACK = 'Nothing to bring back yet';
+
+const DEFAULT_AGEING: AgeingCopy = {
+  leadNow: 'Your library now,',
+  leadAhead: 'Your library as it’ll look in',
+  status: (n) => (n === 0 ? 'Nothing has gone yellow yet' : `${plural(n, 'thing')} ${n === 1 ? 'has' : 'have'} gone yellow`),
+  refresh: 'Refresh my memory',
+  back: 'Back to today',
+  nothing: NOTHING_TO_BRING_BACK,
+  dust: 'Dust off',
+  revived: (months, batch) => (batch && months >= 1 ? `back from ${months} months` : 'dusted off just now'),
+  toast: (n, batch) => (batch ? `Brought back ${plural(n, 'thing')} you’d forgotten` : 'Dusted off'),
+};
+
 const COPY: Record<Theme, Copy> = {
   default: {
     headline: ['Everything you ', 'kept'],
@@ -66,6 +101,7 @@ const COPY: Record<Theme, Copy> = {
     noResults: 'Nothing you kept matches that, yet.',
     itemNoun: ['item', 'items'],
     index: DEFAULT_INDEX,
+    ageing: DEFAULT_AGEING,
   },
   contact: {
     headline: ['Everything you kept,', 'on one sheet'],
@@ -81,6 +117,18 @@ const COPY: Record<Theme, Copy> = {
       staleLine: (n, span) => `${plural(n, 'tag')} unused for ${span}`,
       staleExplainer: 'Their letters are tinted below. Archived tags leave the index but stay on the things they’re on.',
     },
+    ageing: {
+      ...DEFAULT_AGEING,
+      status: (n, total, ahead) => {
+        if (n === 0) return ahead ? 'By then no frames will have faded' : 'No frames have faded yet';
+        const frames = `${n} of ${total} ${total === 1 ? 'frame' : 'frames'}`;
+        return ahead ? `By then ${frames} will have faded` : `${frames} ${n === 1 ? 'has' : 'have'} faded`;
+      },
+      refresh: 'Reprint the three most faded',
+      dust: 'Reprint',
+      revived: (months, batch) => (batch && months >= 1 ? `back from ${months} mo.` : 'reprinted just now'),
+      toast: (n) => `Reprinted ${plural(n, 'frame')}`,
+    },
   },
   field: {
     headline: ['Find it by how it ', 'looked'],
@@ -92,6 +140,19 @@ const COPY: Record<Theme, Copy> = {
     index: {
       ...DEFAULT_INDEX,
       staleExplainer: 'They’ve gone grey below. Archived tags leave the index but stay on the things they’re on.',
+    },
+    ageing: {
+      ...DEFAULT_AGEING,
+      status: (n, total, ahead) => {
+        if (n === 0) return ahead ? 'By then nothing will have lost its colour' : 'Nothing has lost its colour yet';
+        const things = `${n} of ${total} ${total === 1 ? 'thing' : 'things'}`;
+        const lost = n === 1 ? 'lost its colour' : 'lost their colour';
+        return ahead ? `By then ${things} will have ${lost}` : `${things} ${n === 1 ? 'has' : 'have'} ${lost}`;
+      },
+      refresh: 'Bring back three',
+      dust: 'Bring back',
+      revived: (months) => (months >= 1 ? `back from ${months} mo.` : 'brought back just now'),
+      toast: (n) => `Brought back ${plural(n, 'thing')}`,
     },
   },
   covers: {
@@ -115,6 +176,21 @@ const COPY: Record<Theme, Copy> = {
       archivedToast: (n) => `${plural(n, 'tag')} left out of the next edition`,
       onceLabel: 'once: ',
       allArchived: 'Every tag is out of print. Bring them back below.',
+    },
+    ageing: {
+      ...DEFAULT_AGEING,
+      leadNow: 'The issue on the shelf now,',
+      leadAhead: 'Your shelf as it’ll look in',
+      status: (n, total, ahead) => {
+        if (n === 0) return ahead ? 'By then no covers will be sun-faded' : 'No covers are sun-faded yet';
+        const covers = `${n} of ${total} ${total === 1 ? 'cover' : 'covers'}`;
+        return ahead ? `By then ${covers} will be sun-faded` : `${covers} ${n === 1 ? 'is' : 'are'} sun-faded`;
+      },
+      refresh: 'Take three down',
+      dust: 'Take down',
+      revived: (months) => (months >= 1 ? `back from ${months} mo.` : 'back in print'),
+      // The toast itself is headed "Erratum" (covers.css).
+      toast: (n) => `${plural(n, 'cover')} taken down`,
     },
   },
 };

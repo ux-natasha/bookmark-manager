@@ -374,16 +374,6 @@
   left: 0;
 }
 
-.resurfaced {
-  padding: var(--space-4);
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-panel);
-}
-
-.resurfaced .section-heading h2 {
-  font: italic 20px var(--font-serif);
-}
-
 @keyframes card-arrive {
   from {
     opacity: 0;
@@ -776,4 +766,213 @@ button.card-link:hover {
   max-height: 280px;
   margin: 0 auto;
   border-radius: var(--radius-sm);
+}
+
+/* 6.3 Look ahead: a preview of the library months from now. The Default panel; the other themes restyle it. */
+.look-ahead-section {
+  display: block;
+}
+
+.look-ahead {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px 12px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+}
+
+/* The panel takes focus itself only so the arrow keys keep working at either end of the months. */
+.look-ahead:focus {
+  outline: none;
+}
+
+.look-ahead-lead {
+  font: italic 17px var(--font-serif);
+  color: var(--text-muted);
+}
+
+.look-ahead-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.look-ahead-month {
+  /* Wide enough for "September 2026", so the arrows don't move as the names change. */
+  min-width: 250px;
+  font: 400 44px / 1 var(--font-serif);
+  letter-spacing: -0.02em;
+}
+
+.look-ahead-year {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.look-ahead-step {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-h);
+  height: var(--control-h);
+  padding: 0;
+}
+
+.look-ahead-ticks {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 22px;
+}
+
+.look-ahead-tick {
+  width: 7px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border-strong);
+  transition:
+    height 300ms var(--ease-spring),
+    background-color 300ms ease-out;
+}
+
+/* Each January is taller, to mark the year. */
+.look-ahead-tick[data-january='true'] {
+  height: 14px;
+}
+
+.look-ahead-tick[data-state='done'] {
+  background: var(--age-done);
+}
+
+.look-ahead-tick[data-state='now'] {
+  height: 22px;
+  background: var(--text);
+}
+
+.look-ahead-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  font: 13px var(--font-sans);
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .look-ahead-month {
+    min-width: 0;
+    flex: 1;
+    font-size: 34px;
+  }
+}
+
+/* 6.4 The button on a faded item: Dust off, or the theme's word for it. */
+.dust-button {
+  flex: none;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 10px;
+  font: 12px var(--font-sans);
+  white-space: nowrap;
+}
+
+.card-meta {
+  align-items: center;
+  gap: 8px;
+}
+
+.card-age {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-grid {
+  scroll-margin-top: 16px;
+}
+
+/* 7 Ageing (patina). Every look comes from one number, --t (0 fresh, 1 fully aged), set on the card,
+   so a Look ahead step is one re-render and these transitions do the rest. */
+:root:not([data-theme]) .card {
+  /* --side is 1 or -1, so neighbours in a column lean opposite ways. */
+  transform: rotate(calc(var(--t, 0) * 1.4deg * var(--side, 1)));
+  transition: transform var(--dur-age) ease-out;
+}
+
+:root:not([data-theme]) .card-kind-note {
+  background: color-mix(in srgb, var(--aged-paper) calc(var(--t, 0) * 100%), var(--note-paper));
+  transition:
+    transform var(--dur-age) ease-out,
+    background-color var(--dur-age) ease-out,
+    color var(--dur-age) ease-out;
+}
+
+/* Ink: quotes and notes drift from --text toward --aged-text. */
+:root:not([data-theme]) :is(.card-kind-quote, .card-kind-note) {
+  color: color-mix(in srgb, var(--aged-text) calc(var(--t, 0) * 100%), var(--text));
+}
+
+:root:not([data-theme]) .card-kind-quote {
+  transition:
+    transform var(--dur-age) ease-out,
+    color var(--dur-age) ease-out;
+}
+
+/* The quote mark fades to 40%. */
+:root:not([data-theme]) .card-quote {
+  border-left-color: color-mix(in srgb, var(--accent) calc((1 - var(--t, 0) * 0.6) * 100%), transparent);
+  transition: border-left-color var(--dur-age) ease-out;
+}
+
+/* Media goes sepia, desaturated and softer. */
+:root:not([data-theme]) :is(.card-preview-image, .card-fallback, .card-picture img) {
+  filter: sepia(calc(var(--t, 0) * 0.78)) saturate(calc(1 - var(--t, 0) * 0.55)) contrast(calc(1 - var(--t, 0) * 0.14));
+  transition: filter var(--dur-age) ease-out;
+}
+
+/* Dust: specks and a warm vignette over the media and the note paper. */
+:root:not([data-theme]) :is(.card-preview, .card-picture, .card-kind-note .card-link)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 30%, rgb(92 70 36 / 0.42) 0 0.8px, transparent 1.3px) 0 0 / 23px 19px,
+    radial-gradient(circle at 70% 60%, rgb(92 70 36 / 0.34) 0 0.7px, transparent 1.1px) 0 0 / 17px 29px,
+    radial-gradient(ellipse at 50% 45%, transparent 52%, rgb(130 96 40 / 0.3));
+  opacity: calc(var(--t, 0) * 0.95);
+  transition: opacity var(--dur-age) ease-out;
+}
+
+:root:not([data-theme]) .card-kind-note .card-link {
+  position: relative;
+}
+
+/* Dusted off: back to fresh with a shine. */
+@keyframes card-shine {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.015);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.card.is-reviving {
+  animation: card-shine 900ms ease-out both;
+  animation-delay: var(--delay, 0ms);
 }

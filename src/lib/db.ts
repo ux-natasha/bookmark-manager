@@ -63,6 +63,9 @@ export interface Bookmark {
   updatedAt: number;
   lastOpenedAt?: number;
   openCount: number;
+  // Set when the person dusts a faded item off. Counts as touched for ageing (lib/age.ts) but not as
+  // opened, so openCount and "Never opened" stay accurate. Not indexed.
+  dustedAt?: number;
 
   // Soft delete: kept for undo now, and so a future sync can tell "deleted" from "never existed".
   deletedAt?: number;

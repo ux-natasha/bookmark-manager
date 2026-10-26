@@ -1,3 +1,4 @@
+import { lastTouched } from './age';
 import type { Bookmark } from './db';
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -11,8 +12,8 @@ export function pickForgotten(bookmarks: Bookmark[], count: number, now = Date.n
   const pool = old.length >= count ? old : bookmarks;
 
   const weighted = pool.map((b) => {
-    const lastTouched = b.lastOpenedAt ?? b.createdAt;
-    const daysForgotten = Math.max(1, (now - lastTouched) / DAY);
+    // Dusted-off items count as touched, so they aren't picked again straight away.
+    const daysForgotten = Math.max(1, (now - lastTouched(b)) / DAY);
     const neverOpened = b.openCount === 0 ? 2 : 1;
     return { b, weight: daysForgotten * neverOpened };
   });

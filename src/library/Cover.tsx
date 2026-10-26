@@ -16,14 +16,18 @@ interface Props {
   plate?: number;
   // Notes show the date they were written.
   createdAt: number;
+  // Taken down this session: a red "BACK IN PRINT" band across the lower third.
+  backInPrint?: boolean;
 }
 
-export function Cover({ spec, imageUrl, platformLabel, plate, createdAt }: Props) {
+export function Cover({ spec, imageUrl, platformLabel, plate, createdAt, backInPrint }: Props) {
+  const band = backInPrint && <span className="cover-band">Back in print</span>;
   if (imageUrl && spec.template !== 'picture') {
     return (
       <div className="cover cover--preview" aria-hidden="true">
         <img src={imageUrl} alt="" loading="lazy" />
         {platformLabel && <span className="card-platform">{platformLabel}</span>}
+        {band}
       </div>
     );
   }
@@ -35,6 +39,7 @@ export function Cover({ spec, imageUrl, platformLabel, plate, createdAt }: Props
       <div className="cover-fill">
         <CoverFace spec={spec} imageUrl={imageUrl} plate={plate} createdAt={createdAt} />
       </div>
+      {band}
     </div>
   );
 }

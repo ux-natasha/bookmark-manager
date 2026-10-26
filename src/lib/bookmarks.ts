@@ -136,6 +136,28 @@ export async function markOpened(id: string): Promise<void> {
   await db.bookmarks.update(id, { lastOpenedAt: Date.now(), openCount: bookmark.openCount + 1 });
 }
 
+// What dustedAt was before dusting off, so Undo can put it back (or clear it).
+export interface DustSnapshot {
+  id: string;
+  dustedAt: number | undefined;
+}
+
+// Dusting off counts as touching an item without opening it: only dustedAt changes, so openCount and
+// "Never opened" stay truthful. Every item goes in one transaction, so Undo never sees half of them.
+export async function dustOff(ids: string[], now = Date.now()): Promise<DustSnapshot[]> {
+  return db.transaction('rw', db.bookmarks, async () => {
+    const found = (await db.bookmarks.bulkGet(ids)).filter((b): b is Bookmark => !!b);
+    await Promise.all(found.map((b) => db.bookmarks.update(b.id, { dustedAt: now })));
+    return found.map((b) => ({ id: b.id, dustedAt: b.dustedAt }));
+  });
+}
+
+export async function undoDustOff(snapshot: DustSnapshot[]): Promise<void> {
+  await db.transaction('rw', db.bookmarks, () =>
+    Promise.all(snapshot.map(({ id, dustedAt }) => db.bookmarks.update(id, { dustedAt }))),
+  );
+}
+
 export async function liveBookmarks(): Promise<Bookmark[]> {
   const all = await db.bookmarks.orderBy('createdAt').reverse().toArray();
   return all.filter((b) => !b.deletedAt);

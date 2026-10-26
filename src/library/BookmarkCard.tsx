@@ -7,6 +7,8 @@ import { hostnameOf } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { fallbackColor, usePreviewUrl } from '../lib/previews';
 import { useTheme } from '../lib/theme';
+import { useItemAge } from './ageContext';
+import { copyFor } from './copy';
 import { useItemColor } from './Field';
 import { FiledUnderLine } from './FiledUnderLine';
 
@@ -16,18 +18,30 @@ interface Props {
   onTagClick: (tag: string) => void;
   // Saved this session from the library, so it plays the arrive animation.
   arriving?: boolean;
+  // Which way an aged card tilts: neighbours in a column lean opposite ways.
+  side?: 1 | -1;
 }
 
-export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) {
+export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving, side = 1 }: Props) {
   const kind = kindOf(bookmark);
   const dead = isDeadLink(bookmark);
   // Colour field: the card glows in the item's colour.
   const glow = useItemColor(bookmark.id);
+  const age = useItemAge(bookmark);
+  const ageing = copyFor(useTheme()).ageing;
+  const classes = ['card', `card-kind-${kind}`];
+  if (dead) classes.push('is-dead');
+  if (arriving) classes.push('is-arriving');
+  if (age.faded) classes.push('is-faded');
+  if (age.delay !== undefined) classes.push('is-reviving');
+  // "dusted off just now" for the rest of the session, until the page looks ahead.
+  const revivedText = age.revived && !age.lookingAhead ? ageing.revived(age.revived.months, age.revived.batch) : undefined;
 
   return (
     <article
-      className={`card card-kind-${kind} ${dead ? 'is-dead' : ''} ${arriving ? 'is-arriving' : ''}`}
-      style={glow ? ({ '--glow': glow } as CSSProperties) : undefined}
+      className={classes.join(' ')}
+      data-item-id={bookmark.id}
+      style={{ ...age.style, '--side': side, ...(glow && { '--glow': glow }) } as CSSProperties}
     >
       {glow && !dead && <span className="card-halo" aria-hidden="true" />}
       <CardLink bookmark={bookmark} onEdit={onEdit}>
@@ -39,7 +53,14 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) 
       <footer className="card-footer">
         {bookmark.tags.length > 0 && <FiledUnderLine tags={bookmark.tags} onTagClick={onTagClick} />}
         <div className="card-meta small muted">
-          <span title={`Saved ${new Date(bookmark.createdAt).toLocaleString()}`}>{formatDate(bookmark.createdAt)}</span>
+          <span className="card-age" title={`Saved ${new Date(bookmark.createdAt).toLocaleString()}`}>
+            {revivedText ?? formatDate(bookmark.createdAt)}
+          </span>
+          {age.canDust && (
+            <button type="button" className="dust-button" onClick={age.dust}>
+              {ageing.dust}
+            </button>
+          )}
           <button className="link small" onClick={() => onEdit(bookmark)}>
             Edit
           </button>
@@ -67,7 +88,7 @@ export function CardLink({
   const href = bookmark.url || bookmark.imageUrl;
   if (!href) {
     return (
-      <button type="button" className={className} aria-label={ariaLabel} onClick={() => onEdit(bookmark)}>
+      <button type="button" className={className} data-card-link aria-label={ariaLabel} onClick={() => onEdit(bookmark)}>
         {children}
       </button>
     );
@@ -76,6 +97,7 @@ export function CardLink({
   return (
     <a
       className={className}
+      data-card-link
       aria-label={ariaLabel}
       href={href}
       target="_blank"
