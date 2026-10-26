@@ -856,3 +856,214 @@ button.sheet-link:hover:not(:disabled) {
     overflow-x: auto;
   }
 }
+
+/* 4.7 Grease pencil: a hand-drawn loop around a selected tag, drawn on in one stroke */
+.grease-pencil {
+  position: absolute;
+  inset: -7px -10px;
+  width: calc(100% + 20px);
+  height: calc(100% + 14px);
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--pencil);
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+}
+
+.grease-pencil path {
+  stroke-dasharray: var(--length, 200);
+  animation: pencil-draw 450ms var(--ease-out) both;
+}
+
+@keyframes pencil-draw {
+  from {
+    stroke-dashoffset: var(--length, 200);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 4.6 Tag strip: picks are circled, not highlighted */
+[data-theme='contact'] .tag-strip-lead {
+  font-size: 22px;
+}
+
+/* Tags are words, not the theme's mono button labels. */
+[data-theme='contact'] button.tag-strip-tag,
+[data-theme='contact'] button.ix-entry,
+[data-theme='contact'] button.ix-word {
+  font-family: var(--font-serif);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+[data-theme='contact'] button.ix-word {
+  font-size: inherit;
+}
+
+[data-theme='contact'] button.tag-strip-tag {
+  margin: 0 8px;
+  font: 500 21px var(--font-serif);
+}
+
+[data-theme='contact'] .tag-strip-count {
+  font-size: 9.5px;
+}
+
+[data-theme='contact'] .tag-strip-sep {
+  align-self: center;
+  width: 1px;
+  height: 18px;
+  overflow: hidden;
+  background: var(--border-strong);
+  color: transparent;
+}
+
+[data-theme='contact'] .tag-strip-tag[aria-pressed='true'] .tag-strip-name,
+[data-theme='contact'] .ix-entry[aria-pressed='true'] .ix-name,
+[data-theme='contact'] .ix-word[aria-pressed='true'] {
+  background-image: none;
+}
+
+/* 4.8 The index as a grid of cells */
+[data-theme='contact'] .tag-index {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+[data-theme='contact'] .ix-search {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+
+[data-theme='contact'] .ix-search input {
+  font: 18px var(--font-serif);
+}
+
+[data-theme='contact'] .ix-hint,
+[data-theme='contact'] .ix-tidy .segmented button,
+[data-theme='contact'] .ix-tidy button {
+  font: 10.5px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .ix-tidy-lead {
+  font-size: 19px;
+}
+
+[data-theme='contact'] .ix-tidy {
+  padding: 0;
+}
+
+[data-theme='contact'] .ix-tidy button + button {
+  border-left: 1px solid var(--border-strong);
+}
+
+[data-theme='contact'] .ix-tidy-bar {
+  border: 1px solid var(--border-strong);
+}
+
+[data-theme='contact'] .ix-tidy-count {
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .ix-tidy-explainer {
+  font: italic 17px var(--font-serif);
+}
+
+[data-theme='contact'] .ix-letter {
+  border-radius: 0;
+  font-size: 19px;
+}
+
+/* The sheet's hairline technique: each cell draws its own line into the 1px gap. */
+[data-theme='contact'] .ix-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+  gap: 1px;
+  padding: 1px;
+  columns: auto;
+}
+
+[data-theme='contact'] .ix-group {
+  position: relative;
+  margin: 0;
+  padding: 14px 18px 16px;
+  box-shadow: 0 0 0 1px var(--border);
+  /* A letter full of unused tags reads as a faded frame. */
+  background: color-mix(in srgb, var(--aged-paper) calc(var(--stale-share, 0) * 80%), var(--bg));
+  transition: background-color var(--dur-age) ease-out;
+}
+
+[data-theme='contact'] .ix-crosshair {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  background:
+    linear-gradient(var(--text-muted), var(--text-muted)) center / 1px 100% no-repeat,
+    linear-gradient(var(--text-muted), var(--text-muted)) center / 100% 1px no-repeat;
+}
+
+[data-theme='contact'] .ix-head {
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font: italic 400 84px / 0.8 var(--font-serif);
+}
+
+[data-theme='contact'] .ix-head-count {
+  font: normal 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] button.ix-entry.is-stale,
+[data-theme='contact'] button.ix-entry.is-stale:hover:not(:disabled),
+[data-theme='contact'] button.ix-word.is-stale {
+  background: transparent;
+}
+
+[data-theme='contact'] .ix-name {
+  position: relative;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+[data-theme='contact'] .ix-leader {
+  border-bottom-width: 1px;
+}
+
+[data-theme='contact'] .ix-count {
+  font-size: 11px;
+}
+
+[data-theme='contact'] button.ix-sub {
+  padding-left: 24px;
+}
+
+[data-theme='contact'] .ix-sub .ix-name {
+  font-size: 17px;
+}
+
+[data-theme='contact'] .ix-runin {
+  font-size: 17px;
+}
+
+[data-theme='contact'] .ix-archived {
+  font-size: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grease-pencil path {
+    animation: none;
+  }
+}

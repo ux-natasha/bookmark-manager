@@ -75,6 +75,18 @@ export interface BookmarkDetails {
   thread?: { index: number; count: number };
 }
 
+// What the library remembers about a tag beyond the items carrying it (docs/design/library-interactions.md, 5.3).
+export interface TagMeta {
+  // The full tag, including any parent ("recipes/weeknight").
+  tag: string;
+  // 1–8, top-level tags only. Stable once given, so colours never shuffle.
+  colorSlot?: number;
+  // Set when the tag is added to something or picked as a filter.
+  lastUsedAt?: number;
+  // Set by tidy-up. Archived tags stay on items but leave the index.
+  archivedAt?: number;
+}
+
 // Preview images live in their own table so loading the bookmark list stays fast.
 export interface Preview {
   bookmarkId: string;
@@ -86,6 +98,7 @@ export interface Preview {
 export const db = new Dexie('bookmark-manager') as Dexie & {
   bookmarks: EntityTable<Bookmark, 'id'>;
   previews: Dexie.Table<Preview, [string, PreviewKind]>;
+  tagMeta: EntityTable<TagMeta, 'tag'>;
 };
 
 db.version(1).stores({
@@ -96,6 +109,12 @@ db.version(1).stores({
 db.version(2).stores({
   bookmarks: 'id, normalizedUrl, *tags, createdAt, updatedAt, lastOpenedAt, deletedAt, platform',
   previews: '[bookmarkId+kind], bookmarkId',
+});
+
+db.version(3).stores({
+  bookmarks: 'id, normalizedUrl, *tags, createdAt, updatedAt, lastOpenedAt, deletedAt, platform',
+  previews: '[bookmarkId+kind], bookmarkId',
+  tagMeta: 'tag, archivedAt',
 });
 
 export function kindOf(b: Pick<Bookmark, 'kind'>): ItemKind {

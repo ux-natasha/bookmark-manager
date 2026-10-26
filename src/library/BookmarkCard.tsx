@@ -6,6 +6,7 @@ import { formatDate } from '../lib/hooks';
 import { hostnameOf } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { fallbackColor, usePreviewUrl } from '../lib/previews';
+import { FiledUnderLine } from './FiledUnderLine';
 
 interface Props {
   bookmark: Bookmark;
@@ -28,13 +29,7 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) 
         {kind === 'note' && <NoteContent bookmark={bookmark} />}
       </CardLink>
       <footer className="card-footer">
-        <div className="card-tags">
-          {bookmark.tags.map((tag) => (
-            <button key={tag} className="tag" onClick={() => onTagClick(tag)}>
-              {tag}
-            </button>
-          ))}
-        </div>
+        {bookmark.tags.length > 0 && <FiledUnderLine tags={bookmark.tags} onTagClick={onTagClick} />}
         <div className="card-meta small muted">
           <span title={`Saved ${new Date(bookmark.createdAt).toLocaleString()}`}>{formatDate(bookmark.createdAt)}</span>
           <button className="link small" onClick={() => onEdit(bookmark)}>

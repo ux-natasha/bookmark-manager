@@ -181,29 +181,6 @@
   color: var(--text-muted);
 }
 
-.segmented {
-  display: inline-flex;
-  padding: 3px;
-  border: 1px solid var(--border-strong);
-  border-radius: 4px;
-}
-
-.segmented button {
-  height: 38px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 3px;
-  background: transparent;
-  font: 13px var(--font-sans);
-  white-space: nowrap;
-}
-
-.segmented button[aria-pressed='true'],
-.segmented button[aria-pressed='true']:hover:not(:disabled) {
-  background: var(--solid-bg);
-  color: var(--solid-text);
-}
-
 /* 6.4 Kinds as binder tabs along the top of a paper strip that holds the selects */
 [data-theme='covers'] .filter-row {
   flex-direction: column;
@@ -477,28 +454,6 @@ button.rack-link:hover:not(:disabled) {
 .rack-item.is-proof .rack-title,
 .rack-item.is-dead .rack-title {
   color: var(--text-muted);
-}
-
-.rack-filed {
-  margin: 0;
-  font: italic 14px / 1.4 var(--font-serif);
-  color: var(--text-muted);
-}
-
-.rack-filed button.rack-tag {
-  min-height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  font: inherit;
-  color: var(--text);
-}
-
-.rack-filed button.rack-tag:hover:not(:disabled) {
-  background: none;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .rack-meta {
@@ -1149,5 +1104,254 @@ button.rack-link:hover:not(:disabled) {
 
   .segmented button {
     padding: 0 10px;
+  }
+}
+
+/* 6.5 The tag strip as a running header: "INDEX work 24 · design 19 …". Picks get a ribbon. */
+[data-theme='covers'] .tag-strip {
+  border-top-color: var(--text);
+}
+
+[data-theme='covers'] .tag-strip-lead {
+  font: 10.5px var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+[data-theme='covers'] button.tag-strip-tag {
+  font: italic 19px var(--font-display);
+  color: var(--text);
+}
+
+[data-theme='covers'] .tag-strip-count {
+  vertical-align: baseline;
+  margin-left: 4px;
+  font: normal 16px var(--font-serif);
+  font-variant-numeric: oldstyle-nums;
+}
+
+[data-theme='covers'] .tag-strip-tag[aria-pressed='true'] {
+  color: var(--mark-text, var(--text));
+}
+
+[data-theme='covers'] .tag-strip-tag[aria-pressed='true'] .tag-strip-name {
+  background-image: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+/* A ribbon bookmark: a swallowtailed strip hanging from the word. */
+[data-theme='covers'] .tag-strip-tag[aria-pressed='true']::after,
+[data-theme='covers'] .ix-entry[aria-pressed='true']::before,
+[data-theme='covers'] .ix-word[aria-pressed='true']::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 18px;
+  background: var(--ribbon);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+  pointer-events: none;
+}
+
+[data-theme='covers'] .tag-strip-tag[aria-pressed='true']::after {
+  top: calc(100% - 8px);
+  left: 8px;
+}
+
+/* 6.6 The index as the back of a book */
+[data-theme='covers'] .tag-index {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+[data-theme='covers'] .ix-search {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+
+[data-theme='covers'] .ix-search input {
+  font: 17px var(--font-serif);
+}
+
+[data-theme='covers'] .ix-letters {
+  font-family: var(--font-display);
+}
+
+[data-theme='covers'] .ix-letter {
+  border-radius: 3px;
+  font-style: italic;
+}
+
+[data-theme='covers'] .ix-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 40px 56px 28px;
+  border-radius: 3px;
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 20px 30px -24px rgba(60, 40, 10, 0.45);
+}
+
+[data-theme='covers'] .ix-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--text);
+}
+
+[data-theme='covers'] .ix-page-title {
+  font: italic 30px var(--font-display);
+}
+
+[data-theme='covers'] .ix-page-note,
+[data-theme='covers'] .ix-folio {
+  font: 10px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+[data-theme='covers'] .ix-groups {
+  columns: 3 240px;
+  column-gap: 48px;
+  column-rule: 1px solid var(--border);
+}
+
+[data-theme='covers'] .ix-head {
+  font: italic 400 58px / 0.9 var(--font-display);
+}
+
+/* "design, 19": name, comma, count in old-style numerals. No leaders, no squares, no shading. */
+[data-theme='covers'] button.ix-entry {
+  align-items: baseline;
+  gap: 0;
+  min-height: 30px;
+}
+
+[data-theme='covers'] .ix-sq,
+[data-theme='covers'] .ix-leader {
+  display: none;
+}
+
+[data-theme='covers'] .ix-name {
+  font-size: 17px;
+}
+
+[data-theme='covers'] .ix-comma {
+  display: inline;
+  margin-right: 0.3em;
+  font-size: 17px;
+}
+
+[data-theme='covers'] .ix-count {
+  font: 17px var(--font-serif);
+  font-variant-numeric: oldstyle-nums;
+}
+
+[data-theme='covers'] .ix-dagger {
+  display: inline;
+}
+
+[data-theme='covers'] button.ix-sub {
+  padding-left: 22px;
+}
+
+[data-theme='covers'] .ix-sub .ix-name,
+[data-theme='covers'] .ix-sub .ix-comma,
+[data-theme='covers'] .ix-sub .ix-count {
+  font-size: 15.5px;
+}
+
+[data-theme='covers'] .ix-entry[aria-pressed='true'] .ix-name,
+[data-theme='covers'] .ix-word[aria-pressed='true'] {
+  background-image: none;
+  font-style: italic;
+}
+
+[data-theme='covers'] .ix-entry[aria-pressed='true']::before {
+  top: 6px;
+  left: -22px;
+}
+
+[data-theme='covers'] .ix-word[aria-pressed='true']::before {
+  top: 2px;
+  left: -14px;
+}
+
+[data-theme='covers'] button.ix-entry.is-stale,
+[data-theme='covers'] button.ix-entry.is-stale:hover:not(:disabled),
+[data-theme='covers'] button.ix-word.is-stale,
+[data-theme='covers'] button.ix-word.is-stale:hover:not(:disabled) {
+  background: transparent;
+}
+
+[data-theme='covers'] .ix-once {
+  font: inherit;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+/* The tidy bar is an erratum slip at the top of the page. */
+[data-theme='covers'] .ix-tidy-bar {
+  border-top: 1px dashed var(--erratum-rule);
+  border-bottom: 1px dashed var(--erratum-rule);
+  border-radius: 0;
+  background: var(--erratum);
+  color: var(--erratum-text);
+}
+
+[data-theme='covers'] .ix-erratum-label {
+  display: block;
+  flex-basis: 100%;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--erratum-label);
+}
+
+[data-theme='covers'] .ix-tidy-count {
+  flex: 1;
+  min-width: 220px;
+  font: 17px / 1.35 var(--font-serif);
+}
+
+[data-theme='covers'] .ix-tidy-explainer {
+  display: none;
+}
+
+/* Archived tags: "Out of print:" and a run-in of names. */
+[data-theme='covers'] .ix-archived {
+  padding-top: 12px;
+  font-size: 15.5px;
+}
+
+[data-theme='covers'] .ix-archived-lead {
+  font-style: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='covers'] .ix-folio {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (max-width: 719px) {
+  [data-theme='covers'] .ix-page {
+    padding: 24px;
+  }
+
+  [data-theme='covers'] .ix-groups {
+    columns: 1;
+    column-rule: none;
   }
 }

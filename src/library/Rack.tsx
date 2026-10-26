@@ -7,6 +7,7 @@ import { platformById } from '../lib/platform';
 import { usePreviews, usePreviewUrlOfKind } from '../lib/previews';
 import { CardLink } from './BookmarkCard';
 import { Cover } from './Cover';
+import { FiledUnderLine } from './FiledUnderLine';
 import { useFinished, useFresh } from './useFresh';
 
 // The Covers theme's layout: rows of 3:4 covers standing on shelves, in sort order,
@@ -132,23 +133,6 @@ function RackItem({ bookmark, plate, pressing, onEdit, onTagClick }: ItemProps) 
         </button>
       </div>
     </article>
-  );
-}
-
-// "filed under work, reading". Each name filters by that tag; nested tags show only their leaf.
-function FiledUnderLine({ tags, onTagClick }: { tags: string[]; onTagClick: (tag: string) => void }) {
-  return (
-    <p className="rack-filed">
-      filed under{' '}
-      {tags.map((tag, i) => (
-        <span key={tag}>
-          {i > 0 && ', '}
-          <button type="button" className="rack-tag" aria-label={`Filter by ${tag}`} onClick={() => onTagClick(tag)}>
-            {tag.split('/').pop()}
-          </button>
-        </span>
-      ))}
-    </p>
   );
 }
 

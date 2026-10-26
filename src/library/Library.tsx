@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { NoteForm } from '../components/NoteForm';
 import { ToastView } from '../components/ToastView';
 import { exportBackup, restoreBackup } from '../lib/backup';
 import { deleteBookmark, restoreBookmark } from '../lib/bookmarks';
-import { isDeadLink, kindOf, type Bookmark, type ItemKind } from '../lib/db';
+import { db, isDeadLink, kindOf, type Bookmark, type ItemKind } from '../lib/db';
 import { useBookmarks, useEnrichProgress, useTagCounts, useToast } from '../lib/hooks';
 import { saveSequence } from '../lib/codes';
 import { plateNumbers } from '../lib/covers';
@@ -11,7 +12,9 @@ import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } fro
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { pickForgotten } from '../lib/resurface';
+import { archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, unarchiveTags } from '../lib/tags';
 import { THEMES, ThemeContext, useThemeSetting, type Theme } from '../lib/theme';
+import { useTidyThreshold } from '../lib/tidyThreshold';
 import { AppearanceToggle, useAppearance } from './AppearanceToggle';
 import { BookmarkCard } from './BookmarkCard';
 import { copyFor } from './copy';
@@ -22,6 +25,9 @@ import { MoreMenu } from './MoreMenu';
 import { PostDialog } from './PostDialog';
 import { Rack, RackLoading } from './Rack';
 import { Sheet } from './Sheet';
+import { lookupFor, slotStyle, TagLookContext, useTagLook } from './tagLook';
+import { TagIndex } from './TagIndex';
+import { TagStrip } from './TagStrip';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
 
@@ -111,6 +117,36 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const [resurfacedIds, setResurfacedIds] = useState<string[] | null>(null);
   const [arrivedIds, setArrivedIds] = useState<Set<string>>(() => new Set());
   const restoreInput = useRef<HTMLInputElement>(null);
+  const [indexOpen, setIndexOpen] = useState(false);
+  const [tagQuery, setTagQuery] = useState('');
+  const { threshold, setThreshold } = useTidyThreshold();
+  const indexButton = useRef<HTMLButtonElement>(null);
+  const refocusIndexButton = useRef(false);
+  const indexId = useId();
+
+  // The tag index. Colour slots are handed out as tags come and go, and then kept.
+  const tagMeta = useLiveQuery(() => db.tagMeta.toArray(), []);
+  const stats = useMemo(() => tagStats(bookmarks ?? []), [bookmarks]);
+  useEffect(() => {
+    if (!bookmarks || !tagMeta) return;
+    const changes = assignColorSlots(stats, tagMeta);
+    if (changes.length) db.tagMeta.bulkPut(changes);
+  }, [bookmarks, stats, tagMeta]);
+  // Measured when the tags or their metadata change; fading by the hour isn't worth a timer.
+  const now = useMemo(() => Date.now(), [stats, tagMeta]);
+  const tagIndex = useMemo(
+    () => buildTagIndex({ stats, meta: tagMeta ?? [], selected: selectedTags, query: tagQuery, now, threshold }),
+    [stats, tagMeta, selectedTags, tagQuery, now, threshold],
+  );
+  const tagLook = useMemo(() => {
+    const slots = new Map<string, number>();
+    const archived = new Set<string>();
+    for (const m of tagMeta ?? []) {
+      if (m.colorSlot !== undefined) slots.set(m.tag, m.colorSlot);
+      if (m.archivedAt) archived.add(m.tag);
+    }
+    return lookupFor(slots, archived);
+  }, [tagMeta]);
 
   // Everything but the kind filter, so the kind pills can count what each kind would show.
   const matching = useMemo(() => {
@@ -118,7 +154,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     return bookmarks.filter((b) => {
       if (selectedTags.includes(UNTAGGED) && b.tags.length > 0) return false;
-      if (!selectedTags.every((t) => t === UNTAGGED || b.tags.includes(t))) return false;
+      if (!selectedTags.every((t) => t === UNTAGGED || hasTag(b, t))) return false;
       if (platformFilter && (!b.url || (b.platform ?? OTHER_SITES) !== platformFilter)) return false;
       if (deadOnly && !isDeadLink(b)) return false;
       if (!words.length) return true;
@@ -173,8 +209,32 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   );
 
   const toggleTag = (tag: string) => {
+    // Picking a tag counts as using it, so tidy-up leaves it alone.
+    if (!selectedTags.includes(tag) && tag !== UNTAGGED) markTagsUsed([tag]);
     setSelectedTags((tags) => (tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]));
     setVisible(PAGE_SIZE);
+  };
+
+  const closeIndex = () => {
+    setIndexOpen(false);
+    setTagQuery('');
+    refocusIndexButton.current = true;
+  };
+  // Once the panel is gone, focus goes back to the button that opened it.
+  useEffect(() => {
+    if (indexOpen || !refocusIndexButton.current) return;
+    refocusIndexButton.current = false;
+    indexButton.current?.focus();
+  }, [indexOpen]);
+
+  const pickFromIndex = (tag: string, keepOpen: boolean) => {
+    toggleTag(tag);
+    if (!keepOpen) closeIndex();
+  };
+
+  const archive = async (tags: string[]) => {
+    const undo = await archiveTags(tags);
+    showToast({ message: copy.index.archivedToast(tags.length), action: { label: 'Undo', run: undo } });
   };
 
   const refreshMemory = () => {
@@ -214,7 +274,9 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const cardProps = { onEdit: (b: Bookmark) => setEditingId(b.id), onTagClick: toggleTag };
   const isEmpty = bookmarks?.length === 0;
   const searching = query.trim() !== '';
-  const allTags = tagCounts.map((t) => t.tag);
+  // Archived tags aren't suggested when tagging.
+  const allTags = tagCounts.map((t) => t.tag).filter((t) => !tagLook(t).archived);
+  const untaggedCount = bookmarks?.filter((b) => b.tags.length === 0).length ?? 0;
   const fetching = progress?.running ? progress.total - progress.done : 0;
   const renderItems = (items: Bookmark[]) =>
     contact ? (
@@ -230,291 +292,309 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
     );
 
   return (
-    <div className="library">
-      <header className="library-header">
-        {contact && (
-          <p className="header-summary">
-            {bookmarks?.length ?? 0} kept{fetching > 0 && ` · ${fetching} fetching`}
-          </p>
-        )}
-        <p className="wordmark">Bookmarks</p>
-        {covers && (
-          <p className="dateline">
-            <span>{volumeLine(bookmarks)}</span>
-            <span>
-              {bookmarks?.length ? summaryLine(bookmarks.length, kindCounts) : '0 kept'}
-              {fetching > 0 && ` · ${fetching} fetching`}
-            </span>
-          </p>
-        )}
-        <div className="header-actions">
-          <MoreMenu
-            items={[
-              { label: 'New note', run: () => setWritingNote('') },
-              { label: 'Import favorites', run: () => setImporting(true) },
-              { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
-              { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
-              { label: 'Restore', run: () => restoreInput.current?.click() },
-              ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system') }] : []),
-              ...THEMES.map(({ id, label }, i) => ({
-                label,
-                ariaLabel: `Theme: ${label}`,
-                groupLabel: i === 0 ? 'Theme' : undefined,
-                checked: theme === id,
-                run: () => setTheme(id),
-              })),
-            ]}
-          />
-          <AppearanceToggle isDark={isDark} onToggle={toggleAppearance} />
-          <button type="button" className="primary header-add" onClick={() => setAddingFromPost(true)}>
-            <span className="label-long">Add from a post</span>
-            <span className="label-short">Add from post</span>
-          </button>
-        </div>
-        <input
-          ref={restoreInput}
-          type="file"
-          accept="application/json,.json"
-          hidden
-          onChange={(e) => {
-            handleRestore(e.target.files?.[0]);
-            e.target.value = '';
-          }}
-        />
-      </header>
-
-      <section className="hero">
-        <div className="hero-main">
-          {/* The Contact sheet theme moves these into the header and the kind list; Covers, into the dateline. */}
-          {theme === 'default' && !!bookmarks?.length && <p className="summary-line">{summaryLine(bookmarks.length, kindCounts)}</p>}
-          {theme === 'default' && progress?.running && progress.total > 0 && (
-            <div className="enrich-progress" role="status">
+    <TagLookContext.Provider value={tagLook}>
+      <div className="library">
+        <header className="library-header">
+          {contact && (
+            <p className="header-summary">
+              {bookmarks?.length ?? 0} kept{fetching > 0 && ` · ${fetching} fetching`}
+            </p>
+          )}
+          <p className="wordmark">Bookmarks</p>
+          {covers && (
+            <p className="dateline">
+              <span>{volumeLine(bookmarks)}</span>
               <span>
-                Fetching previews and details… {progress.done} of {progress.total}
+                {bookmarks?.length ? summaryLine(bookmarks.length, kindCounts) : '0 kept'}
+                {fetching > 0 && ` · ${fetching} fetching`}
               </span>
-              <progress value={progress.done} max={progress.total} />
+            </p>
+          )}
+          <div className="header-actions">
+            <MoreMenu
+              items={[
+                { label: 'New note', run: () => setWritingNote('') },
+                { label: 'Import favorites', run: () => setImporting(true) },
+                { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
+                { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
+                { label: 'Restore', run: () => restoreInput.current?.click() },
+                ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system') }] : []),
+                ...THEMES.map(({ id, label }, i) => ({
+                  label,
+                  ariaLabel: `Theme: ${label}`,
+                  groupLabel: i === 0 ? 'Theme' : undefined,
+                  checked: theme === id,
+                  run: () => setTheme(id),
+                })),
+              ]}
+            />
+            <AppearanceToggle isDark={isDark} onToggle={toggleAppearance} />
+            <button type="button" className="primary header-add" onClick={() => setAddingFromPost(true)}>
+              <span className="label-long">Add from a post</span>
+              <span className="label-short">Add from post</span>
+            </button>
+          </div>
+          <input
+            ref={restoreInput}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              handleRestore(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
+        </header>
+
+        <section className="hero">
+          <div className="hero-main">
+            {/* The Contact sheet theme moves these into the header and the kind list; Covers, into the dateline. */}
+            {theme === 'default' && !!bookmarks?.length && <p className="summary-line">{summaryLine(bookmarks.length, kindCounts)}</p>}
+            {theme === 'default' && progress?.running && progress.total > 0 && (
+              <div className="enrich-progress" role="status">
+                <span>
+                  Fetching previews and details… {progress.done} of {progress.total}
+                </span>
+                <progress value={progress.done} max={progress.total} />
+              </div>
+            )}
+            <div className="headline-row">
+              <h1 className="headline">
+                {copy.headline[0]}
+                {copy.headlineBreak && <br />}
+                <em>{copy.headline[1]}</em>.
+              </h1>
+              {covers && <LinksShowControl value={linksShow} onChange={setLinksShow} />}
+            </div>
+            <div className="hero-fields">
+              <label className="search-field">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                <input
+                  type="search"
+                  aria-label="Search everything you kept"
+                  placeholder="Search links, quotes, pictures, notes…"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setVisible(PAGE_SIZE);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Escape') return;
+                    e.preventDefault();
+                    if (query) {
+                      setQuery('');
+                      setVisible(PAGE_SIZE);
+                    } else e.currentTarget.blur();
+                  }}
+                />
+              </label>
+              <JotNote
+                onSaved={(b) => setArrivedIds((ids) => new Set(ids).add(b.id))}
+                onExpand={(text) => setWritingNote(text)}
+              />
+            </div>
+          </div>
+          {/* Becomes the Look ahead panel in phase 3; until then it keeps today's "From a while ago" row. */}
+          {!isEmpty && (
+            <div className="hero-side">
+              {contact && kindCounts.length > 0 && (
+                <ul className="kind-list">
+                  {kindCounts.map(({ kind, count }) => (
+                    <li key={kind}>
+                      <span aria-hidden="true">{KIND_CODES[kind]} · </span>
+                      {count} {count === 1 ? KIND_LABELS[kind][0] : KIND_LABELS[kind][1].toLowerCase()}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <button type="button" className="ghost-button" onClick={refreshMemory} disabled={!bookmarks?.length}>
+                Refresh my memory
+              </button>
             </div>
           )}
-          <div className="headline-row">
-            <h1 className="headline">
-              {copy.headline[0]}
-              {copy.headlineBreak && <br />}
-              <em>{copy.headline[1]}</em>.
-            </h1>
-            {covers && <LinksShowControl value={linksShow} onChange={setLinksShow} />}
-          </div>
-          <div className="hero-fields">
-            <label className="search-field">
-              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-              <input
-                type="search"
-                aria-label="Search everything you kept"
-                placeholder="Search links, quotes, pictures, notes…"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setVisible(PAGE_SIZE);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key !== 'Escape') return;
-                  e.preventDefault();
-                  if (query) {
-                    setQuery('');
-                    setVisible(PAGE_SIZE);
-                  } else e.currentTarget.blur();
-                }}
-              />
-            </label>
-            <JotNote
-              onSaved={(b) => setArrivedIds((ids) => new Set(ids).add(b.id))}
-              onExpand={(text) => setWritingNote(text)}
-            />
-          </div>
-        </div>
-        {/* Becomes the Look ahead panel in phase 3; until then it keeps today's "From a while ago" row. */}
-        {!isEmpty && (
-          <div className="hero-side">
-            {contact && kindCounts.length > 0 && (
-              <ul className="kind-list">
-                {kindCounts.map(({ kind, count }) => (
-                  <li key={kind}>
-                    <span aria-hidden="true">{KIND_CODES[kind]} · </span>
-                    {count} {count === 1 ? KIND_LABELS[kind][0] : KIND_LABELS[kind][1].toLowerCase()}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button type="button" className="ghost-button" onClick={refreshMemory} disabled={!bookmarks?.length}>
-              Refresh my memory
-            </button>
-          </div>
-        )}
-      </section>
-
-      {resurfaced && resurfaced.length > 0 && (
-        <section className="resurfaced">
-          <div className="section-heading">
-            <h2>From a while ago</h2>
-            <button className="link" onClick={refreshMemory}>
-              Shuffle
-            </button>
-            <button className="link" onClick={() => setResurfacedIds(null)}>
-              Close
-            </button>
-          </div>
-          {renderItems(resurfaced)}
         </section>
-      )}
 
-      {isEmpty ? (
-        <section className="empty">
-          <h2>{copy.emptyTitle}</h2>
-          <p className="muted">
-            Click the extension icon or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> on any page to save it.
-            Right-click a link to save it without opening it, a picture to keep it, or selected text to save it as a
-            quote.
-          </p>
-          <button className="primary" onClick={() => setImporting(true)}>
-            Import your Edge favorites
-          </button>
-        </section>
-      ) : !bookmarks ? (
-        covers && <RackLoading />
-      ) : (
-        bookmarks && (
-          <main className="library-main">
-            {selectedTags.length > 0 && (
-              <FiledUnder lead={copy.filedUnderLead} tags={selectedTags} onRemove={toggleTag} onClear={() => setSelectedTags([])} />
-            )}
-
-            <div className="filter-row">
-              {kindCounts.length > 1 && (
-                <div className="kind-pills" role="group" aria-label="Kinds">
-                  <KindPill
-                    label="Everything"
-                    code={contact ? 'All' : undefined}
-                    count={matching.length}
-                    pressed={kindFilter === null}
-                    onClick={() => setKindFilter(null)}
-                  />
-                  {kindCounts.map(({ kind }) => (
-                    <KindPill
-                      key={kind}
-                      label={KIND_LABELS[kind][1]}
-                      code={contact ? KIND_CODES[kind] : undefined}
-                      count={matchingKindCounts.get(kind) ?? 0}
-                      pressed={kindFilter === kind}
-                      onClick={() => {
-                        setKindFilter(kind);
-                        setVisible(PAGE_SIZE);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-              <div className="filter-selects">
-                {/* Stands in for the tag strip and index until phase 4. Picking adds to the selection. */}
-                <LabelledSelect label="Tags" showLabel={contact} value="" onChange={(value) => value && toggleTag(value)}>
-                  <option value="">Tags…</option>
-                  {!selectedTags.includes(UNTAGGED) && <option value={UNTAGGED}>untagged</option>}
-                  {tagCounts
-                    .filter(({ tag }) => !selectedTags.includes(tag))
-                    .map(({ tag, count }) => (
-                      <option key={tag} value={tag}>
-                        {tag} ({count})
-                      </option>
-                    ))}
-                </LabelledSelect>
-                {(platformCounts.length > 1 || deadCount > 0) && (
-                  <LabelledSelect label="Source" showLabel={contact} value={sourceValue} onChange={pickSource}>
-                    <option value="">All sources</option>
-                    {platformCounts.map(({ id, label, count }) => (
-                      <option key={id} value={id}>
-                        {label} ({count})
-                      </option>
-                    ))}
-                    {deadCount > 0 && <option value={DEAD_LINKS}>Links that may be dead ({deadCount})</option>}
-                  </LabelledSelect>
-                )}
-                <LabelledSelect label="Sort" showLabel={contact} value={sort} onChange={(value) => setSort(value as Sort)}>
-                  <option value="newest">Newest first</option>
-                  <option value="oldest">Oldest first</option>
-                  <option value="recently-opened">Recently opened</option>
-                  <option value="never-opened">Never opened</option>
-                </LabelledSelect>
-              </div>
-            </div>
-
-            {(filtersActive || searching) && filtered.length > 0 && (
-              <p className="result-count">
-                {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1, copy.itemNoun)}
-                {' · '}
-                <button className="link" onClick={clearFilters}>
-                  clear filters
-                </button>
-              </p>
-            )}
-
-            {filtered.length === 0 ? (
-              <div className="no-results">
-                {theme !== 'default' && (
-                  <p className="no-results-filters">
-                    {[
-                      contact && `0 ${copy.itemNoun[1]}`,
-                      kindFilter && (contact ? KIND_CODES[kindFilter] : KIND_LABELS[kindFilter][1]),
-                      selectedTags.length > 0 && `filed under ${selectedTags.map(tagLabel).join(', ')}`,
-                      platformFilter && (platformCounts.find((p) => p.id === platformFilter)?.label ?? platformFilter),
-                      deadOnly && 'may be dead',
-                      searching && `“${query.trim()}”`,
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
-                  </p>
-                )}
-                <p>{copy.noResults}</p>
-                <button className="link" onClick={clearFilters}>
-                  clear filters
-                </button>
-              </div>
-            ) : (
-              renderItems(filtered.slice(0, visible))
-            )}
-
-            {filtered.length > visible && (
-              <button className="ghost-button show-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
-                Show more · {filtered.length - visible} left
+        {resurfaced && resurfaced.length > 0 && (
+          <section className="resurfaced">
+            <div className="section-heading">
+              <h2>From a while ago</h2>
+              <button className="link" onClick={refreshMemory}>
+                Shuffle
               </button>
-            )}
-          </main>
-        )
-      )}
+              <button className="link" onClick={() => setResurfacedIds(null)}>
+                Close
+              </button>
+            </div>
+            {renderItems(resurfaced)}
+          </section>
+        )}
 
-      {editing && (
-        <EditDialog
-          key={editing.id}
-          bookmark={editing}
-          allTags={allTags}
-          onClose={() => setEditingId(null)}
-          onDelete={handleDelete}
-        />
-      )}
-      {writingNote !== null && (
-        <NoteDialog
-          allTags={allTags}
-          initialText={writingNote}
-          onClose={(saved) => {
-            setWritingNote(null);
-            if (saved) showToast({ message: 'Note saved' });
-          }}
-        />
-      )}
-      {importing && <ImportDialog onClose={() => setImporting(false)} />}
-      {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
-      <ToastView toast={toast} onDone={hideToast} />
-    </div>
+        {isEmpty ? (
+          <section className="empty">
+            <h2>{copy.emptyTitle}</h2>
+            <p className="muted">
+              Click the extension icon or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> on any page to save it.
+              Right-click a link to save it without opening it, a picture to keep it, or selected text to save it as a
+              quote.
+            </p>
+            <button className="primary" onClick={() => setImporting(true)}>
+              Import your Edge favorites
+            </button>
+          </section>
+        ) : !bookmarks ? (
+          covers && <RackLoading />
+        ) : (
+          bookmarks && (
+            <main className="library-main">
+              {tagCounts.length > 0 && (
+                <section className="tags" aria-label="Tags">
+                  <TagStrip
+                    mostUsed={tagIndex.mostUsed}
+                    liveCount={tagIndex.liveCount}
+                    open={indexOpen}
+                    panelId={indexId}
+                    buttonRef={indexButton}
+                    onToggleTag={toggleTag}
+                    onToggleOpen={() => (indexOpen ? closeIndex() : setIndexOpen(true))}
+                  />
+                  {selectedTags.length > 0 && (
+                    <FiledUnder lead={copy.filedUnderLead} tags={selectedTags} onRemove={toggleTag} onClear={() => setSelectedTags([])} />
+                  )}
+                  {indexOpen && (
+                    <TagIndex
+                      id={indexId}
+                      index={tagIndex}
+                      query={tagQuery}
+                      onQuery={setTagQuery}
+                      threshold={threshold}
+                      onThreshold={setThreshold}
+                      untagged={{ count: untaggedCount, selected: selectedTags.includes(UNTAGGED), tag: UNTAGGED }}
+                      onPick={pickFromIndex}
+                      onArchive={archive}
+                      onUnarchive={unarchiveTags}
+                      onClose={closeIndex}
+                    />
+                  )}
+                </section>
+              )}
+
+              <div className="filter-row">
+                {kindCounts.length > 1 && (
+                  <div className="kind-pills" role="group" aria-label="Kinds">
+                    <KindPill
+                      label="Everything"
+                      code={contact ? 'All' : undefined}
+                      count={matching.length}
+                      pressed={kindFilter === null}
+                      onClick={() => setKindFilter(null)}
+                    />
+                    {kindCounts.map(({ kind }) => (
+                      <KindPill
+                        key={kind}
+                        label={KIND_LABELS[kind][1]}
+                        code={contact ? KIND_CODES[kind] : undefined}
+                        count={matchingKindCounts.get(kind) ?? 0}
+                        pressed={kindFilter === kind}
+                        onClick={() => {
+                          setKindFilter(kind);
+                          setVisible(PAGE_SIZE);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="filter-selects">
+                  {(platformCounts.length > 1 || deadCount > 0) && (
+                    <LabelledSelect label="Source" showLabel={contact} value={sourceValue} onChange={pickSource}>
+                      <option value="">All sources</option>
+                      {platformCounts.map(({ id, label, count }) => (
+                        <option key={id} value={id}>
+                          {label} ({count})
+                        </option>
+                      ))}
+                      {deadCount > 0 && <option value={DEAD_LINKS}>Links that may be dead ({deadCount})</option>}
+                    </LabelledSelect>
+                  )}
+                  <LabelledSelect label="Sort" showLabel={contact} value={sort} onChange={(value) => setSort(value as Sort)}>
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="recently-opened">Recently opened</option>
+                    <option value="never-opened">Never opened</option>
+                  </LabelledSelect>
+                </div>
+              </div>
+
+              {(filtersActive || searching) && filtered.length > 0 && (
+                <p className="result-count">
+                  {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1, copy.itemNoun)}
+                  {' · '}
+                  <button className="link" onClick={clearFilters}>
+                    clear filters
+                  </button>
+                </p>
+              )}
+
+              {filtered.length === 0 ? (
+                <div className="no-results">
+                  {theme !== 'default' && (
+                    <p className="no-results-filters">
+                      {[
+                        contact && `0 ${copy.itemNoun[1]}`,
+                        kindFilter && (contact ? KIND_CODES[kindFilter] : KIND_LABELS[kindFilter][1]),
+                        selectedTags.length > 0 && `filed under ${selectedTags.map((t) => tagLabel(t, true)).join(', ')}`,
+                        platformFilter && (platformCounts.find((p) => p.id === platformFilter)?.label ?? platformFilter),
+                        deadOnly && 'may be dead',
+                        searching && `“${query.trim()}”`,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  )}
+                  <p>{copy.noResults}</p>
+                  <button className="link" onClick={clearFilters}>
+                    clear filters
+                  </button>
+                </div>
+              ) : (
+                renderItems(filtered.slice(0, visible))
+              )}
+
+              {filtered.length > visible && (
+                <button className="ghost-button show-more" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+                  Show more · {filtered.length - visible} left
+                </button>
+              )}
+            </main>
+          )
+        )}
+
+        {editing && (
+          <EditDialog
+            key={editing.id}
+            bookmark={editing}
+            allTags={allTags}
+            onClose={() => setEditingId(null)}
+            onDelete={handleDelete}
+          />
+        )}
+        {writingNote !== null && (
+          <NoteDialog
+            allTags={allTags}
+            initialText={writingNote}
+            onClose={(saved) => {
+              setWritingNote(null);
+              if (saved) showToast({ message: 'Note saved' });
+            }}
+          />
+        )}
+        {importing && <ImportDialog onClose={() => setImporting(false)} />}
+        {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
+        <ToastView toast={toast} onDone={hideToast} />
+      </div>
+    </TagLookContext.Provider>
   );
 }
 
@@ -611,14 +691,21 @@ function FiledUnder({
   onRemove: (tag: string) => void;
   onClear: () => void;
 }) {
+  const look = useTagLook();
   return (
     <p className="filed-under-filter" aria-live="polite">
       <span className="filed-under-lead">{lead}</span>{' '}
       {tags.map((tag, i) => (
         <span key={tag}>
           {i > 0 && (i === tags.length - 1 ? ' and ' : ', ')}
-          <button type="button" className="filed-under-tag" aria-label={`Remove filter: ${tagLabel(tag)}`} onClick={() => onRemove(tag)}>
-            {tagLabel(tag)}
+          <button
+            type="button"
+            className="filed-under-tag"
+            style={slotStyle(look(tag).slot)}
+            aria-label={`Remove filter: ${tagLabel(tag)}`}
+            onClick={() => onRemove(tag)}
+          >
+            {tagLabel(tag, true)}
             <svg className="filed-under-x" aria-hidden="true" width="9" height="9" viewBox="0 0 10 10">
               <path d="M1 1l8 8M9 1l-8 8" stroke="currentColor" strokeWidth="1.4" />
             </svg>
@@ -632,8 +719,8 @@ function FiledUnder({
   );
 }
 
-function tagLabel(tag: string): string {
-  return tag === UNTAGGED ? 'untagged' : tag;
+function tagLabel(tag: string, leaf = false): string {
+  return tag === UNTAGGED ? 'untagged' : tagName(tag, leaf);
 }
 
 // "18 kept · 8 links · 3 quotes · 4 pictures · 3 notes", over the whole library. Kinds with nothing are left out.

@@ -1,5 +1,6 @@
 import { db, kindOf, type Bookmark, type BookmarkSource, type ItemKind, type PreviewPreference } from './db';
 import { normalizeUrl } from './normalize';
+import { markTagsUsed } from './tags';
 
 export interface NewBookmark {
   // Unset means a link.
@@ -27,10 +28,19 @@ export interface SaveResult {
 
 const TRASH_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
+// Nested tags are "parent/child": spaces around slashes and empty segments go ("Recipes / Weeknight" → "recipes/weeknight").
 export function cleanTags(tags: string[]): string[] {
   const seen = new Set<string>();
   for (const raw of tags) {
-    const tag = raw.trim().replace(/^#/, '').replace(/\s+/g, ' ').toLowerCase();
+    const tag = raw
+      .trim()
+      .replace(/^#/, '')
+      .replace(/\s+/g, ' ')
+      .toLowerCase()
+      .split('/')
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join('/');
     if (tag) seen.add(tag);
   }
   return [...seen];
@@ -59,7 +69,7 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
   const kind = input.kind ?? 'link';
   const normalizedUrl = input.url ? normalizeUrl(input.url) : '';
 
-  return db.transaction('rw', db.bookmarks, async () => {
+  const result = await db.transaction('rw', db.bookmarks, async (): Promise<SaveResult> => {
     const matches =
       kind === 'note'
         ? []
@@ -104,6 +114,9 @@ export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
     await db.bookmarks.add(bookmark);
     return { bookmark, created: true };
   });
+  // Tags given now count as used now, for the index's tidy-up.
+  if (result.created && input.tags?.length) await markTagsUsed(cleanTags(input.tags));
+  return result;
 }
 
 export async function updateBookmark(
@@ -112,7 +125,10 @@ export async function updateBookmark(
 ): Promise<void> {
   const changes: Partial<Bookmark> = { ...patch, updatedAt: Date.now() };
   if (patch.tags) changes.tags = cleanTags(patch.tags);
+  const before = patch.tags ? await db.bookmarks.get(id) : undefined;
   await db.bookmarks.update(id, changes);
+  // Only tags that were added count as used; ones already there weren't touched.
+  if (before && changes.tags) await markTagsUsed(changes.tags.filter((t) => !before.tags.includes(t)));
 }
 
 export async function deleteBookmark(id: string): Promise<void> {
