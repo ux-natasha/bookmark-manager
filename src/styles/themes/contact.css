@@ -1,0 +1,858 @@
+/* Contact sheet theme (docs/design/theme-contact-sheet.md). Applied with <html data-theme="contact">.
+   Token overrides first, then the rules that only exist in this theme. Everything else is the Default's. */
+
+/* Only fetched when something in this theme uses the family. */
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/fonts/cormorant-garamond-latin-wght-italic.woff2') format('woff2-variations');
+}
+
+:root[data-theme='contact'] {
+  --bg: #f2f4f3;
+  --surface: #f7f8f8;
+  --text: #1e2a2e;
+  --text-muted: #566468;
+  --border: rgba(30, 42, 46, 0.2);
+  --border-strong: rgba(30, 42, 46, 0.32);
+  --hover: #e9edec;
+  --accent: #a13a22;
+  --solid-bg: #1e2a2e;
+  --solid-text: #f2f4f3;
+  --danger: #a13a22;
+  --note-paper: var(--bg);
+  --aged-paper: #ece2cc;
+  --aged-text: #665840;
+  --pencil: #e2574a;
+  --tidy-bar: #ece2cc;
+  --film: #1e2a2e;
+  --hatch: rgba(30, 42, 46, 0.08);
+  --sun-strength: 0.8;
+  --placeholder-cell: #e2e7e6;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+
+  --radius: 0;
+  --radius-sm: 0;
+  --radius-media: 0;
+  --radius-note: 0;
+  --radius-panel: 0;
+  --radius-bar: 0;
+  --radius-pill: 0;
+}
+
+/* Darkroom. Repeated for the forced and the system case, as in base.css. */
+:root[data-theme='contact'][data-appearance='dark'] {
+  --bg: #101617;
+  --surface: #151c1d;
+  --text: #dce5e3;
+  --text-muted: #97a6a5;
+  --border: rgba(220, 229, 227, 0.18);
+  --border-strong: rgba(220, 229, 227, 0.32);
+  --hover: #172021;
+  --accent: #f09a82;
+  --solid-bg: #dce5e3;
+  --solid-text: #101617;
+  --danger: #f09a82;
+  --aged-paper: #221e16;
+  --aged-text: #ac9f86;
+  --pencil: #f09a82;
+  --tidy-bar: #221e16;
+  --film: #05090a;
+  --hatch: rgba(220, 229, 227, 0.08);
+  --sun-strength: 0.55;
+  --placeholder-cell: #1a2324;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='contact']:not([data-appearance='light']) {
+    --bg: #101617;
+    --surface: #151c1d;
+    --text: #dce5e3;
+    --text-muted: #97a6a5;
+    --border: rgba(220, 229, 227, 0.18);
+    --border-strong: rgba(220, 229, 227, 0.32);
+    --hover: #172021;
+    --accent: #f09a82;
+    --solid-bg: #dce5e3;
+    --solid-text: #101617;
+    --danger: #f09a82;
+    --aged-paper: #221e16;
+    --aged-text: #ac9f86;
+    --pencil: #f09a82;
+    --tidy-bar: #221e16;
+    --film: #05090a;
+    --hatch: rgba(220, 229, 227, 0.08);
+    --sun-strength: 0.55;
+    --placeholder-cell: #1a2324;
+  }
+}
+
+/* 4.9 Controls: square, 44px, mono uppercase. The source text stays sentence case for screen readers. */
+[data-theme='contact'] button,
+[data-theme='contact'] .ghost-button,
+[data-theme='contact'] .library-header .primary {
+  border-color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] button.link {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .icon-button,
+[data-theme='contact'] .ghost-button {
+  min-height: var(--control-h);
+}
+
+/* 4.1 Header: summary, wordmark centred, actions */
+[data-theme='contact'] .library-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 66px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme='contact'] .header-summary {
+  margin: 0;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] .wordmark {
+  grid-column: 2;
+  margin: 0;
+  font: 500 30px / 1 var(--font-serif);
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+[data-theme='contact'] .header-actions {
+  justify-content: flex-end;
+}
+
+/* 4.2 Hero */
+[data-theme='contact'] .headline {
+  font: 500 clamp(56px, 6.4vw, 84px) / 0.9 var(--font-serif);
+  letter-spacing: -0.015em;
+}
+
+[data-theme='contact'] .hero-side {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.kind-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 11px / 1.9 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: right;
+}
+
+[data-theme='contact'] .search-field,
+[data-theme='contact'] .jot-note {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+
+[data-theme='contact'] .search-field input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+/* Notes are typed, not handwritten, in this theme. */
+[data-theme='contact'] .jot-note input {
+  font: 15px var(--font-mono);
+}
+
+[data-theme='contact'] .search-field input::placeholder,
+[data-theme='contact'] .jot-note input::placeholder {
+  font-style: normal;
+}
+
+[data-theme='contact'] .jot-note .primary {
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 4.3 Kind bar and text-style selects */
+[data-theme='contact'] .kind-pills {
+  gap: 0;
+}
+
+[data-theme='contact'] .kind-pill,
+[data-theme='contact'] .kind-pill:hover:not(:disabled),
+[data-theme='contact'] .kind-pill[aria-pressed='true'],
+[data-theme='contact'] .kind-pill[aria-pressed='true']:hover:not(:disabled) {
+  height: var(--control-h);
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  font: 11px / calc(var(--control-h) - 2px) var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+[data-theme='contact'] .kind-pill:hover:not(:disabled) {
+  color: var(--text);
+}
+
+[data-theme='contact'] .kind-pill[aria-pressed='true'],
+[data-theme='contact'] .kind-pill[aria-pressed='true']:hover:not(:disabled) {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+[data-theme='contact'] .kind-pill-count {
+  font-size: 11px;
+  opacity: 1;
+}
+
+.labelled-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme='contact'] .labelled-select-name {
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] .pill-select {
+  height: var(--control-h);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .pill-select option {
+  background: var(--surface);
+  text-transform: none;
+}
+
+/* 4.6 Filed-under row */
+[data-theme='contact'] .filed-under-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font: 11px var(--font-mono);
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] .filed-under-lead {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.filed-under-x {
+  display: none;
+}
+
+[data-theme='contact'] .filed-under-tag,
+[data-theme='contact'] .filed-under-tag:hover:not(:disabled) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  background: none;
+  font: 500 19px var(--font-serif);
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  text-decoration: none;
+  color: var(--text);
+}
+
+[data-theme='contact'] .filed-under-tag:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+[data-theme='contact'] .filed-under-x {
+  display: block;
+}
+
+[data-theme='contact'] .filed-under-clear {
+  margin-left: 4px;
+}
+
+[data-theme='contact'] .result-count {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* 6.1 No results, empty library */
+[data-theme='contact'] .no-results-filters {
+  margin: 0 0 12px;
+  font: 11px var(--font-mono);
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .no-results p:not(.no-results-filters) {
+  font: italic 34px / 1.2 var(--font-serif);
+}
+
+/* A blank sheet: an empty hairline grid behind the text. */
+[data-theme='contact'] .empty {
+  position: relative;
+  max-width: none;
+  margin-top: 0;
+  padding: 72px 16px;
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(90deg, var(--border) 1px, transparent 1px) 0 0 / 25% 75px,
+    linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 25% 75px;
+}
+
+[data-theme='contact'] .empty > * {
+  position: relative;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  background: var(--bg);
+}
+
+[data-theme='contact'] .empty h2 {
+  font: 500 34px / 1.2 var(--font-serif);
+}
+
+[data-theme='contact'] .empty p {
+  font: 13px / 1.6 var(--font-mono);
+}
+
+/* 4.9 More menu */
+[data-theme='contact'] .more-menu-list {
+  padding: 0;
+  border-color: var(--border);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.1);
+}
+
+[data-theme='contact'] .more-menu-list::before {
+  content: 'More';
+  padding: 12px 16px;
+  font: 10.5px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] .more-menu-list button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  font: 19px var(--font-serif);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.more-menu-group {
+  padding: 10px 12px 4px;
+  font: 11px var(--font-sans);
+  color: var(--text-muted);
+}
+
+[data-theme='contact'] .more-menu-group {
+  padding: 10px 16px 6px;
+  border-top: 1px solid var(--border);
+  font: 10.5px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* 4.9 Toast */
+[data-theme='contact'] .toast {
+  min-height: 48px;
+  padding: 0 18px;
+  box-shadow: none;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .resurfaced {
+  border: 1px solid var(--border);
+}
+
+[data-theme='contact'] .resurfaced .section-heading h2 {
+  font: italic 22px var(--font-serif);
+}
+
+/* 4.4 The sheet */
+.sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
+  grid-auto-rows: minmax(300px, auto);
+  grid-auto-flow: dense;
+  gap: 1px;
+  /* Each cell draws its own hairline into the 1px gap, so a short last row leaves blank paper, not a grey block. */
+  padding: 1px;
+}
+
+.sheet-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px 18px 12px;
+  box-shadow: 0 0 0 1px var(--border);
+  /* --t (0 fresh, 1 fully aged) comes with Look ahead; until then every frame is fresh. */
+  background: color-mix(in srgb, var(--aged-paper) calc(var(--t, 0) * 90%), var(--bg));
+  color: color-mix(in srgb, var(--aged-text) calc(var(--t, 0) * 100%), var(--text));
+  transition: background-color var(--dur-age) ease-out, color var(--dur-age) ease-out;
+}
+
+.sheet-cell:hover {
+  background: var(--hover);
+}
+
+.sheet-cell:has(.sheet-link:focus-visible) {
+  background: var(--hover);
+  box-shadow:
+    0 0 0 1px var(--border),
+    inset 0 0 0 2px var(--text);
+}
+
+.sheet-cell.span2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 640px) {
+  .sheet-cell.span2 {
+    grid-column: auto;
+  }
+}
+
+.sheet-plus {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  z-index: 2;
+  width: 13px;
+  height: 13px;
+  color: var(--text-muted);
+}
+
+.sheet-link,
+button.sheet-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+button.sheet-link:hover:not(:disabled) {
+  background: none;
+}
+
+/* The ring is drawn on the whole cell instead. */
+.sheet-link:focus-visible {
+  outline: none;
+}
+
+.sheet-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sheet-code {
+  color: inherit;
+}
+
+.sheet-cell .sheet-code {
+  color: color-mix(in srgb, var(--aged-text) calc(var(--t, 0) * 100%), var(--text));
+}
+
+.sheet-corner {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.is-accent {
+  color: var(--accent);
+}
+
+.sheet-media {
+  position: relative;
+  display: block;
+  flex: none;
+  overflow: visible;
+  background: var(--hover);
+  /* Sun-bleaching (spec section 5): colour drains, then contrast, then it lifts toward white. */
+  filter: grayscale(calc(var(--t, 0) * 0.85)) sepia(calc(var(--t, 0) * 0.35)) contrast(calc(1 - var(--t, 0) * 0.3))
+    brightness(calc(1 + var(--t, 0) * 0.12));
+  transition: filter var(--dur-age) ease-out;
+}
+
+/* Light falls from the top right, so that corner goes first. */
+.sheet-media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(215deg, rgba(255, 251, 240, 0.95) 0%, rgba(255, 251, 240, 0.4) 38%, transparent 68%);
+  opacity: calc(var(--t, 0) * var(--sun-strength));
+  transition: opacity var(--dur-age) ease-out;
+}
+
+.sheet-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.sheet-cell-image .sheet-media img {
+  object-position: center;
+}
+
+.sheet-fallback {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
+  padding: 3px 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
+  color: #15171a;
+  font: 11px var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheet-play {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.4));
+}
+
+/* An unexposed frame: details on the way, or a picture with no negative. */
+.sheet-unexposed {
+  aspect-ratio: 1.91 / 1;
+  border: 1px dashed var(--text-muted);
+  background: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 10px);
+  filter: none;
+}
+
+.sheet-no-negative {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font: 10px var(--font-mono);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Crop marks: hidden at rest, slide out to the media's corners on hover or focus. */
+.crop {
+  position: absolute;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border: 0 solid var(--text);
+  opacity: 0;
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.crop.tl {
+  top: -7px;
+  left: -7px;
+  border-width: 1px 0 0 1px;
+  transform: translate(5px, 5px);
+}
+
+.crop.tr {
+  top: -7px;
+  right: -7px;
+  border-width: 1px 1px 0 0;
+  transform: translate(-5px, 5px);
+}
+
+.crop.bl {
+  bottom: -7px;
+  left: -7px;
+  border-width: 0 0 1px 1px;
+  transform: translate(5px, -5px);
+}
+
+.crop.br {
+  bottom: -7px;
+  right: -7px;
+  border-width: 0 1px 1px 0;
+  transform: translate(-5px, -5px);
+}
+
+.sheet-cell:hover .crop,
+.sheet-cell:focus-within .crop {
+  opacity: 1;
+  transform: none;
+}
+
+.sheet-frames {
+  display: flex;
+  justify-content: space-between;
+  font: 9.5px var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.sheet-title {
+  font: 500 31px / 1 var(--font-serif);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.sheet-cell:hover .sheet-title,
+.sheet-link:focus-visible .sheet-title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.sheet-quote {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  font: clamp(36px, 3.8vw, 52px) / 1 var(--font-serif);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.sheet-note {
+  display: block;
+  flex: 1;
+  font: 15px / 1.55 var(--font-mono);
+  white-space: pre-line;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.sheet-caret {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.18em;
+  background: currentColor;
+  animation: sheet-blink 1.1s steps(1) infinite;
+}
+
+@keyframes sheet-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.sheet-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: 30px;
+  font: 10.5px var(--font-mono);
+  color: var(--text-muted);
+}
+
+.sheet-tags {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sheet-tags button.sheet-tag,
+.sheet-meta button.sheet-edit {
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.sheet-tags button.sheet-tag:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+
+.sheet-age {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sheet-meta button.sheet-edit {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+
+.sheet-cell:hover .sheet-edit,
+.sheet-cell:focus-within .sheet-edit {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .sheet-meta button.sheet-edit {
+    opacity: 0.7;
+  }
+}
+
+/* 6.1 Dead link: code struck through, grey media, muted title. No bleaching. */
+.sheet-cell.is-dead {
+  --t: 0;
+}
+
+.sheet-cell.is-dead .sheet-code {
+  text-decoration: line-through;
+}
+
+.sheet-cell.is-dead .sheet-media {
+  filter: grayscale(1) opacity(0.6);
+}
+
+.sheet-cell.is-dead .sheet-title {
+  color: var(--text-muted);
+}
+
+/* 6.2 Develop: from blank paper to a full image, like a print in the tray. */
+.sheet-cell.is-developing .sheet-media {
+  animation: sheet-develop 1400ms cubic-bezier(0.3, 0.6, 0.3, 1) both;
+}
+
+.sheet-cell.is-developing .sheet-title,
+.sheet-cell.is-developing .sheet-quote,
+.sheet-cell.is-developing .sheet-note {
+  animation: sheet-ink 1400ms ease-out both;
+}
+
+@keyframes sheet-develop {
+  0% {
+    filter: contrast(0) brightness(1.9);
+    opacity: 0.6;
+  }
+  35% {
+    filter: contrast(0.35) brightness(1.4) sepia(0.4);
+    opacity: 1;
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes sheet-ink {
+  0% {
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 9. Responsive */
+@media (max-width: 720px) {
+  [data-theme='contact'] .library-header {
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 0;
+  }
+
+  [data-theme='contact'] .wordmark {
+    order: -1;
+    width: 100%;
+  }
+
+  [data-theme='contact'] .hero-side {
+    align-items: flex-start;
+  }
+
+  [data-theme='contact'] .kind-list {
+    text-align: left;
+  }
+
+  [data-theme='contact'] .kind-pills {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}

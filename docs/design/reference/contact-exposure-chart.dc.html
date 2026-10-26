@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contact sheet · Exposure chart</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&amp;family=Geist:wght@400;500&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.sheet{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.hd{background:var(--ground);padding:14px 16px;font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);display:flex;flex-direction:column;gap:4px}
+.hd b{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:26px;letter-spacing:-.01em;text-transform:none;color:var(--ink)}
+.rowlab{background:var(--ground);padding:18px 16px;display:flex;flex-direction:column;gap:6px}
+.cell{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px 16px 12px;min-height:250px;min-width:0}
+.plus{position:absolute;top:-7px;left:-7px;width:13px;height:13px;z-index:2;color:var(--ink2)}
+.top{display:flex;justify-content:space-between;gap:8px;font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.media{position:relative;overflow:hidden}
+.sun{position:absolute;inset:0;pointer-events:none;background:linear-gradient(215deg,rgba(255,251,240,.95) 0%,rgba(255,251,240,.4) 38%,transparent 68%)}
+.title{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:23px;line-height:1.02}
+.quote{margin:0;flex:1;display:flex;align-items:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:27px;line-height:1.02}
+.note{margin:0;flex:1;font-family:'Geist Mono',monospace;font-size:13px;line-height:1.55}
+.meta{display:flex;justify-content:space-between;gap:8px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--ink2)}
+.inner{position:absolute;inset:0;padding:10px;display:flex;align-items:flex-end;font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;line-height:1}
+.pic-tiles{background:radial-gradient(circle,#E9EEF5 0 4px,transparent 4.5px) 13px 13px/26px 26px,repeating-conic-gradient(#3E6CA8 0 25%,#E9EEF5 0 50%) 0 0/26px 26px}
+.pic-sun{background:radial-gradient(circle at 64% 44%,#F7D9A8 0 10%,transparent 10.5%),linear-gradient(180deg,transparent 63%,#2F4A6B 63%),linear-gradient(180deg,#D47E66,#F0B48C 63%)}
+</style>
+</helmet>
+<div style="--ground: #F2F4F3; --ink: #1E2A2E; --ink2: #566468; --rule: rgba(30,42,46,0.2); --accent: #A13A22; width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #F2F4F3; color: #1E2A2E; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 30px">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <h1 style="margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: 76px; line-height: 0.9; letter-spacing: -0.02em">Exposure <span style="font-style: italic">chart</span></h1>
+    <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #566468; text-align: right; line-height: 1.6">Each frame, untouched for<br>0 · 6 · 12 · 24 months</span>
+  </div>
+
+  <div class="sheet">
+    <div class="hd">Kind</div>
+    <sc-for list="{{cols}}" as="h" hint-placeholder-count="4">
+      <div class="hd"><span>{{h.kicker}}</span><b>{{h.label}}</b></div>
+    </sc-for>
+
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+      <div class="rowlab">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #1E2A2E">{{r.code}}</span>
+        <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.1">{{r.name}}</span>
+      </div>
+      <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+        <div class="cell" style="background: {{c.bg}}">
+          <svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span style="color: {{c.ink}}; text-decoration: {{c.strike}}">{{c.code}}</span><span style="color: {{c.rightColor}}">{{c.right}}</span></span>
+          <sc-if value="{{c.hasMedia}}" hint-placeholder-val="{{true}}">
+            <div class="media {{c.pic}}" style="aspect-ratio: {{c.ratio}}; background-color: {{c.mbg}}; color: {{c.mfg}}; filter: {{c.filter}}">
+              <sc-if value="{{c.hasInner}}" hint-placeholder-val="{{false}}"><span class="inner">{{c.inner}}</span></sc-if>
+              <sc-if value="{{c.isVideo}}" hint-placeholder-val="{{false}}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" style="position: absolute; left: 10px; top: 10px"><path d="M7 4v16l13-8z" fill="#fff"></path></svg></sc-if>
+              <sc-if value="{{c.isRepo}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; padding: 12px; display: flex; flex-direction: column; justify-content: center; gap: 8px; font-family: 'Geist Mono', monospace; font-size: 20px; letter-spacing: -0.03em">inkwell<span style="display: flex; height: 3px; gap: 2px"><span style="flex: 7; background: currentColor"></span><span style="flex: 3; background: currentColor; opacity: 0.35"></span></span></span></sc-if>
+              <div aria-hidden="true" class="sun" style="opacity: {{c.sun}}"></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{c.isQuote}}" hint-placeholder-val="{{false}}"><p class="quote" style="color: {{c.ink}}">“{{c.text}}”</p></sc-if>
+          <sc-if value="{{c.isNote}}" hint-placeholder-val="{{false}}"><p class="note" style="color: {{c.ink}}">{{c.text}}</p></sc-if>
+          <sc-if value="{{c.hasTitle}}" hint-placeholder-val="{{true}}"><span class="title" style="color: {{c.ink}}">{{c.title}}</span></sc-if>
+          <span class="meta"><span>{{c.host}}</span><span style="color: {{c.ageColor}}">{{c.age}}</span></span>
+        </div>
+      </sc-for>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: rgba(30,42,46,0.2); border: 1px solid rgba(30,42,46,0.2)">
+    <sc-for list="{{legend}}" as="l" hint-placeholder-count="4">
+      <div style="background: #F2F4F3; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: 'Geist Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #566468">{{l.k}}</span>
+        <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; line-height: 1.2">{{l.v}}</span>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2620}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const G = '#F2F4F3', AGED = '#ECE2CC', INK = '#1E2A2E', AGEDINK = '#665840', INK2 = '#566468', ACC = '#A13A22';
+    const ages = [[0, 'Today', 'Fresh'], [6, 'In 6 months', 'Warming'], [12, 'In a year', 'Faded'], [24, 'In two years', 'Bleached']];
+    const kinds = [
+      { code: 'LNK', name: 'Link, article', media: true, ratio: '1.91 / 1', mbg: '#24453B', mfg: '#F1EDE3', inner: 'Field Notes', title: 'Why every team needs a decision log', host: 'fieldnotes.substack.com' },
+      { code: 'VID', name: 'Video', media: true, video: true, ratio: '16 / 9', mbg: '#2A2F3A', mfg: '#fff', title: 'Colour theory for interfaces, part 2', host: 'youtube.com · 18:42' },
+      { code: 'PST', name: 'Post', quoteLike: true, text: '40 tools I use to design faster.', title: '', host: 'x.com · @studio_ana' },
+      { code: 'REP', name: 'Repository', media: true, repo: true, ratio: '2 / 1', mbg: '#EEF0F2', mfg: '#15171A', title: 'A markdown notebook that syncs over git', host: 'github.com' },
+      { code: 'QTE', name: 'Quote', quoteLike: true, text: 'A decision you can’t find is a decision you’ll make twice.', host: 'from Field Notes' },
+      { code: 'PIC', name: 'Picture', media: true, pic: 'pic-tiles', ratio: '4 / 3', mbg: '#E9EEF5', host: 'slowtravel.blog' },
+      { code: 'PIC', name: 'Picture, warm', media: true, pic: 'pic-sun', ratio: '3 / 2', mbg: '#E79A7A', host: 'slowtravel.blog' },
+      { code: 'NTE', name: 'Your note', note: true, text: 'Ragù: tomato paste, not passata. Brown it longer than feels right.', host: 'your note' }
+    ];
+    const rows = kinds.map((k, ri) => ({
+      code: k.code + ' · ' + String(ri + 1).padStart(3, '0'),
+      name: k.name,
+      cells: ages.map(([m]) => {
+        const t = m / 24;
+        const faded = t >= 0.5;
+        return {
+          bg: mix(G, AGED, t * 0.9),
+          ink: mix(INK, AGEDINK, t),
+          code: k.code + '·' + String(ri + 1).padStart(3, '0'),
+          strike: 'none',
+          right: faded ? 'Faded · ' + m + ' mo.' : m === 0 ? 'Today' : m + ' mo.',
+          rightColor: faded ? ACC : INK2,
+          hasMedia: !!k.media, isVideo: !!k.video, isRepo: !!k.repo, pic: k.pic ?? '',
+          hasInner: !!k.inner, inner: k.inner ?? '',
+          ratio: k.ratio ?? '1 / 1', mbg: k.mbg ?? 'transparent', mfg: k.mfg ?? INK,
+          filter: 'grayscale(' + (t * 0.85).toFixed(2) + ') sepia(' + (t * 0.35).toFixed(2) + ') contrast(' + (1 - t * 0.3).toFixed(2) + ') brightness(' + (1 + t * 0.12).toFixed(2) + ')',
+          sun: (t * 0.8).toFixed(2),
+          isQuote: !!k.quoteLike, isNote: !!k.note, text: k.text ?? '',
+          hasTitle: !!k.title, title: k.title ?? '',
+          host: k.host,
+          age: m === 0 ? 'opened this week' : 'untouched ' + m + ' mo.',
+          ageColor: INK2
+        };
+      })
+    }));
+    return {
+      cols: ages.map(([m, k, l]) => ({ kicker: k, label: l })),
+      rows,
+      legend: [
+        { k: 'Image', v: 'Loses colour, then contrast, then lifts toward white. Light comes from the top right.' },
+        { k: 'Paper', v: 'The cell warms from cool grey to sun-yellowed card.' },
+        { k: 'Ink', v: 'Titles, quotes and notes drift from blue-black to faded brown.' },
+        { k: 'Label', v: 'At a year, the corner reads Faded, in red, the only colour left.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

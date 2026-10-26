@@ -47,11 +47,21 @@ export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) 
 }
 
 // Links, pictures and quotes open the page they're from; notes (and anything without a page) open for editing.
-function CardLink({ bookmark, onEdit, children }: { bookmark: Bookmark; onEdit: (b: Bookmark) => void; children: ReactNode }) {
+export function CardLink({
+  bookmark,
+  onEdit,
+  className = 'card-link',
+  children,
+}: {
+  bookmark: Bookmark;
+  onEdit: (b: Bookmark) => void;
+  className?: string;
+  children: ReactNode;
+}) {
   const href = bookmark.url || bookmark.imageUrl;
   if (!href) {
     return (
-      <button type="button" className="card-link" onClick={() => onEdit(bookmark)}>
+      <button type="button" className={className} onClick={() => onEdit(bookmark)}>
         {children}
       </button>
     );
@@ -59,7 +69,7 @@ function CardLink({ bookmark, onEdit, children }: { bookmark: Bookmark; onEdit: 
   const open = () => markOpened(bookmark.id);
   return (
     <a
-      className="card-link"
+      className={className}
       href={href}
       target="_blank"
       rel="noreferrer"

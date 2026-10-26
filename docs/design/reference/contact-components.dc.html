@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contact sheet · Components</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&amp;family=Geist:wght@400;500&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+:focus-visible{outline:2px solid #1E2A2E;outline-offset:2px}
+input::placeholder{color:#566468;font-style:italic}
+.lab{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#566468}
+.box{position:relative;border:1px solid rgba(30,42,46,.2);background:#F7F8F8}
+.plus{position:absolute;width:13px;height:13px;color:#566468}
+.mono{font-family:'Geist Mono',monospace}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid #1E2A2E;border-radius:0;background:transparent;color:#1E2A2E;font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:#E9EDEC}
+.btn.solid{background:#1E2A2E;color:#F2F4F3}
+.btn.solid:hover{background:#2c3c41}
+.btn:disabled{opacity:.35;cursor:default}
+.sq{width:44px;padding:0;justify-content:center}
+.frame{position:relative;flex:none;width:34px;height:30px;border:0;padding:0;cursor:pointer;transition:filter 300ms ease-out}
+.pencil{position:absolute;pointer-events:none;overflow:visible}
+.kseg{min-height:44px;padding:0 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:#566468;font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.kseg[aria-pressed="true"]{color:#1E2A2E;border-bottom-color:#1E2A2E}
+.tag{position:relative;border:0;background:transparent;padding:0 4px;min-height:40px;color:#1E2A2E;font-family:'Cormorant Garamond',Georgia,serif;font-size:21px;font-weight:500;cursor:pointer}
+.tag:hover .w,.ent:hover .w,.lnk:hover .w{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.ixgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1px;background:rgba(30,42,46,.2);border:1px solid rgba(30,42,46,.2)}
+.ixcell{position:relative;padding:14px 18px 16px;background:#F2F4F3;min-width:0}
+.ent{position:relative;display:flex;align-items:flex-end;gap:8px;width:100%;min-height:32px;padding:3px 0;border:0;background:transparent;text-align:left;cursor:pointer;font-family:'Cormorant Garamond',Georgia,serif}
+.w{position:relative;font-size:20px;font-weight:500;line-height:1.15;padding-left:1em;text-indent:-1em;min-width:0;overflow-wrap:anywhere}
+.leader{flex:1 1 14px;min-width:14px;margin-bottom:6px;border-bottom:1px dotted currentColor;opacity:.45}
+.num{flex:none;font-family:'Geist Mono',monospace;font-size:11px;line-height:1.9}
+.lnk{position:relative;border:0;background:transparent;padding:0;color:inherit;font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;cursor:pointer}
+.tseg{min-height:36px;padding:0 12px;border:0;border-left:1px solid rgba(30,42,46,.32);background:transparent;color:#1E2A2E;font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.tseg:first-child{border-left:0}
+.tseg[aria-pressed="true"]{background:#1E2A2E;color:#F2F4F3}
+.menu-item{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 16px;border:0;border-top:1px solid rgba(30,42,46,.2);background:transparent;width:100%;text-align:left;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;color:#1E2A2E;cursor:pointer}
+.menu-item:hover{background:#E9EDEC}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #F2F4F3; color: #1E2A2E; font-family: Geist, system-ui, sans-serif; font-size: 14px; display: flex; flex-direction: column; gap: 40px">
+  <h1 style="margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: 76px; line-height: 0.9; letter-spacing: -0.02em">Components, <span style="font-style: italic">on the sheet</span></h1>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Header">
+    <span class="lab">A · Header and summary</span>
+    <div class="box" style="padding: 0 22px">
+      <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; min-height: 66px; border-bottom: 1px solid rgba(30,42,46,0.2)">
+        <span class="mono" style="font-size: 11px; color: #566468">18 KEPT · 2 FETCHING</span>
+        <span class="serif" style="font-size: 30px; font-weight: 500">Bookmarks</span>
+        <span style="display: flex; justify-content: flex-end; gap: 8px"><button type="button" class="btn">More<svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <button type="button" class="btn sq" aria-label="Switch to dark mode"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg></button>
+        <button type="button" class="btn solid">Add from a post</button></span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; padding: 26px 0 22px">
+        <h2 class="serif" style="margin: 0; font-weight: 500; font-size: 72px; line-height: 0.9; letter-spacing: -0.02em">Everything you kept,<br><span style="font-style: italic">on one sheet.</span></h2>
+        <ul class="mono" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; font-size: 11px; letter-spacing: 0.08em">
+          <li>LNK · 8 links</li><li>QTE · 3 quotes</li><li>PIC · 4 pictures</li><li>NTE · 3 notes</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Look ahead">
+    <span class="lab">B · Look ahead · a strip of film, one frame a month</span>
+    <div class="box" role="group" aria-label="Look ahead" style="padding: 22px 24px 18px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span class="serif" style="font-size: 19px; font-style: italic; color: #566468">{{la.lead}}</span>
+          <span class="serif" aria-live="polite" style="font-size: 54px; font-weight: 500; line-height: 0.95; letter-spacing: -0.02em">{{la.month}} <span style="font-style: italic; color: #566468">{{la.year}}</span></span>
+        </div>
+        <div style="display: flex; gap: 6px">
+          <button type="button" class="btn sq" aria-label="One month earlier" onClick="{{la.prev}}" disabled="{{la.atStart}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <button type="button" class="btn sq" aria-label="One month later" onClick="{{la.next}}" disabled="{{la.atEnd}}"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"></path></svg></button>
+        </div>
+      </div>
+      <div style="position: relative; background: #1E2A2E; padding: 14px 12px 8px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 3px; height: 6px; background: repeating-linear-gradient(90deg, transparent 0 8px, #F2F4F3 8px 14px, transparent 14px 20px)"></div>
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 3px; height: 6px; background: repeating-linear-gradient(90deg, transparent 0 8px, #F2F4F3 8px 14px, transparent 14px 20px)"></div>
+        <div style="display: flex; gap: 8px; justify-content: space-between">
+          <sc-for list="{{la.frames}}" as="f" hint-placeholder-count="25">
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px">
+              <button type="button" class="frame" aria-label="{{f.aria}}" aria-pressed="{{f.pressed}}" onClick="{{f.pick}}" style="background: {{f.bg}}">
+                <sc-if value="{{f.pressed}}" hint-placeholder-val="{{false}}"><svg class="pencil" aria-hidden="true" viewBox="0 0 60 50" preserveAspectRatio="none" style="left: -9px; top: -8px; width: 52px; height: 46px"><path d="M10 9 C 22 2, 46 3, 53 12 C 59 22, 56 38, 44 44 C 30 49, 10 46, 5 34 C 1 24, 4 14, 14 7" fill="none" stroke="#E2574A" stroke-width="2.6" stroke-linecap="round"></path></svg></sc-if>
+              </button>
+              <span class="mono" style="font-size: 8.5px; color: {{f.numColor}}; letter-spacing: 0.04em">{{f.num}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px">
+        <span class="mono" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #566468">{{la.status}}</span>
+        <sc-if value="{{la.isToday}}" hint-placeholder-val="{{true}}"><button type="button" class="btn">Reprint the three most faded</button></sc-if>
+        <sc-if value="{{la.notToday}}" hint-placeholder-val="{{false}}"><button type="button" class="btn" onClick="{{la.reset}}">Back to today</button></sc-if>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Tag strip and filed under">
+    <span class="lab">C · Tag strip, closed index · picks are circled in grease pencil</span>
+    <div class="box" style="padding: 0 22px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 64px">
+        <span class="serif" style="font-size: 22px; font-style: italic; margin-right: 10px">Most used</span>
+        <sc-for list="{{top}}" as="t" hint-placeholder-count="6">
+          <button type="button" class="tag" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}"><span class="w" style="padding: 0; text-indent: 0">{{t.name}}</span><sup class="mono" style="font-size: 9.5px; margin-left: 3px">{{t.k}}</sup><sc-if value="{{t.pressed}}" hint-placeholder-val="{{false}}"><svg class="pencil" aria-hidden="true" viewBox="0 0 100 40" preserveAspectRatio="none" style="left: -8px; top: 2px; width: calc(100% + 16px); height: 36px"><path d="M14 8 C 34 1, 80 2, 93 12 C 101 22, 88 35, 54 37 C 22 39, 2 31, 4 20 C 6 11, 20 6, 36 5" fill="none" stroke="#E2574A" stroke-width="2.2" stroke-linecap="round"></path></svg></sc-if></button>
+          <span aria-hidden="true" style="width: 1px; height: 18px; background: rgba(30,42,46,0.32)"></span>
+        </sc-for>
+        <button type="button" class="btn" style="margin-left: auto" onClick="{{toggleIx}}" aria-expanded="{{ixOpen}}">{{ixLabel}}</button>
+      </div>
+      <sc-if value="{{hasSel}}" hint-placeholder-val="{{true}}">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 0 14px; border-top: 1px solid rgba(30,42,46,0.2)">
+          <span class="mono" style="font-size: 11px; letter-spacing: 0.1em; color: #566468">SHOWING FRAMES FILED UNDER</span>
+          <sc-for list="{{selWords}}" as="s" hint-placeholder-count="2">
+            <button type="button" onClick="{{s.pick}}" aria-label="Remove filter: {{s.n}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border: 1px solid #1E2A2E; background: transparent; color: #1E2A2E; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; font-variant: small-caps; letter-spacing: 0.04em; cursor: pointer">{{s.n}}<svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+          </sc-for>
+          <button type="button" onClick="{{clear}}" class="mono" style="min-height: 32px; border: 0; background: transparent; color: #1E2A2E; font-size: 11px; letter-spacing: 0.08em; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">CLEAR</button>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <sc-if value="{{ixOpen}}" hint-placeholder-val="{{true}}">
+    <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Tag index">
+      <span class="lab">D · The index, open · each letter is a frame on the sheet</span>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px">
+        <label style="display: flex; align-items: center; gap: 10px; flex: 0 1 300px; height: 44px; padding: 0 14px; box-sizing: border-box; border: 1px solid rgba(30,42,46,0.32); background: #F7F8F8">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input type="search" aria-label="Find a tag" value="{{query}}" onChange="{{onQuery}}" placeholder="Find a tag" style="flex: 1; min-width: 0; border: 0; background: transparent; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 18px; outline: none; color: inherit">
+        </label>
+        <span class="mono" style="font-size: 10.5px; letter-spacing: 0.06em; color: #566468">PICKING CLOSES THE INDEX · SHIFT-CLICK FOR SEVERAL</span>
+        <span class="serif" style="margin-left: auto; font-size: 19px; font-style: italic; color: #566468">Tidy up tags not used in</span>
+        <div role="group" aria-label="Tidy up threshold" style="display: inline-flex; border: 1px solid rgba(30,42,46,0.32)">
+          <sc-for list="{{tidy}}" as="t" hint-placeholder-count="4"><button type="button" class="tseg" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for>
+        </div>
+      </div>
+      <sc-if value="{{tidying}}" hint-placeholder-val="{{true}}">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 16px; background: #ECE2CC; border: 1px solid rgba(102,88,64,0.35)">
+          <span class="mono" style="font-size: 11px; letter-spacing: 0.08em; color: #4F4430">{{staleLabel}}</span>
+          <span class="serif" style="flex: 1; min-width: 200px; font-size: 17px; font-style: italic; color: #4F4430">Their frames are bleached below. Archived tags leave the index but stay on what they’re on.</span>
+          <button type="button" class="btn solid">Archive {{staleCount}}</button>
+        </div>
+      </sc-if>
+      <div class="ixgrid">
+        <sc-for list="{{groups}}" as="g" hint-placeholder-count="12">
+          <section class="ixcell" aria-label="{{g.ch}}" style="background: {{g.bg}}">
+            <svg aria-hidden="true" class="plus" viewBox="0 0 13 13" style="top: -7px; left: -7px; z-index: 2"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start">
+              <h3 class="serif" style="margin: 0 0 6px; font-weight: 400; font-style: italic; font-size: 84px; line-height: 0.8; letter-spacing: -0.03em">{{g.ch}}</h3>
+              <span class="mono" style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #566468; padding-top: 4px">{{g.count}}</span>
+            </div>
+            <sc-for list="{{g.entries}}" as="e" hint-placeholder-count="3">
+              <button type="button" class="ent" aria-pressed="{{e.pressed}}" onClick="{{e.pick}}" style="color: {{e.ink}}"><span class="w">{{e.name}}<sc-if value="{{e.pressed}}" hint-placeholder-val="{{false}}"><svg class="pencil" aria-hidden="true" viewBox="0 0 100 40" preserveAspectRatio="none" style="left: -10px; top: -5px; width: calc(100% + 20px); height: calc(100% + 10px)"><path d="M14 8 C 34 1, 80 2, 93 12 C 101 22, 88 35, 54 37 C 22 39, 2 31, 4 20 C 6 11, 20 6, 36 5" fill="none" stroke="#E2574A" stroke-width="2.2" stroke-linecap="round"></path></svg></sc-if></span><span aria-hidden="true" class="leader"></span><span class="num">{{e.right}}</span></button>
+              <sc-for list="{{e.kids}}" as="k" hint-placeholder-count="0"><button type="button" class="ent" aria-pressed="{{k.pressed}}" onClick="{{k.pick}}" style="padding-left: 24px; min-height: 30px; color: {{k.ink}}"><span class="w" style="font-size: 17px"><span aria-hidden="true" style="opacity: 0.5">— </span>{{k.name}}</span><span aria-hidden="true" class="leader"></span><span class="num" style="font-size: 10.5px">{{k.right}}</span></button></sc-for>
+            </sc-for>
+            <sc-if value="{{g.hasOnce}}" hint-placeholder-val="{{false}}"><p style="margin: 6px 0 0; padding-left: 1em; text-indent: -1em; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 17px; line-height: 1.6; color: #566468"><span class="mono" style="font-size: 9.5px; letter-spacing: 0.1em">ONCE · </span><sc-for list="{{g.once}}" as="o" hint-placeholder-count="3"><button type="button" class="lnk" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}" style="color: {{o.ink}}"><span class="w" style="font-size: 17px; font-weight: 400; padding: 0; text-indent: 0">{{o.name}}</span></button>{{o.sep}}</sc-for></p></sc-if>
+          </section>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Filter bar">
+    <span class="lab">E · Kind bar, source and sort</span>
+    <div class="box" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; padding: 0 12px">
+      <div role="group" aria-label="Kinds" style="display: flex; flex-wrap: wrap">
+        <sc-for list="{{kinds}}" as="k" hint-placeholder-count="5"><button type="button" class="kseg" aria-pressed="{{k.pressed}}" onClick="{{k.pick}}">{{k.label}} <span style="opacity: 0.7">{{k.n}}</span></button></sc-for>
+      </div>
+      <span class="mono" style="margin-left: auto; display: flex; gap: 22px; font-size: 11px; letter-spacing: 0.08em">
+        <span style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px">SOURCE · ALL<svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"></path></svg></span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px">SORT · NEWEST<svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"></path></svg></span>
+      </span>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px" aria-label="Small parts">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">F · Buttons</span>
+      <div class="box" style="padding: 20px; display: flex; flex-wrap: wrap; gap: 10px">
+        <button type="button" class="btn solid">Add from a post</button>
+        <button type="button" class="btn">Reprint</button>
+        <button type="button" class="btn" disabled>Check links</button>
+        <button type="button" class="mono" style="min-height: 44px; border: 0; background: transparent; color: #1E2A2E; font-size: 11px; letter-spacing: 0.08em; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">CLEAR FILTERS</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">G · More menu</span>
+      <div class="box" role="menu" aria-label="More" style="padding: 6px 0 0">
+        <span class="mono" style="display: block; padding: 6px 16px 10px; font-size: 10px; letter-spacing: 0.1em; color: #566468">MORE</span>
+        <button type="button" role="menuitem" class="menu-item">New note<span class="mono" style="font-size: 10px; color: #566468">N</span></button>
+        <button type="button" role="menuitem" class="menu-item">Import favorites</button>
+        <button type="button" role="menuitem" class="menu-item">Check links</button>
+        <button type="button" role="menuitem" class="menu-item">Back up</button>
+        <button type="button" role="menuitem" class="menu-item">Restore</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">H · Toast</span>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div role="status" style="display: flex; align-items: center; gap: 16px; min-height: 48px; padding: 0 8px 0 18px; background: #1E2A2E; color: #F2F4F3; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em">REPRINTED 3 FRAMES<button type="button" style="margin-left: auto; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #F2F4F3; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">UNDO</button></div>
+        <div role="status" style="display: flex; align-items: center; gap: 16px; min-height: 48px; padding: 0 8px 0 18px; background: #1E2A2E; color: #F2F4F3; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em">ARCHIVED 31 TAGS<button type="button" style="margin-left: auto; min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #F2F4F3; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">UNDO</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2400}}'>
+class Component extends DCLogic {
+  state = { query: '', sel: ['travel', 'recipes/weeknight'], month: 6, ixOpen: true, tidy: 12, kind: 'ALL' };
+
+  renderVals() {
+    const st = this.state;
+    const COLOR = { work: ['#c47a52', '#9A4F2B'], design: ['#4d6fa3', '#2F5288'], reading: ['#c4688a', '#9C3E62'], travel: ['#5f98a8', '#2E6E7E'], recipes: ['#b4893f', '#80601E'], type: ['#6f8a3e', '#4A6224'], dev: ['#8a857a', '#5C584F'], video: ['#7b93c4', '#4B63A0'] };
+    const multi = [
+      ['work', 24], ['design', 19], ['reading', 17], ['travel', 14], ['recipes', 12], ['type', 9], ['dev', 8], ['video', 7],
+      ['inspiration', 6], ['recipes/weeknight', 5], ['gifts', 5], ['lisbon', 4], ['typography-specimens', 4], ['side-project', 4],
+      ['recipes/baking', 3], ['finance', 3], ['health', 3], ['music', 3], ['film', 3], ['architecture', 3], ['writing', 3],
+      ['things-to-read-on-the-flight-to-lisbon', 2], ['Q4 planning: design system review', 2], ['kitchen renovation ideas (maybe)', 2],
+      ['home/kitchen renovation/lighting ideas', 2], ['recipes/vegetarian', 2], ['books', 2], ['newsletters', 2], ['photography', 2],
+      ['interiors', 2], ['learning', 2], ['career', 2], ['ai', 2], ['climbing', 2], ['birthday-ideas', 2], ['home', 2], ['wedding', 2]
+    ];
+    const singles = ['aalto', 'airport-lounges', 'ambient', 'analog', 'bauhaus', 'bikes', 'bookbinding', 'brutalism', 'cameras', 'ceramics', 'chess', 'coffee', 'crosswords', 'dataviz', 'denim', 'dumplings', 'espresso', 'gardening', 'hiking', 'illustration', 'interview prep for the staff role', 'jazz', 'kerning', 'keyboards', 'lamps', 'linocut', 'maps', 'matcha', 'mushrooms', 'origami', 'papers-to-cite-in-the-thesis-chapter-3', 'pens', 'podcasts', 'posters-for-the-hallway', 'pottery', 'risograph', 'sourdough', 'swiss-style', 'trains', 'woodwork', 'zines'];
+    const hash = (s) => s.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const all = multi.map(([n, k]) => ({ n, k })).concat(singles.map((n) => ({ n, k: 1 }))).map((t) => ({ ...t, last: t.k >= 7 ? hash(t.n) % 2 : t.k >= 3 ? 1 + (hash(t.n) % 6) : 2 + (hash(t.n) % 21) }));
+    const pretty = (n) => n.replace(/-/g, ' ');
+    const sel = st.sel ?? [];
+    const toggle = (n) => this.setState({ sel: sel.includes(n) ? sel.filter((x) => x !== n) : sel.concat(n) });
+    const tint = (n) => (COLOR[n.split('/')[0]] ? COLOR[n.split('/')[0]][0] + '55' : 'rgba(235,212,150,0.9)');
+    const mark = (on, n) => (on ? 'linear-gradient(transparent 55%, ' + tint(n) + ' 55% 92%, transparent 92%)' : 'transparent');
+    const q = (st.query ?? '').trim().toLowerCase();
+    const hit = (n) => !q || n.toLowerCase().includes(q) || pretty(n).toLowerCase().includes(q);
+    const buildGroups = (decorate) => {
+      const map = {};
+      all.filter((t) => !t.n.includes('/')).forEach((t) => {
+        const kids = all.filter((x) => x.n.startsWith(t.n + '/'));
+        const self = hit(t.n);
+        const shownKids = kids.filter((x) => self || hit(x.n));
+        if (!self && !shownKids.length) return;
+        const ch = t.n[0].toUpperCase();
+        const g = (map[ch] = map[ch] ?? { ch, entries: [], once: [] });
+        const on = sel.includes(t.n);
+        const base = { name: pretty(t.n), raw: t.n, k: t.k, last: t.last, pressed: on, pick: () => toggle(t.n), mark: mark(on, t.n), style: on ? 'italic' : 'normal', c: COLOR[t.n] ? COLOR[t.n][0] : 'transparent', ...decorate(t, on) };
+        if (t.k === 1 && !kids.length) g.once.push(base);
+        else g.entries.push({ ...base, kids: shownKids.map((x) => { const kon = sel.includes(x.n); return { name: pretty(x.n.slice(t.n.length + 1)).replace(/\//g, ' / '), raw: x.n, k: x.k, last: x.last, pressed: kon, pick: () => toggle(x.n), mark: mark(kon, x.n), style: kon ? 'italic' : 'normal', ...decorate(x, kon) }; }) });
+      });
+      return Object.values(map).sort((a, b) => a.ch.localeCompare(b.ch)).map((g) => {
+        g.entries.sort((a, b) => a.name.localeCompare(b.name));
+        g.once.sort((a, b) => a.name.localeCompare(b.name));
+        const total = g.entries.length + g.entries.reduce((s, e) => s + e.kids.length, 0) + g.once.length;
+        return { ...g, id: g.ch.toLowerCase(), total, count: total + (total === 1 ? ' tag' : ' tags'), hasOnce: g.once.length > 0, once: g.once.map((o, i) => ({ ...o, sep: i < g.once.length - 1 ? ', ' : '' })) };
+      });
+    };
+    const selWords = sel.map((n, i) => ({ n: pretty(n.split('/').pop()), ink: COLOR[n.split('/')[0]] ? COLOR[n.split('/')[0]][1] : '#1f1d1a', sep: i === sel.length - 1 ? '' : i === sel.length - 2 ? ' and ' : ', ', pick: () => toggle(n) }));
+
+    const hexes = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hexes(a), B = hexes(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const m = st.month;
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const mi = 9 + m;
+    const set = (v) => this.setState({ month: Math.max(0, Math.min(24, v)) });
+    const O = [0, 0.1, 0.5, 14, 2, 9, 4, 1, 6, 14, 11, 16, 3, 0.5, 20, 7, 12];
+    const framesFaded = (k) => O.filter((o) => o + k >= 12).length;
+    const frames = Array.from({ length: 25 }, (_, i) => {
+      const t = i / 24;
+      const on = i === m;
+      return {
+        num: i === 0 ? 'NOW' : (9 + i) % 12 === 0 ? String(2026 + Math.floor((9 + i) / 12)).slice(2) + '▸' : String(i),
+        aria: i === 0 ? 'Today' : MONTHS[(9 + i) % 12] + ' ' + (2026 + Math.floor((9 + i) / 12)),
+        pressed: on,
+        bg: 'linear-gradient(215deg, rgba(255,251,240,' + (t * 0.8).toFixed(2) + ') 0%, transparent 70%), ' + mix('#3E6CA8', '#D8CDB4', t),
+        numColor: on ? '#F2F4F3' : 'rgba(242,244,243,0.6)',
+        pick: () => set(i)
+      };
+    });
+    const isStale = (t) => st.tidy > 0 && t.last + m >= st.tidy && !sel.includes(t.n);
+    const groups = buildGroups((t, on) => ({
+      ink: on ? '#1E2A2E' : mix('#1E2A2E', '#665840', Math.min(1, (t.last + m) / 18)),
+      right: st.tidy > 0 ? (t.last + m === 0 ? 'NOW' : (t.last + m) + ' MO') : String(t.k),
+      stale: isStale(t)
+    })).map((g) => {
+      const items = g.entries.concat(g.once);
+      const staleShare = items.filter((x) => x.stale).length / Math.max(1, items.length);
+      return { ...g, count: g.count.toUpperCase(), bg: mix('#F2F4F3', '#ECE2CC', staleShare * 0.8) };
+    });
+    const stale = all.filter(isStale);
+    const kindsDef = [['ALL', 18], ['LNK', 8], ['QTE', 3], ['PIC', 4], ['NTE', 3]];
+    return {
+      la: {
+        lead: m === 0 ? 'Your library now,' : 'Your library as it’ll look in',
+        month: MONTHS[mi % 12], year: String(2026 + Math.floor(mi / 12)),
+        atStart: m === 0, atEnd: m === 24, prev: () => set(m - 1), next: () => set(m + 1), reset: () => set(0),
+        isToday: m === 0, notToday: m > 0,
+        status: m === 0 ? framesFaded(0) + ' of 18 frames have faded' : 'By then ' + framesFaded(m) + ' of 18 frames will have faded',
+        frames
+      },
+      top: all.filter((t) => !t.n.includes('/')).sort((a, b) => b.k - a.k).slice(0, 6).map((t) => { const on = sel.includes(t.n); return { name: pretty(t.n), k: t.k, pressed: on, pick: () => toggle(t.n) }; }),
+      ixOpen: st.ixOpen,
+      toggleIx: () => this.setState({ ixOpen: !st.ixOpen }),
+      ixLabel: st.ixOpen ? 'Close the index' : 'Open the index · ' + all.length,
+      hasSel: sel.length > 0,
+      selWords,
+      clear: () => this.setState({ sel: [] }),
+      query: st.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      tidy: [[0, 'Off'], [3, '3 mo'], [6, '6 mo'], [12, 'A year']].map(([v, l]) => ({ label: l, pressed: v === st.tidy, pick: () => this.setState({ tidy: v }) })),
+      tidying: st.tidy > 0 && stale.length > 0,
+      staleCount: stale.length,
+      staleLabel: (m === 0 ? '' : 'BY ' + MONTHS[mi % 12].toUpperCase() + ' ' + (2026 + Math.floor(mi / 12)) + ', ') + stale.length + ' TAGS ' + (m === 0 ? 'UNUSED' : 'WILL BE UNUSED') + ' FOR ' + (st.tidy === 12 ? 'A YEAR' : st.tidy + ' MONTHS'),
+      groups,
+      kinds: kindsDef.map(([k, n]) => ({ label: k, n, pressed: k === st.kind, pick: () => this.setState({ kind: k }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Contact sheet · States</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&amp;family=Geist:wght@400;500&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+:focus-visible{outline:2px solid currentColor;outline-offset:-4px}
+.lab{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#566468}
+.sheet{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:rgba(30,42,46,.2);border:1px solid rgba(30,42,46,.2)}
+.slot{display:flex;flex-direction:column;background:#F2F4F3;min-width:0}
+.slab{padding:10px 16px;border-bottom:1px solid rgba(30,42,46,.12);font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#566468}
+.cell{position:relative;flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 16px 12px;min-height:290px}
+.plus{position:absolute;top:-7px;left:-7px;width:13px;height:13px;z-index:2;color:#566468}
+.top{display:flex;justify-content:space-between;gap:8px;font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#566468}
+.code{position:relative;color:#1E2A2E}
+.media{position:relative;flex:none;aspect-ratio:1.91/1;background:#24453B;color:#F1EDE3}
+.inner{position:absolute;inset:0;padding:10px;display:flex;align-items:flex-end;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;line-height:1}
+.title{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:24px;line-height:1.02;color:#1E2A2E}
+.meta{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;font-family:'Geist Mono',monospace;font-size:10px;color:#566468}
+.cm{position:absolute;width:12px;height:12px;border:0 solid #1E2A2E}
+.cm.tl{top:-7px;left:-7px;border-width:1px 0 0 1px}.cm.tr{top:-7px;right:-7px;border-width:1px 1px 0 0}
+.cm.bl{bottom:-7px;left:-7px;border-width:0 0 1px 1px}.cm.br{bottom:-7px;right:-7px;border-width:0 1px 1px 0}
+.pencil{position:absolute;pointer-events:none;overflow:visible}
+.rp{min-height:30px;padding:0 10px;border:1px solid #1E2A2E;background:transparent;color:#1E2A2E;font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.08em;cursor:pointer}
+.sun{position:absolute;inset:0;background:linear-gradient(215deg,rgba(255,251,240,.95) 0%,rgba(255,251,240,.4) 38%,transparent 68%)}
+.dev-a{animation:develop-a 1400ms cubic-bezier(.3,.6,.3,1) both}
+.dev-b{animation:develop-b 1400ms cubic-bezier(.3,.6,.3,1) both}
+@keyframes develop-a{0%{filter:contrast(0) brightness(1.9);opacity:.6}35%{filter:contrast(.35) brightness(1.4) sepia(.4);opacity:1}100%{filter:none}}
+@keyframes develop-b{0%{filter:contrast(0) brightness(1.9);opacity:.6}35%{filter:contrast(.35) brightness(1.4) sepia(.4);opacity:1}100%{filter:none}}
+.txt-a{animation:ink-a 1400ms ease-out both}.txt-b{animation:ink-b 1400ms ease-out both}
+@keyframes ink-a{0%{opacity:0}45%{opacity:.2}100%{opacity:1}}
+@keyframes ink-b{0%{opacity:0}45%{opacity:.2}100%{opacity:1}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #F2F4F3; color: #1E2A2E; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 40px">
+  <h1 style="margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: 76px; line-height: 0.9; letter-spacing: -0.02em">States <span style="font-style: italic">and moments</span></h1>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Frame states">
+    <span class="lab">A · A frame, state by state</span>
+    <div class="sheet">
+      <div class="slot"><span class="slab">Rest</span>
+        <div class="cell"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code">LNK·002</span><span>Substack</span></span>
+          <div class="media"><span class="inner">Field Notes</span></div>
+          <span class="title">Why every team needs a decision log</span>
+          <span class="meta"><span>FILED · WORK / READING</span><span>this week</span></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Hover · crop marks, edit appears</span>
+        <div class="cell" style="background: #E9EDEC"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code">LNK·002</span><span>Substack</span></span>
+          <div class="media"><span class="inner">Field Notes</span><span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span></div>
+          <span class="title" style="text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 5px">Why every team needs a decision log</span>
+          <span class="meta"><span>FILED · WORK / READING</span><span style="color: #1E2A2E; text-decoration: underline; text-underline-offset: 3px">EDIT</span></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Keyboard focus · marks plus a ring</span>
+        <div class="cell" style="background: #E9EDEC; box-shadow: inset 0 0 0 2px #1E2A2E"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code">LNK·002</span><span>Substack</span></span>
+          <div class="media"><span class="inner">Field Notes</span><span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span></div>
+          <span class="title">Why every team needs a decision log</span>
+          <span class="meta"><span>FILED · WORK / READING</span><span style="color: #1E2A2E; text-decoration: underline; text-underline-offset: 3px">EDIT</span></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Faded · reprint offered</span>
+        <div class="cell" style="background: rgb(237,228,208)"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code" style="color: #665840">PIC·004</span><span style="color: #A13A22">Faded · 14 mo.</span></span>
+          <div class="media" style="aspect-ratio: 4 / 3; background: radial-gradient(circle,#E9EEF5 0 4px,transparent 4.5px) 13px 13px/26px 26px,repeating-conic-gradient(#3E6CA8 0 25%,#E9EEF5 0 50%) 0 0/26px 26px; filter: grayscale(.5) sepia(.2) contrast(.82) brightness(1.07)"><div class="sun" style="opacity: 0.47"></div></div>
+          <span class="meta"><span>slowtravel.blog · untouched 14 mo.</span><button type="button" class="rp">REPRINT</button></span>
+        </div>
+      </div>
+
+      <div class="slot"><span class="slab">New · it develops in · {{devLabel}}</span>
+        <div class="cell"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code">PIC·019</span><span>Just now</span></span>
+          <div class="media {{devCls}}" style="aspect-ratio: 3 / 2; background: radial-gradient(circle at 64% 44%, #F7D9A8 0 10%, transparent 10.5%), linear-gradient(180deg, transparent 63%, #2F4A6B 63%), linear-gradient(180deg, #D47E66, #F0B48C 63%)"></div>
+          <span class="title {{txtCls}}">Saved a moment ago</span>
+          <span class="meta"><span>slowtravel.blog</span><button type="button" class="rp" onClick="{{replay}}">REPLAY</button></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Reprinted · circled, back at the front</span>
+        <div class="cell" style="background: #F7F8F8"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <svg class="pencil" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" style="left: 6px; top: 6px; width: calc(100% - 12px); height: calc(100% - 12px)"><path d="M18 6 C 50 1, 88 3, 95 14 C 100 40, 98 76, 90 92 C 70 99, 26 98, 8 90 C 2 68, 1 30, 6 12 C 9 6, 20 4, 34 4" fill="none" stroke="#E2574A" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg>
+          <span class="top"><span class="code">PIC·004</span><span style="color: #A13A22">Reprinted</span></span>
+          <div class="media" style="aspect-ratio: 4 / 3; background: radial-gradient(circle,#E9EEF5 0 4px,transparent 4.5px) 13px 13px/26px 26px,repeating-conic-gradient(#3E6CA8 0 25%,#E9EEF5 0 50%) 0 0/26px 26px"></div>
+          <span class="meta"><span>slowtravel.blog</span><span>back from 14 mo.</span></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Dead link · struck off</span>
+        <div class="cell"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code" style="text-decoration: line-through">LNK·018</span><span style="color: #A13A22">No answer ×2</span></span>
+          <div class="media" style="background: #d9cfbb; color: #1f1d1a; filter: grayscale(1); opacity: 0.6"><span class="inner" style="font-family: Geist, sans-serif; font-size: 14px; font-weight: 500">a tiny local-first notes app</span></div>
+          <span class="title" style="color: #566468">Show HN: a tiny local-first notes app</span>
+          <span class="meta"><span>news.ycombinator.com</span><span style="color: #A13A22">stopped Oct 9</span></span>
+        </div>
+      </div>
+      <div class="slot"><span class="slab">Fetching · an unexposed frame</span>
+        <div class="cell"><svg aria-hidden="true" class="plus" viewBox="0 0 13 13"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <span class="top"><span class="code">LNK·020</span><span>Fetching</span></span>
+          <div aria-hidden="true" style="aspect-ratio: 1.91 / 1; border: 1px dashed #566468; background: repeating-linear-gradient(135deg, transparent 0 9px, rgba(30,42,46,0.08) 9px 10px)"></div>
+          <span class="title" style="color: #566468">lisbon-in-four-days.com</span>
+          <span class="meta"><span>details on the way</span><span>next try in 1.5 s</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Page states">
+    <span class="lab">B · Whole-sheet states</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab" style="padding: 0; border: 0">Empty library</span>
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 300px; padding: 24px; border: 1px solid rgba(30,42,46,0.2); background: repeating-linear-gradient(90deg, transparent 0 calc(25% - 1px), rgba(30,42,46,0.12) calc(25% - 1px) 25%), repeating-linear-gradient(180deg, transparent 0 74px, rgba(30,42,46,0.12) 74px 75px); text-align: center">
+          <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 34px; font-weight: 500; line-height: 1; background: #F2F4F3; padding: 4px 10px">Nothing exposed yet</span>
+          <span style="max-width: 280px; font-family: 'Geist Mono', monospace; font-size: 11px; line-height: 1.6; color: #566468; background: #F2F4F3; padding: 4px 8px">Press Alt+Shift+S on any page to save it, or right-click a link, picture or selected text.</span>
+          <button type="button" style="min-height: 44px; padding: 0 16px; border: 0; background: #1E2A2E; color: #F2F4F3; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; cursor: pointer">IMPORT YOUR EDGE FAVORITES</button>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab" style="padding: 0; border: 0">No results</span>
+        <div style="display: flex; flex-direction: column; justify-content: center; gap: 10px; min-height: 300px; padding: 24px 28px; border: 1px solid rgba(30,42,46,0.2)">
+          <span style="font-family: 'Geist Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: #566468">0 FRAMES · LNK · FILED UNDER WEDDING · “LISBON”</span>
+          <span style="font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 34px; line-height: 1.05">No frame on the sheet matches that, yet.</span>
+          <button type="button" style="align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: transparent; color: #1E2A2E; font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">CLEAR FILTERS</button>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab" style="padding: 0; border: 0">Loading the sheet</span>
+        <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; min-height: 300px; background: rgba(30,42,46,0.2); border: 1px solid rgba(30,42,46,0.2)">
+          <div style="background: #F2F4F3; padding: 14px; display: flex; flex-direction: column; gap: 8px"><span style="height: 8px; width: 40%; background: #E2E7E6"></span><span style="flex: 1; background: #E2E7E6"></span><span style="height: 10px; width: 80%; background: #E2E7E6"></span></div>
+          <div style="background: #F2F4F3; padding: 14px; display: flex; flex-direction: column; gap: 8px"><span style="height: 8px; width: 40%; background: #E2E7E6"></span><span style="height: 60%; background: #E2E7E6"></span><span style="height: 10px; width: 70%; background: #E2E7E6"></span></div>
+          <div style="background: #F2F4F3; padding: 14px; display: flex; flex-direction: column; gap: 8px"><span style="height: 8px; width: 40%; background: #E2E7E6"></span><span style="height: 10px; width: 90%; background: #E2E7E6"></span><span style="height: 10px; width: 60%; background: #E2E7E6"></span></div>
+          <div style="background: #F2F4F3; padding: 14px; display: flex; flex-direction: column; gap: 8px"><span style="height: 8px; width: 40%; background: #E2E7E6"></span><span style="flex: 1; background: #E2E7E6"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 12px" aria-label="Darkroom">
+    <span class="lab">C · Dark mode · the darkroom, same bleaching in reverse light</span>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: rgba(220,229,227,0.18); border: 1px solid rgba(220,229,227,0.18); padding: 0">
+      <sc-for list="{{dark}}" as="d" hint-placeholder-count="4">
+        <div style="position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 290px; padding: 16px 16px 12px; background: {{d.bg}}">
+          <svg aria-hidden="true" class="plus" viewBox="0 0 13 13" style="color: #97A6A5"><path d="M6.5 0v13M0 6.5h13" stroke="currentColor" stroke-width="1"></path></svg>
+          <sc-if value="{{d.circled}}" hint-placeholder-val="{{false}}"><svg class="pencil" aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" style="left: 6px; top: 6px; width: calc(100% - 12px); height: calc(100% - 12px)"><path d="M18 6 C 50 1, 88 3, 95 14 C 100 40, 98 76, 90 92 C 70 99, 26 98, 8 90 C 2 68, 1 30, 6 12 C 9 6, 20 4, 34 4" fill="none" stroke="#F09A82" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></sc-if>
+          <span class="top" style="color: #97A6A5"><span style="color: {{d.ink}}">PIC·011</span><span style="color: {{d.rightColor}}">{{d.right}}</span></span>
+          <div style="position: relative; aspect-ratio: 3 / 2; background: radial-gradient(circle at 64% 44%, #F7D9A8 0 10%, transparent 10.5%), linear-gradient(180deg, transparent 63%, #2F4A6B 63%), linear-gradient(180deg, #D47E66, #F0B48C 63%); filter: {{d.filter}}"><div class="sun" style="opacity: {{d.sun}}"></div></div>
+          <span class="title" style="color: {{d.ink}}">Sunset over the river</span>
+          <span class="meta" style="color: #97A6A5"><span>slowtravel.blog</span><span>{{d.age}}</span></span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2200}}'>
+class Component extends DCLogic {
+  state = { flip: false };
+
+  renderVals() {
+    const hexes = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hexes(a), B = hexes(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const dark = [[0, false, 'this week'], [12, false, 'untouched 12 mo.'], [24, false, 'untouched 24 mo.'], [0, true, 'back from 24 mo.']].map(([m, circled, age]) => {
+      const t = m / 24;
+      return {
+        bg: circled ? '#151C1D' : mix('#101617', '#221E16', t * 0.9),
+        ink: mix('#DCE5E3', '#AC9F86', t),
+        right: circled ? 'Reprinted' : t >= 0.5 ? 'Faded · ' + m + ' mo.' : '3 : 2',
+        rightColor: circled || t >= 0.5 ? '#F09A82' : '#97A6A5',
+        filter: 'grayscale(' + (t * 0.85).toFixed(2) + ') sepia(' + (t * 0.35).toFixed(2) + ') contrast(' + (1 - t * 0.3).toFixed(2) + ') brightness(' + (1 + t * 0.12).toFixed(2) + ')',
+        sun: (t * 0.55).toFixed(2), circled, age
+      };
+    });
+    return {
+      devCls: this.state.flip ? 'dev-b' : 'dev-a',
+      txtCls: this.state.flip ? 'txt-b' : 'txt-a',
+      devLabel: '1.4 s',
+      replay: () => this.setState({ flip: !this.state.flip }),
+      dark
+    };
+  }
+}
+</script>
+</body>
+</html>

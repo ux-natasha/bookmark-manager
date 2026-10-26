@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 
 export interface MenuItem {
   label: string;
   run: () => void;
   disabled?: boolean;
+  // Set for a choice among several (the theme): the item becomes a radio item.
+  checked?: boolean;
+  ariaLabel?: string;
+  // A heading shown above this item, starting a new group.
+  groupLabel?: string;
 }
 
 // The header's "More" menu: everything except "Add from a post", which stays a button of its own.
@@ -73,20 +78,33 @@ export function MoreMenu({ items }: { items: MenuItem[] }) {
       {open && (
         <div className="more-menu-list" role="menu" aria-label="More" onKeyDown={onMenuKeyDown}>
           {items.map((item, i) => (
-            <button
-              key={item.label}
-              ref={(el) => (itemRefs.current[i] = el)}
-              type="button"
-              role="menuitem"
-              tabIndex={-1}
-              disabled={item.disabled}
-              onClick={() => {
-                close(true);
-                item.run();
-              }}
-            >
-              {item.label}
-            </button>
+            <Fragment key={item.label}>
+              {item.groupLabel && (
+                <span className="more-menu-group" aria-hidden="true">
+                  {item.groupLabel}
+                </span>
+              )}
+              <button
+                ref={(el) => (itemRefs.current[i] = el)}
+                type="button"
+                role={item.checked === undefined ? 'menuitem' : 'menuitemradio'}
+                aria-checked={item.checked}
+                aria-label={item.ariaLabel}
+                tabIndex={-1}
+                disabled={item.disabled}
+                onClick={() => {
+                  close(true);
+                  item.run();
+                }}
+              >
+                {item.label}
+                {item.checked && (
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12l5 5L20 7" />
+                  </svg>
+                )}
+              </button>
+            </Fragment>
           ))}
         </div>
       )}
