@@ -1,12 +1,37 @@
 # Bookmark Manager
 
-A visual bookmark manager for Edge and other Chromium browsers. Everything is stored locally in the browser.
+A visual bookmark manager that makes you want to look at your bookmarks. A browser extension for Chrome, Edge and other Chromium browsers. Everything is stored locally in your browser: no account, no server, no tracking.
 
-## Load it in Edge
+![The library in the default theme](docs/screenshots/library-light.png)
+
+## Features
+
+- **Save in one click** (`Alt+Shift+S`), or right-click a link, picture or selected text to keep it without leaving the page.
+- **Visual by default.** Every bookmark gets a preview, either a screenshot or the site's own image, so you recognise things by how they looked.
+- **Links, quotes, pictures and notes** live together in one library, filterable by kind and searchable by text.
+- **Find it by colour.** Pick a colour and see everything that looked like it.
+- **Pull every link out of a post.** Paste a post's link or text (X, Bluesky, Mastodon, Reddit, Hacker News, LinkedIn…) and review the links it mentions before saving.
+- **Look ahead and ageing.** Bookmarks you haven't opened fade, and *Refresh my memory* brings old ones back.
+- **Four themes**, each in light and dark.
+- **Import, back up and restore.** Bring in Edge favorites, export JSON backups, and check for dead links in the background.
+
+## Screenshots
+
+| Dark mode | Colour search |
+|---|---|
+| ![Default theme in dark mode](docs/screenshots/library-dark.png) | ![Searching by colour in the Colour field theme](docs/screenshots/search-by-colour.png) |
+
+| Contact sheet | Covers | Colour field |
+|---|---|---|
+| ![Contact sheet theme](docs/screenshots/theme-contact-sheet.png) | ![Covers theme](docs/screenshots/theme-covers.png) | ![Colour field theme](docs/screenshots/theme-colour-field.png) |
+
+The sites in these screenshots are invented sample data.
+
+## Load it in Chrome or Edge
 
 1. `npm install` (first time only)
 2. `npm run build`. This creates the `dist/` folder.
-3. Open `edge://extensions`, turn on **Developer mode**, click **Load unpacked** and pick the `dist` folder.
+3. Open `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, click **Load unpacked** and pick the `dist` folder.
 4. Pin the extension to the toolbar (puzzle-piece icon → eye icon).
 
 While working on it, `npm run dev` rebuilds `dist/` on every change. After a rebuild, click the reload arrow on the extension's card in `edge://extensions` and reopen the side panel.
@@ -65,3 +90,7 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 - `src/styles/base.css`: design tokens. All colors, spacing and type sizes live here for the design pass
 
 `npm test` runs the unit tests for duplicate detection, saving, page details and finding links in posts.
+
+## License
+
+[MIT](LICENSE)
