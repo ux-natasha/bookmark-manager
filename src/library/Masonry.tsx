@@ -19,10 +19,14 @@ interface Props<T> {
   className?: string;
   items: T[];
   keyOf: (item: T) => string;
+  // Columns an item stretches across (1 or 2). Two-wide items sit at the lowest pair of neighbouring columns.
+  spanOf?: (item: T) => number;
+  // Narrowest a column may get, for themes whose cells are smaller or larger than a card.
+  minColumn?: number;
   render: (item: T, placement: Placement) => ReactNode;
 }
 
-export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
+export function Masonry<T>({ className, items, keyOf, spanOf, minColumn = MIN_COLUMN, render }: Props<T>) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [gap, setGap] = useState({ x: 28, y: 34 });
@@ -33,7 +37,8 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
   useLayoutEffect(() => {
     const el = ref.current!;
     const style = getComputedStyle(el);
-    setGap({ x: parseFloat(style.columnGap) || 28, y: parseFloat(style.rowGap) || 34 });
+    const px = (value: string, fallback: number) => (Number.isNaN(parseFloat(value)) ? fallback : parseFloat(value));
+    setGap({ x: px(style.columnGap, 28), y: px(style.rowGap, 34) });
     setWidth(el.clientWidth);
     const container = new ResizeObserver(() => setWidth(el.clientWidth));
     container.observe(el);
@@ -96,31 +101,44 @@ export function Masonry<T>({ className, items, keyOf, render }: Props<T>) {
     }
   });
 
-  const columns = width ? Math.max(1, Math.min(MAX_COLUMNS, Math.floor((width + gap.x) / (MIN_COLUMN + gap.x)))) : 1;
+  const columns = width ? Math.max(1, Math.min(MAX_COLUMNS, Math.floor((width + gap.x) / (minColumn + gap.x)))) : 1;
   const columnWidth = width ? (width - (columns - 1) * gap.x) / columns : 0;
   const tops = new Array<number>(columns).fill(0);
   const rows = new Array<number>(columns).fill(0);
   const placed = items.map((item) => {
     const key = keyOf(item);
+    const span = Math.min(columns, spanOf?.(item) ?? 1);
+    const itemHeight = (heights.current.get(key) ?? ESTIMATE) + gap.y;
+    // The leftmost stretch of columns that is lowest (a pair, for a wide item).
     let column = 0;
-    for (let c = 1; c < columns; c++) if (tops[c] < tops[column] - 1) column = c;
-    const top = tops[column];
-    tops[column] += (heights.current.get(key) ?? ESTIMATE) + gap.y;
-    return { item, key, left: column * (columnWidth + gap.x), top, row: rows[column]++ };
+    let lowest = Infinity;
+    for (let c = 0; c + span <= columns; c++) {
+      const reach = Math.max(...tops.slice(c, c + span));
+      if (reach < lowest - 1) {
+        lowest = reach;
+        column = c;
+      }
+    }
+    const row = Math.max(...rows.slice(column, column + span));
+    for (let c = column; c < column + span; c++) {
+      tops[c] = lowest + itemHeight;
+      rows[c] = row + 1;
+    }
+    return { item, key, left: column * (columnWidth + gap.x), top: lowest, row, itemWidth: span * columnWidth + (span - 1) * gap.x };
   });
   const height = Math.max(0, ...tops) - (items.length ? gap.y : 0);
 
   return (
     <div className={className ? `grid ${className}` : 'grid'} ref={ref} role="list" style={{ height }}>
       {width > 0 &&
-        placed.map(({ item, key, left, top, row }) => (
+        placed.map(({ item, key, left, top, row, itemWidth }) => (
           <div
             key={key}
             ref={refFor(key)}
             data-key={key}
             className="grid-item"
             role="listitem"
-            style={{ width: columnWidth, transform: `translate(${left}px, ${top}px)` }}
+            style={{ width: itemWidth, transform: `translate(${left}px, ${top}px)` }}
           >
             {render(item, { row })}
           </div>

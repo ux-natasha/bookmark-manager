@@ -30,6 +30,7 @@ import { ImportDialog } from './ImportDialog';
 import { JotNote } from './JotNote';
 import { LookAhead } from './LookAhead';
 import { LookAheadFilm } from './LookAheadFilm';
+import { LookAheadFold } from './LookAheadFold';
 import { LookAheadMeter } from './LookAheadMeter';
 import { LookAheadShelf } from './LookAheadShelf';
 import { Masonry } from './Masonry';
@@ -577,7 +578,11 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
               )}
             </section>
 
-            {!isEmpty && theme !== 'default' && <section className="look-ahead-section">{lookAheadPanel}</section>}
+            {!isEmpty && theme !== 'default' && (
+              <LookAheadFold months={lookAheadMonths} fadedCount={fadedCount}>
+                {lookAheadPanel}
+              </LookAheadFold>
+            )}
 
             {field && swatchList.length > 0 && (
               <ColourSearch
@@ -600,7 +605,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                   quote.
                 </p>
                 <button className="primary" onClick={() => setImporting(true)}>
-                  Import your Edge favorites
+                  Import your browser bookmarks
                 </button>
               </section>
             ) : !bookmarks ? (
@@ -917,7 +922,7 @@ function summaryLine(total: number, kindCounts: { kind: ItemKind; count: number 
 }
 
 // "VOL. 1 · OCTOBER 2026". The volume is the years since the first save, plus one. Imports don't count:
-// their dates are Edge's, and a long-kept favourites list would start the library at Vol. 8.
+// their dates are the browser's, and a long-kept favourites list would start the library at Vol. 8.
 function volumeLine(bookmarks: Bookmark[] | undefined): string {
   const now = new Date();
   const first = (bookmarks ?? []).reduce((min, b) => (b.source === 'import' ? min : Math.min(min, b.createdAt)), now.getTime());

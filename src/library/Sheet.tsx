@@ -12,10 +12,12 @@ import { useItemAge, type ItemAge } from './ageContext';
 import { CardLink } from './BookmarkCard';
 import { copyFor } from './copy';
 import { FiledUnderLine } from './FiledUnderLine';
+import { Masonry } from './Masonry';
 import { useFinished, useFresh } from './useFresh';
 
 // The Contact sheet theme's grid: every item is a frame on one hairline sheet, in row order.
-// Replaces the card grid (and, later, the masonry) when that theme is on.
+// Replaces the card grid when that theme is on. Frames run in height-adjusted columns like the other themes' cards;
+// the 1px gap between them is the hairline each frame draws into.
 
 const DEVELOP_MS = 1400;
 const CARET_MS = 60_000;
@@ -42,18 +44,23 @@ interface Props {
 export function Sheet({ bookmarks, sequence, arrivedIds, onEdit, onTagClick }: Props) {
   const developing = useDevelop(arrivedIds);
   return (
-    <div className="sheet" role="list">
-      {bookmarks.map((b) => (
+    <Masonry
+      className="sheet-masonry"
+      items={bookmarks}
+      keyOf={(b) => b.id}
+      // A quote stands two frames wide.
+      spanOf={(b) => (kindOf(b) === 'quote' ? 2 : 1)}
+      minColumn={270}
+      render={(b) => (
         <SheetCell
-          key={b.id}
           bookmark={b}
           sequence={sequence.get(b.id) ?? 0}
           developing={developing.has(b.id)}
           onEdit={onEdit}
           onTagClick={onTagClick}
         />
-      ))}
-    </div>
+      )}
+    />
   );
 }
 
@@ -92,7 +99,7 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
   const onImageLoad = (img: HTMLImageElement) => img.naturalHeight && setRatio(img.naturalWidth / img.naturalHeight);
 
   return (
-    <article className={classes.join(' ')} role="listitem" data-item-id={bookmark.id} style={age.style}>
+    <article className={classes.join(' ')} data-item-id={bookmark.id} style={age.style}>
       <svg aria-hidden="true" className="sheet-plus" viewBox="0 0 13 13">
         <path d="M6.5 0v13M0 6.5h13" stroke="currentColor" strokeWidth="1" />
       </svg>

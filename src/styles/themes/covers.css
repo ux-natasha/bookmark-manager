@@ -1617,3 +1617,55 @@ button.spine:focus-visible {
   animation: cover-band-in 400ms ease-out both;
   animation-delay: calc(600ms + var(--delay, 0ms));
 }
+
+/* Look ahead folds away as a ribbon bookmark: a tail hangs from the handle and drops further when the page is open. */
+[data-theme='covers'] .fold-handle {
+  position: relative;
+  padding: 12px 8px 12px 44px;
+  font: italic 19px var(--font-serif);
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme='covers'] .fold-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+[data-theme='covers'] .fold-mark {
+  position: absolute;
+  top: 0;
+  left: 14px;
+  width: 14px;
+  height: 22px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  transition: height 320ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
+}
+
+[data-theme='covers'] .look-ahead-fold[data-open='true'] .fold-mark {
+  height: 46px;
+}
+
+[data-theme='covers'] .fold-handle:hover .fold-mark {
+  height: 30px;
+}
+
+[data-theme='covers'] .look-ahead-fold[data-open='true'] .fold-handle:hover .fold-mark {
+  height: 46px;
+}
+
+[data-theme='covers'] .fold-where {
+  font-size: 15px;
+}
+
+[data-theme='covers'] .fold-action {
+  font: 11px var(--font-sans, sans-serif);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='covers'] .fold-mark {
+    transition: none;
+  }
+}

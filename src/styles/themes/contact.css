@@ -425,6 +425,13 @@
   padding: 1px;
 }
 
+/* The real sheet: frames in height-adjusted columns (Masonry.tsx). The 1px gap is where each frame's hairline lands. */
+.grid.sheet-masonry {
+  column-gap: 1px;
+  row-gap: 1px;
+  margin: 1px;
+}
+
 /* Loading: grey cells with bars where the code, media and title go. */
 .sheet-cell-blank {
   --blank: #e2e7e6;
@@ -485,15 +492,6 @@
     inset 0 0 0 2px var(--text);
 }
 
-.sheet-cell.span2 {
-  grid-column: span 2;
-}
-
-@media (max-width: 640px) {
-  .sheet-cell.span2 {
-    grid-column: auto;
-  }
-}
 
 .sheet-plus {
   position: absolute;
@@ -1329,4 +1327,50 @@ button.film-frame:focus-visible {
   .film-slot {
     flex-basis: 38px;
   }
+}
+
+/* Look ahead folds away as a length of film leader: sprocket holes above and below, the frame arrow turning as it opens. */
+[data-theme='contact'] .fold-handle {
+  position: relative;
+  padding: 18px 4px;
+  font: 11px var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background-color: color-mix(in srgb, var(--text) 7%, var(--bg));
+  background-image:
+    radial-gradient(circle at 5px 4px, var(--bg) 2px, transparent 2.5px),
+    radial-gradient(circle at 5px 4px, var(--bg) 2px, transparent 2.5px);
+  background-repeat: repeat-x;
+  background-position: 0 4px, 0 calc(100% - 4px);
+  background-size: 14px 8px;
+  border-block: 1px solid var(--border);
+  padding-inline: 16px;
+}
+
+[data-theme='contact'] .fold-handle:hover {
+  color: var(--accent);
+}
+
+[data-theme='contact'] .fold-handle:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+[data-theme='contact'] .fold-mark::before {
+  content: '▸';
+  display: inline-block;
+  color: var(--accent);
+  transition: transform 260ms ease-out;
+}
+
+[data-theme='contact'] .look-ahead-fold[data-open='true'] .fold-mark::before {
+  transform: rotate(90deg);
+}
+
+[data-theme='contact'] .fold-where {
+  letter-spacing: 0.08em;
+}
+
+[data-theme='contact'] .look-ahead-fold:not([data-open='true']) .fold-action {
+  color: var(--accent);
 }
