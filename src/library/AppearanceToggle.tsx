@@ -23,7 +23,8 @@ function apply(appearance: Appearance) {
 
 apply(readMirror());
 
-export function useAppearance() {
+// darkByDefault: the theme is dark when following the system, whatever the system says (Colour field).
+export function useAppearance(darkByDefault = false) {
   const [appearance, setAppearanceState] = useState<Appearance>(readMirror);
   const [systemDark, setSystemDark] = useState(darkQuery.matches);
 
@@ -51,7 +52,7 @@ export function useAppearance() {
     chrome.storage?.local.set({ [STORAGE_KEY]: next });
   };
 
-  const isDark = appearance === 'dark' || (appearance === 'system' && systemDark);
+  const isDark = appearance === 'dark' || (appearance === 'system' && (systemDark || darkByDefault));
   // From system, the first click goes to the opposite of what's showing.
   const toggle = () => setAppearance(isDark ? 'light' : 'dark');
 

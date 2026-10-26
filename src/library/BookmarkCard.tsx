@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
 import { Favicon } from '../components/Favicon';
 import { markOpened } from '../lib/bookmarks';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
@@ -6,6 +6,8 @@ import { formatDate } from '../lib/hooks';
 import { hostnameOf } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { fallbackColor, usePreviewUrl } from '../lib/previews';
+import { useTheme } from '../lib/theme';
+import { useItemColor } from './Field';
 import { FiledUnderLine } from './FiledUnderLine';
 
 interface Props {
@@ -19,9 +21,15 @@ interface Props {
 export function BookmarkCard({ bookmark, onEdit, onTagClick, arriving }: Props) {
   const kind = kindOf(bookmark);
   const dead = isDeadLink(bookmark);
+  // Colour field: the card glows in the item's colour.
+  const glow = useItemColor(bookmark.id);
 
   return (
-    <article className={`card card-kind-${kind} ${dead ? 'is-dead' : ''} ${arriving ? 'is-arriving' : ''}`}>
+    <article
+      className={`card card-kind-${kind} ${dead ? 'is-dead' : ''} ${arriving ? 'is-arriving' : ''}`}
+      style={glow ? ({ '--glow': glow } as CSSProperties) : undefined}
+    >
+      {glow && !dead && <span className="card-halo" aria-hidden="true" />}
       <CardLink bookmark={bookmark} onEdit={onEdit}>
         {kind === 'link' && <LinkContent bookmark={bookmark} />}
         {kind === 'image' && <ImageContent bookmark={bookmark} />}
@@ -81,17 +89,37 @@ export function CardLink({
   );
 }
 
+// Shapes of previews already loaded, so a card that mounts again starts at its real height
+// and the masonry doesn't jump.
+const ratios = new Map<string, number>();
+
+function useMediaRatio(bookmark: Bookmark, min: number, max: number) {
+  const key = `${bookmark.id}:${bookmark.previewPreference ?? ''}`;
+  const [ratio, setRatio] = useState(() => ratios.get(key));
+  const onLoad = (e: SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    if (!w || !h) return;
+    const next = Math.min(max, Math.max(min, w / h));
+    ratios.set(key, next);
+    setRatio(next);
+  };
+  return { style: ratio ? ({ '--ratio': ratio } as CSSProperties) : undefined, onLoad };
+}
+
 function LinkContent({ bookmark }: { bookmark: Bookmark }) {
   const previewUrl = usePreviewUrl(bookmark);
+  // Between 4:5 and 2:1, so a full-page screenshot doesn't make a card a column long.
+  const media = useMediaRatio(bookmark, 0.8, 2);
   const platform = platformById(bookmark.platform);
   const source = platform?.label ?? bookmark.siteName ?? hostnameOf(bookmark.url);
   const dead = isDeadLink(bookmark);
+  const field = useTheme() === 'field';
 
   return (
     <>
-      <div className="card-preview">
+      <div className="card-preview" style={previewUrl ? media.style : undefined}>
         {previewUrl ? (
-          <img className="card-preview-image" src={previewUrl} alt="" loading="lazy" />
+          <img className="card-preview-image" src={previewUrl} alt="" loading="lazy" onLoad={media.onLoad} />
         ) : (
           // Designed fallback for pages with no image: site color, icon and name.
           <div className="card-fallback" style={{ background: fallbackColor(bookmark) }}>
@@ -100,6 +128,7 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
           </div>
         )}
         {platform && <span className="card-platform">{platform.label}</span>}
+        {previewUrl && VIDEO_PLATFORMS.has(bookmark.platform ?? '') && <span className="card-play" aria-hidden="true" />}
         {dead && (
           <span className="card-dead" title={bookmark.linkStatus === 'gone' ? 'The site says this page no longer exists' : "The site hasn't answered in two checks"}>
             Link may be dead
@@ -109,6 +138,7 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
       <div className="card-body">
         <h3 className="card-title">{bookmark.title}</h3>
         <p className="small muted truncate card-host">
+          {field && <KindTag kind="link" word={dead ? 'may be dead' : linkKind(bookmark)} />}
           <Favicon url={bookmark.url} />
           {bookmark.siteName && bookmark.siteName !== platform?.label ? `${bookmark.siteName} · ` : ''}
           {hostnameOf(bookmark.url)}
@@ -125,11 +155,12 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
 
 function ImageContent({ bookmark }: { bookmark: Bookmark }) {
   const pictureUrl = usePreviewUrl(bookmark);
+  const media = useMediaRatio(bookmark, 2 / 3, 2.5);
   return (
     <>
-      <div className="card-picture">
+      <div className="card-picture" style={pictureUrl ? media.style : undefined}>
         {pictureUrl ? (
-          <img src={pictureUrl} alt={bookmark.title} loading="lazy" />
+          <img src={pictureUrl} alt={bookmark.title} loading="lazy" onLoad={media.onLoad} />
         ) : (
           <span className="small muted">Picture couldn't be downloaded</span>
         )}
@@ -145,11 +176,12 @@ function ImageContent({ bookmark }: { bookmark: Bookmark }) {
 }
 
 function QuoteContent({ bookmark }: { bookmark: Bookmark }) {
+  const field = useTheme() === 'field';
   return (
     <div className="card-body">
       <blockquote className="card-quote">{bookmark.text}</blockquote>
       <p className="small card-quote-title truncate">{bookmark.title}</p>
-      <SourceLine bookmark={bookmark} />
+      <SourceLine bookmark={bookmark} kindTag={field} />
       {bookmark.note && <p className="card-note small">{bookmark.note}</p>}
     </div>
   );
@@ -159,20 +191,47 @@ function NoteContent({ bookmark }: { bookmark: Bookmark }) {
   // Untitled notes are titled by their first line, so it isn't repeated underneath.
   const [firstLine, ...rest] = (bookmark.text ?? '').split('\n');
   const body = firstLine.trim() === bookmark.title ? rest.join('\n').trim() : bookmark.text;
+  const field = useTheme() === 'field';
   return (
     <div className="card-body">
+      {field && (
+        <p className="small muted card-host">
+          <KindTag kind="note" word="note" />
+        </p>
+      )}
       <h3 className="card-title">{bookmark.title}</h3>
       {body && <p className="card-note-text small">{body}</p>}
     </div>
   );
 }
 
-function SourceLine({ bookmark }: { bookmark: Bookmark }) {
+function SourceLine({ bookmark, kindTag }: { bookmark: Bookmark; kindTag?: boolean }) {
   if (!bookmark.url) return null;
   return (
     <p className="small muted truncate card-host">
+      {kindTag && <KindTag kind="quote" word="quote" />}
       <Favicon url={bookmark.url} />
       from {platformById(bookmark.platform)?.label ?? hostnameOf(bookmark.url)}
     </p>
   );
+}
+
+const VIDEO_PLATFORMS = new Set(['youtube', 'vimeo']);
+const REPO_PLATFORMS = new Set(['github', 'gitlab', 'codeberg']);
+const ARTICLE_PLATFORMS = new Set(['substack', 'medium', 'devto', 'ghost', 'beehiiv', 'wikipedia']);
+
+// Colour field names what kind of link it is on the card's pill.
+function linkKind(b: Bookmark): string {
+  const platform = b.platform ?? '';
+  if (VIDEO_PLATFORMS.has(platform)) return 'video';
+  if (b.details?.recipe) return 'recipe';
+  if (REPO_PLATFORMS.has(platform)) return 'repo';
+  if (platformById(platform)?.social) return 'post';
+  if (ARTICLE_PLATFORMS.has(platform)) return 'article';
+  return 'link';
+}
+
+// An outline pill in the kind's colour (Colour field 2.2). The word says the kind, so colour isn't the only cue.
+function KindTag({ kind, word }: { kind: 'link' | 'quote' | 'note'; word: string }) {
+  return <span className={`kind-tag kind-tag-${kind}`}>{word}</span>;
 }

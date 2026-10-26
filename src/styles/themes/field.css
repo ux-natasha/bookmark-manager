@@ -1,0 +1,784 @@
+/* Colour field theme (docs/design/theme-colour-field.md). Applied with <html data-theme="field">.
+   A dark room lit by what you kept: frosted glass cards, each glowing its own colour (--glow, set per card),
+   in front of five blurred fields of the library's colours. Dark unless daylight is chosen.
+   Token overrides first, then the rules that only exist in this theme. Everything else is the Default's. */
+
+:root[data-theme='field'] {
+  --bg: #0e1116;
+  --surface: #161a21;
+  --glass: linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)), rgba(14, 17, 22, 0.75);
+  --glass-hover: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08)), rgba(14, 17, 22, 0.75);
+  --glass-solid: #1a1e25;
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --glass-blur: blur(22px) saturate(1.5);
+  --lift: 0 20px 40px -24px rgba(0, 0, 0, 0.6);
+  --text: #eef0f4;
+  --text-muted: #b3b9c5;
+  --aged-text: #9ea4ae;
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.24);
+  --hover: rgba(255, 255, 255, 0.08);
+  --accent: #8ab8f7;
+  --solid-bg: #eef0f4;
+  --solid-text: #0e1116;
+  --danger: #f2a08f;
+  --note-paper: transparent;
+  --stale-tint: rgba(255, 255, 255, 0.06);
+  --tidy-bar: rgba(255, 255, 255, 0.05);
+  --accent-text: #0e1116;
+  --kind-link: #8ab8f7;
+  --kind-quote: #f4a184;
+  --kind-picture: #ebcb66;
+  --kind-note: #8ed2a8;
+  --halo-strength: 0.42;
+  --field-strength: 0.5;
+  --tag-1-text: #e8a985;
+  --tag-2-text: #9db7e3;
+  --tag-3-text: #e79bb8;
+  --tag-4-text: #93c6d3;
+  --tag-5-text: #e0bd74;
+  --tag-6-text: #a9c77a;
+  --tag-7-text: #c2bcaf;
+  --tag-8-text: #a9bce6;
+
+  --radius: 20px;
+  --radius-media: 13px;
+  --radius-note: 20px;
+  --radius-panel: 22px;
+  --radius-bar: 16px;
+  --grid-gap-y: 30px;
+  color-scheme: dark;
+}
+
+/* Daylight */
+:root[data-theme='field'][data-appearance='light'] {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-hover: rgba(255, 255, 255, 0.9);
+  --glass-solid: #ffffff;
+  --glass-edge: rgba(255, 255, 255, 0.95);
+  --lift: 0 18px 36px -22px rgba(30, 30, 40, 0.35);
+  --text: #1a1c20;
+  --text-muted: #555a63;
+  --aged-text: #666a72;
+  --border: rgba(26, 28, 32, 0.12);
+  --border-strong: rgba(26, 28, 32, 0.24);
+  --hover: rgba(26, 28, 32, 0.06);
+  --accent: #2a63b8;
+  --solid-bg: #1a1c20;
+  --solid-text: #faf8f5;
+  --danger: #8a2f1c;
+  --stale-tint: rgba(26, 28, 32, 0.06);
+  --tidy-bar: rgba(26, 28, 32, 0.04);
+  --accent-text: #ffffff;
+  --kind-link: #2a63b8;
+  --kind-quote: #b04a2a;
+  --kind-picture: #86640c;
+  --kind-note: #2c7449;
+  --halo-strength: 0.3;
+  --field-strength: 0.32;
+  --tag-1-text: #9a4f2b;
+  --tag-2-text: #2f5288;
+  --tag-3-text: #9c3e62;
+  --tag-4-text: #2e6e7e;
+  --tag-5-text: #80601e;
+  --tag-6-text: #4a6224;
+  --tag-7-text: #5c584f;
+  --tag-8-text: #4b63a0;
+  color-scheme: light;
+}
+
+/* Reduced transparency: solid glass, no blur, a dimmer room. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-theme='field'] {
+    --glass: var(--glass-solid);
+    --glass-hover: var(--glass-solid);
+    --glass-blur: none;
+    --field-strength: 0.25;
+  }
+}
+
+/* The parts of the page that are glass. */
+[data-theme='field'] .card-link,
+[data-theme='field'] .colour-search,
+[data-theme='field'] .tag-index,
+[data-theme='field'] .resurfaced,
+[data-theme='field'] .more-menu-list,
+[data-theme='field'] .toast {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* Glass pill controls. */
+[data-theme='field'] .ghost-button,
+[data-theme='field'] .icon-button,
+[data-theme='field'] .pill-select,
+[data-theme='field'] .search-field,
+[data-theme='field'] .jot-note {
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+[data-theme='field'] .ghost-button:hover:not(:disabled),
+[data-theme='field'] .icon-button:hover:not(:disabled) {
+  background: var(--glass-hover);
+}
+
+[data-theme='field'] .jot-note {
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+
+[data-theme='field'] .pill-select option {
+  background: var(--surface);
+}
+
+/* 5.1 The room */
+.field-room {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.field-light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: var(--field-strength);
+  transition: background-color 1200ms ease-out;
+}
+
+/* Top-left, top-right, middle, lower-left, lower-right. The top centre stays dark for the headline. */
+.field-light:nth-child(1) {
+  top: -220px;
+  left: -160px;
+  width: 620px;
+  height: 620px;
+}
+
+.field-light:nth-child(2) {
+  top: -160px;
+  right: -200px;
+  width: 680px;
+  height: 560px;
+}
+
+.field-light:nth-child(3) {
+  top: 48%;
+  left: 30%;
+  width: 720px;
+  height: 520px;
+}
+
+.field-light:nth-child(4) {
+  bottom: -260px;
+  left: -220px;
+  width: 560px;
+  height: 560px;
+}
+
+.field-light:nth-child(5) {
+  bottom: -240px;
+  right: -140px;
+  width: 600px;
+  height: 600px;
+}
+
+/* 5.2 Hero: centred */
+[data-theme='field'] .hero {
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+[data-theme='field'] .hero-main {
+  flex: none;
+  width: 100%;
+  align-items: center;
+}
+
+[data-theme='field'] .headline {
+  font: 400 clamp(56px, 7.4vw, 104px) / 0.92 var(--font-serif);
+  letter-spacing: -0.03em;
+}
+
+[data-theme='field'] .summary-line {
+  order: -1;
+}
+
+.kind-sentence {
+  margin: 0;
+  max-width: 720px;
+  font: italic 21px / 1.9 var(--font-serif);
+  color: var(--text-muted);
+}
+
+.kind-sentence .kind-tag {
+  height: 30px;
+  padding: 0 13px;
+  font-size: 15px;
+  font-style: normal;
+  vertical-align: 2px;
+}
+
+[data-theme='field'] .hero-fields {
+  justify-content: center;
+  width: 100%;
+  max-width: 960px;
+}
+
+[data-theme='field'] .hero-side {
+  flex: none;
+  max-width: none;
+}
+
+/* Kind pills: coloured outlines; filled and glowing when pressed (5.5). */
+.kind-tag {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border: 1px solid var(--kind, var(--text-muted));
+  border-radius: 999px;
+  font: 500 12px / 1 var(--font-sans);
+  color: var(--kind, var(--text-muted));
+  white-space: nowrap;
+}
+
+.kind-tag-link,
+[data-theme='field'] .kind-pill[data-kind='link'] {
+  --kind: var(--kind-link);
+}
+
+.kind-tag-quote,
+[data-theme='field'] .kind-pill[data-kind='quote'] {
+  --kind: var(--kind-quote);
+}
+
+.kind-tag-image,
+[data-theme='field'] .kind-pill[data-kind='image'] {
+  --kind: var(--kind-picture);
+}
+
+.kind-tag-note,
+[data-theme='field'] .kind-pill[data-kind='note'] {
+  --kind: var(--kind-note);
+}
+
+[data-theme='field'] .kind-pill {
+  border-color: var(--kind, var(--text));
+  color: var(--kind, var(--text));
+}
+
+[data-theme='field'] .kind-pill[aria-pressed='true'],
+[data-theme='field'] .kind-pill[aria-pressed='true']:hover:not(:disabled) {
+  border-color: var(--kind, var(--text));
+  background: var(--kind, var(--text));
+  color: var(--bg);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--kind, var(--text)) 60%, transparent);
+}
+
+/* 5.4 Search by colour */
+.colour-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 14px 22px;
+  border-radius: var(--radius-panel);
+}
+
+.colour-search-lead {
+  margin: 0;
+  font: italic 400 20px var(--font-serif);
+}
+
+.colour-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+button.swatch {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: 0 0 0 1px var(--glass-edge);
+  transition:
+    transform 200ms ease-out,
+    box-shadow 200ms ease-out;
+}
+
+button.swatch:hover:not(:disabled) {
+  background: var(--swatch);
+  transform: translateY(-3px);
+}
+
+button.swatch[aria-pressed='true'] {
+  box-shadow:
+    0 0 0 2px var(--text),
+    0 0 26px var(--swatch);
+}
+
+.colour-search-status {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+  text-align: right;
+  font: 13px var(--font-sans);
+  color: var(--text-muted);
+}
+
+/* 5.6 Cards */
+[data-theme='field'] .card {
+  position: relative;
+  gap: 8px;
+  overflow: visible;
+  border: 0;
+  background: none;
+}
+
+/* The glow behind each card, in the item's colour. */
+.card-halo {
+  position: absolute;
+  inset: 10% 4% 4%;
+  border-radius: 24px;
+  background: var(--glow);
+  filter: blur(34px);
+  opacity: var(--halo-strength);
+  pointer-events: none;
+  transition:
+    opacity 260ms ease-out,
+    transform 260ms ease-out;
+}
+
+[data-theme='field'] .card-kind-image .card-halo {
+  inset: 6% 0 -4%;
+}
+
+[data-theme='field'] .card:hover .card-halo,
+[data-theme='field'] .card:focus-within .card-halo {
+  opacity: calc(var(--halo-strength) * 1.7);
+  transform: scale(1.04);
+}
+
+[data-theme='field'] .card-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 10px 14px;
+  border-radius: var(--radius);
+  box-shadow: var(--lift);
+  transition:
+    transform 240ms ease-out,
+    background-color 240ms ease-out;
+}
+
+[data-theme='field'] .card:hover .card-link {
+  transform: translateY(-3px);
+  background: var(--glass-hover);
+}
+
+[data-theme='field'] .card-link:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--text);
+}
+
+/* Blur only where it's cheap: past 60 cards the card glass goes solid (8.3). */
+[data-theme='field'] .grid.is-crowded .card-link {
+  background: var(--glass-solid);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme='field'] .card-preview,
+[data-theme='field'] .card-picture {
+  border-radius: var(--radius-media);
+}
+
+[data-theme='field'] .card-body {
+  gap: 8px;
+  padding: 0 6px;
+}
+
+[data-theme='field'] .card-title {
+  font: 500 19px / 1.2 var(--font-serif);
+}
+
+[data-theme='field'] .card-host {
+  flex-wrap: nowrap;
+  gap: 8px;
+  min-width: 0;
+  font-size: 12px;
+}
+
+[data-theme='field'] .card-platform {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  font: 11px var(--font-mono);
+  color: #15171a;
+}
+
+/* The link card's dead-link pill is in its kind row instead. */
+[data-theme='field'] .card-dead {
+  display: none;
+}
+
+[data-theme='field'] .card.is-dead {
+  opacity: 0.72;
+}
+
+[data-theme='field'] .card.is-dead .card-preview {
+  opacity: 1;
+  filter: grayscale(1);
+}
+
+[data-theme='field'] .card.is-dead .kind-tag {
+  --kind: var(--text-muted);
+  border-style: dashed;
+}
+
+/* Picture: no glass, the bare image with its pill inside. */
+[data-theme='field'] .card-kind-image .card-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme='field'] .card-kind-image .card-picture {
+  border-radius: 20px;
+  box-shadow: var(--lift);
+}
+
+[data-theme='field'] .card-kind-image .card-platform {
+  top: auto;
+  bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: rgba(20, 24, 32, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font: 500 12px var(--font-sans);
+  color: #fff;
+}
+
+[data-theme='field'] .card-kind-image .card-body {
+  padding: 0 6px;
+}
+
+[data-theme='field'] .card-kind-image .card-title {
+  font-size: 16px;
+}
+
+/* Quote: glass tinted with its page's colour. */
+[data-theme='field'] .card-kind-quote .card-link {
+  padding: 22px 20px 16px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--glow, transparent) 42%, transparent), transparent 70%), var(--glass);
+}
+
+[data-theme='field'] .card-quote {
+  padding: 0;
+  border: 0;
+  font: 400 26px / 1.18 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+[data-theme='field'] .card-quote-title {
+  font: italic 15px var(--font-serif);
+  color: var(--text-muted);
+}
+
+/* Note: glass with a dashed edge. */
+[data-theme='field'] .card-kind-note .card-link {
+  padding: 18px 18px 16px;
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+
+[data-theme='field'] .card-kind-note .card-body {
+  padding: 0;
+}
+
+[data-theme='field'] .card-kind-note .card-title,
+[data-theme='field'] .card-note-text {
+  font: italic 400 21px / 1.3 var(--font-serif);
+}
+
+[data-theme='field'] .card-note-text {
+  font-size: 17px;
+  color: var(--text-muted);
+}
+
+/* The meta row under the glass. */
+[data-theme='field'] .card-footer {
+  position: relative;
+  padding: 0 6px;
+}
+
+[data-theme='field'] .card-meta {
+  font: 11px var(--font-mono);
+}
+
+/* Tag dots stay on cards here, since colour is the organising idea (11.6). */
+[data-theme='field'] button.filed-under-word::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 5px 1px 1px;
+  border-radius: 50%;
+  background: var(--mark, var(--text-muted));
+  box-shadow: 0 0 6px var(--mark, transparent);
+}
+
+[data-theme='field'] button.filed-under-word.is-archived::before {
+  background: var(--text-muted);
+  box-shadow: none;
+}
+
+/* New, and brought back: the colour blooms out from the centre (7, Bloom). */
+@keyframes field-bloom-media {
+  from {
+    filter: saturate(0.08) brightness(0.92);
+  }
+
+  55% {
+    filter: saturate(1.25) brightness(1.04);
+  }
+}
+
+@keyframes field-bloom-halo {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+
+  55% {
+    opacity: 0.75;
+    transform: scale(1.15);
+  }
+}
+
+[data-theme='field'] .card.is-arriving {
+  animation: none;
+}
+
+[data-theme='field'] .card.is-arriving :is(.card-preview, .card-picture, .card-link) {
+  animation: field-bloom-media 1300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-theme='field'] .card.is-arriving .card-halo {
+  animation: field-bloom-halo 1300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 5.7 Tags: outline pills, filled and glowing when picked */
+[data-theme='field'] .tag-strip {
+  font-family: var(--font-serif);
+  border-color: var(--border);
+}
+
+[data-theme='field'] .tag-strip-tags {
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme='field'] .tag-strip-sep {
+  display: none;
+}
+
+[data-theme='field'] button.tag-strip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid var(--mark, var(--border-strong));
+  border-radius: 999px;
+  font: 400 16px var(--font-serif);
+  color: var(--mark-text, var(--text));
+}
+
+[data-theme='field'] .tag-strip-count {
+  margin: 0;
+  font-size: 10px;
+  vertical-align: baseline;
+}
+
+[data-theme='field'] .tag-strip-tag[aria-pressed='true'] .tag-strip-name {
+  background: none;
+}
+
+[data-theme='field'] button.tag-strip-tag[aria-pressed='true'],
+[data-theme='field'] button.tag-strip-tag[aria-pressed='true']:hover:not(:disabled) {
+  border-color: var(--mark, var(--text));
+  background: var(--mark, var(--text));
+  color: var(--bg);
+  box-shadow: 0 0 22px var(--mark, transparent);
+}
+
+[data-theme='field'] .tag-strip-open {
+  border-radius: 999px;
+}
+
+[data-theme='field'] .filed-under-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  margin: 2px 0;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--mark, var(--text));
+  font: 500 14px var(--font-sans);
+  font-variant: normal;
+  letter-spacing: 0;
+  color: var(--bg);
+  box-shadow: 0 0 22px var(--mark, transparent);
+}
+
+[data-theme='field'] .filed-under-x {
+  display: block;
+}
+
+[data-theme='field'] .filed-under-tag:hover:not(:disabled) {
+  background: var(--mark, var(--text));
+  text-decoration: none;
+  filter: brightness(1.08);
+}
+
+/* The index on a glass panel; dots instead of squares, glowing while fresh. */
+[data-theme='field'] .tag-index {
+  border-radius: var(--radius-panel);
+}
+
+[data-theme='field'] .ix-search {
+  background: var(--glass);
+  border-color: var(--glass-edge);
+}
+
+[data-theme='field'] .ix-sq {
+  width: 8px;
+  height: 8px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, #5a5f68 calc(var(--fade, 0) * 100%), var(--mark));
+  box-shadow: 0 0 10px var(--mark);
+}
+
+[data-theme='field'] .ix-sq.is-hollow {
+  background: color-mix(in srgb, #5a5f68 calc(var(--fade, 0) * 100%), var(--mark));
+  box-shadow: none;
+}
+
+[data-theme='field'] .ix-sq.is-blank {
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-theme='field'] .ix-entry[aria-pressed='true'] .ix-name,
+[data-theme='field'] .ix-word[aria-pressed='true'] {
+  background-image: none;
+}
+
+[data-theme='field'] button.ix-entry[aria-pressed='true'],
+[data-theme='field'] button.ix-entry[aria-pressed='true']:hover:not(:disabled) {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--mark, var(--text)) 20%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--mark, var(--text)) 53%, transparent);
+}
+
+[data-theme='field'] button.ix-word[aria-pressed='true'] {
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--mark, var(--text)) 20%, transparent);
+}
+
+[data-theme='field'] .ix-tidy-bar {
+  border: 1px dashed var(--border-strong);
+}
+
+[data-theme='field'] .segmented {
+  background: var(--glass);
+  border-color: var(--glass-edge);
+}
+
+/* States */
+[data-theme='field'] .empty {
+  position: relative;
+}
+
+/* A room with no light yet. */
+[data-theme='field'] .empty::before {
+  content: '';
+  position: absolute;
+  inset: -120px -160px;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), transparent);
+  pointer-events: none;
+}
+
+[data-theme='field'] .empty h2 {
+  font-size: 34px;
+}
+
+[data-theme='field'] .no-results p:not(.no-results-filters) {
+  font-size: 32px;
+}
+
+[data-theme='field'] .no-results-filters {
+  font: 11px var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 719px) {
+  .field-light {
+    scale: 0.6;
+  }
+
+  [data-theme='field'] .headline {
+    font-size: clamp(48px, 13vw, 56px);
+  }
+
+  .colour-search {
+    padding: 14px 16px;
+  }
+
+  .colour-swatches {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+  }
+
+  button.swatch {
+    flex: none;
+  }
+
+  .colour-search-status {
+    text-align: left;
+  }
+}

@@ -1,12 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 // Library themes. Each is a token set (src/styles/themes/) plus, for a few components, a different structure.
-export type Theme = 'default' | 'contact' | 'covers';
+export type Theme = 'default' | 'contact' | 'covers' | 'field';
 
 export const THEMES: { id: Theme; label: string }[] = [
   { id: 'default', label: 'Default' },
   { id: 'contact', label: 'Contact sheet' },
   { id: 'covers', label: 'Covers' },
+  { id: 'field', label: 'Colour field' },
 ];
 
 const STORAGE_KEY = 'theme';

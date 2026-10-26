@@ -1,7 +1,7 @@
 import type { Theme } from '../lib/theme';
 
 // Words that change with the theme. Only the words: the actions behind them are the same.
-// Keep both themes' strings here so the verbs aren't scattered through components.
+// Keep every theme's strings here so the verbs aren't scattered through components.
 interface Copy {
   headline: [plain: string, italic: string];
   // Contact sheet sets the italic part on its own line.
@@ -80,6 +80,18 @@ const COPY: Record<Theme, Copy> = {
       tidyOptions: ['Off', '3 mo', '6 mo', 'A year'],
       staleLine: (n, span) => `${plural(n, 'tag')} unused for ${span}`,
       staleExplainer: 'Their letters are tinted below. Archived tags leave the index but stay on the things they’re on.',
+    },
+  },
+  field: {
+    headline: ['Find it by how it ', 'looked'],
+    headlineBreak: false,
+    filedUnderLead: 'Showing things filed under',
+    emptyTitle: 'Nothing here to glow yet',
+    noResults: 'Nothing you kept looked like that, yet.',
+    itemNoun: ['thing', 'things'],
+    index: {
+      ...DEFAULT_INDEX,
+      staleExplainer: 'They’ve gone grey below. Archived tags leave the index but stay on the things they’re on.',
     },
   },
   covers: {

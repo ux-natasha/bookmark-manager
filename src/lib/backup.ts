@@ -86,6 +86,7 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
         note: newer.note || current.note,
         text: newer.text || current.text,
         tags: cleanTags([...current.tags, ...(incoming.tags ?? [])]),
+        color: current.color ?? incoming.color,
         openCount: Math.max(current.openCount, incoming.openCount ?? 0),
         lastOpenedAt: Math.max(current.lastOpenedAt ?? 0, incoming.lastOpenedAt ?? 0) || undefined,
         createdAt: Math.min(current.createdAt, incoming.createdAt ?? current.createdAt),

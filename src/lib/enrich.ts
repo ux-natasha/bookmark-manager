@@ -1,6 +1,7 @@
 // Fills in a bookmark's details (description, site, platform, preview image, link status)
 // by fetching the page in the background. Runs in the background script.
 
+import { updateColor } from './colorPass';
 import { db, kindOf, type Bookmark, type LinkStatus, type PreviewKind } from './db';
 import { decodeEntities, MAX_HTML_BYTES, parseHtmlMeta, type PageMeta } from './metadata';
 import { detectPlatform } from './platform';
@@ -143,6 +144,7 @@ async function downloadPreviewImage(imageUrl: string): Promise<Blob | undefined>
 
 export async function savePreview(bookmarkId: string, kind: PreviewKind, blob: Blob): Promise<void> {
   await db.previews.put({ bookmarkId, kind, blob, createdAt: Date.now() });
+  await updateColor(bookmarkId);
 }
 
 // Stores a saved picture, shrunk if it's huge. Pictures that can't be decoded here (SVGs) are kept as they are.

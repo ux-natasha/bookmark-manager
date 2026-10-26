@@ -45,6 +45,8 @@ export interface Bookmark {
   author?: string;
   publishedAt?: number;
   themeColor?: string;
+  // The colour the preview or picture reads as (lib/color.ts). Empty when it couldn't be read.
+  color?: string;
   // Extra details some covers use, read where they're cheap to get. Every template works without them.
   details?: BookmarkDetails;
   enrichedAt?: number;

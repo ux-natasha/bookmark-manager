@@ -1,3 +1,4 @@
+import { updateColor } from './colorPass';
 import { db, kindOf, type Bookmark, type BookmarkSource, type ItemKind, type PreviewPreference } from './db';
 import { normalizeUrl } from './normalize';
 import { cleanTags } from './tagText';
@@ -151,4 +152,5 @@ export async function purgeOldTrash(): Promise<number> {
 
 export async function setPreviewPreference(id: string, preference: PreviewPreference | undefined): Promise<void> {
   await db.bookmarks.update(id, { previewPreference: preference, updatedAt: Date.now() });
+  await updateColor(id);
 }
