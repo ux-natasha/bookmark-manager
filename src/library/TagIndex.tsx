@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { GreasePencil } from '../components/GreasePencil';
 import { HOLLOW_FADE, tagName, type IndexEntry, type IndexGroup, type TagIndex as Index, type TidyThreshold } from '../lib/tags';
 import { useTheme } from '../lib/theme';
@@ -29,10 +29,25 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
   const theme = useTheme();
   const copy = copyFor(theme).index;
   const [showArchived, setShowArchived] = useState(false);
-  const pick = (tag: string) => (e: MouseEvent) => onPick(tag, e.shiftKey || e.ctrlKey || e.metaKey);
+  const search = useRef<HTMLInputElement>(null);
+  // Shift, Ctrl or Cmd with a click or with Enter picks and keeps the index open.
+  const pick = (tag: string) => ({
+    onClick: (e: MouseEvent) => onPick(tag, e.shiftKey || e.ctrlKey || e.metaKey),
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || !(e.shiftKey || e.ctrlKey || e.metaKey)) return;
+      e.preventDefault();
+      onPick(tag, true);
+    },
+  });
+  // The button that was pressed goes away with what it acted on, so focus moves to the tag search.
+  const thenFocusSearch = (run: () => void) => () => {
+    run();
+    search.current?.focus();
+  };
   const q = query.trim().toLowerCase();
   const showUntagged = untagged.count > 0 && (!q || 'untagged'.includes(q));
   const empty = index.groups.length === 0 && !showUntagged;
+  const allArchived = index.liveCount === 0 && index.archived.length > 0;
   const book = theme === 'covers';
   const grid = theme === 'contact';
 
@@ -46,7 +61,8 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
 
   const jump = (e: MouseEvent, letterId: string) => {
     e.preventDefault();
-    document.getElementById(`ix-${letterId}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById(`ix-${letterId}`)?.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
     document.getElementById(`ix-${letterId}-h`)?.focus({ preventScroll: true });
   };
 
@@ -55,7 +71,7 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
       {book && <span className="ix-erratum-label">Erratum</span>}
       <span className="ix-tidy-count">{copy.staleLine(index.stale.length, tidySpan(threshold))}</span>
       <span className="ix-tidy-explainer">{copy.staleExplainer}</span>
-      <button type="button" className="primary ix-archive" onClick={() => onArchive(index.stale)}>
+      <button type="button" className="primary ix-archive" onClick={thenFocusSearch(() => onArchive(index.stale))}>
         {copy.archive(index.stale.length)}
       </button>
     </div>
@@ -66,7 +82,12 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
       {index.archived.map((tag, i) => (
         <span key={tag}>
           {i > 0 && ', '}
-          <button type="button" className="ix-word" aria-label={`Bring back ${tagName(tag)}`} onClick={() => onUnarchive([tag])}>
+          <button
+            type="button"
+            className="ix-word"
+            aria-label={`Bring back ${tagName(tag)}`}
+            onClick={index.archived.length === 1 ? thenFocusSearch(() => onUnarchive([tag])) : () => onUnarchive([tag])}
+          >
             {tagName(tag)}
           </button>
         </span>
@@ -81,14 +102,14 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
           <span className="ix-archived-lead">Out of print: </span>
           {archivedNames}
           {'. '}
-          <button type="button" className="link" onClick={() => onUnarchive(index.archived)}>
+          <button type="button" className="link" onClick={thenFocusSearch(() => onUnarchive(index.archived))}>
             {copy.bringBack}
           </button>
         </>
       ) : (
         <>
           {copy.archivedLine(index.archived.length)}{' '}
-          <button type="button" className="link" onClick={() => onUnarchive(index.archived)}>
+          <button type="button" className="link" onClick={thenFocusSearch(() => onUnarchive(index.archived))}>
             {copy.bringBack}
           </button>
           {' · '}
@@ -103,14 +124,14 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
 
   const body = (
     <>
-      {empty && <p className="ix-empty">No tag matches that.</p>}
+      {empty && <p className="ix-empty">{allArchived && !q ? copy.allArchived : 'No tag matches that.'}</p>}
       <div className="ix-groups">
         {index.groups.map((g) => (
           <Group key={g.id} group={g} threshold={threshold} grid={grid} book={book} onceLabel={copy.onceLabel} pick={pick} />
         ))}
         {showUntagged && (
           <section className="ix-group ix-untagged" aria-label="Untagged">
-            <button type="button" className="ix-entry" aria-pressed={untagged.selected} onClick={pick(untagged.tag)}>
+            <button type="button" className="ix-entry" aria-pressed={untagged.selected} {...pick(untagged.tag)}>
               <span className="ix-name">
                 untagged
                 {grid && untagged.selected && <GreasePencil />}
@@ -135,7 +156,14 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <input type="search" aria-label="Find a tag" placeholder="Find a tag" value={query} onChange={(e) => onQuery(e.target.value)} />
+          <input
+            ref={search}
+            type="search"
+            aria-label="Find a tag"
+            placeholder="Find a tag"
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+          />
         </label>
         <span className="ix-hint">{copy.hint}</span>
         <span className="ix-tidy-lead" id={`${id}-tidy`}>
@@ -196,7 +224,7 @@ interface GroupProps {
   grid: boolean;
   book: boolean;
   onceLabel: string;
-  pick: (tag: string) => (e: MouseEvent) => void;
+  pick: (tag: string) => { onClick: (e: MouseEvent) => void; onKeyDown: (e: KeyboardEvent) => void };
 }
 
 function Group({ group, threshold, grid, book, onceLabel, pick }: GroupProps) {
@@ -229,7 +257,7 @@ function Group({ group, threshold, grid, book, onceLabel, pick }: GroupProps) {
                 className={`ix-word${e.stale ? ' is-stale' : ''}`}
                 aria-pressed={e.selected}
                 style={slotStyle(e.slot, { '--fade': e.fade })}
-                onClick={pick(e.tag)}
+                {...pick(e.tag)}
               >
                 {e.name}
                 {book && e.stale && <span className="ix-dagger"> †</span>}
@@ -250,7 +278,7 @@ interface EntryProps {
   threshold: TidyThreshold;
   grid: boolean;
   book: boolean;
-  pick: (tag: string) => (e: MouseEvent) => void;
+  pick: (tag: string) => { onClick: (e: MouseEvent) => void; onKeyDown: (e: KeyboardEvent) => void };
 }
 
 function Entry({ entry: e, parentSlot, sub, threshold, grid, book, pick }: EntryProps) {
@@ -266,7 +294,7 @@ function Entry({ entry: e, parentSlot, sub, threshold, grid, book, pick }: Entry
       className={classes.join(' ')}
       aria-pressed={e.selected}
       style={slotStyle(sub ? parentSlot : e.slot, { '--fade': e.fade })}
-      onClick={pick(e.tag)}
+      {...pick(e.tag)}
     >
       {!sub && <span className={`ix-sq${e.slot === undefined ? ' is-blank' : e.fade > HOLLOW_FADE ? ' is-hollow' : ''}`} aria-hidden="true" />}
       <span className="ix-name">

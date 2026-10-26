@@ -23,7 +23,8 @@ export function TagStrip({ mostUsed, liveCount, open, panelId, buttonRef, onTogg
   const copy = copyFor(theme).index;
   return (
     <div className="tag-strip">
-      <span className="tag-strip-lead">{copy.stripLead}</span>
+      {/* Every tag can be archived, leaving only the button. */}
+      {mostUsed.length > 0 && <span className="tag-strip-lead">{copy.stripLead}</span>}
       <div className="tag-strip-tags">
         {mostUsed.map((e, i) => (
           <Fragment key={e.tag}>
@@ -45,7 +46,7 @@ export function TagStrip({ mostUsed, liveCount, open, panelId, buttonRef, onTogg
         type="button"
         className="ghost-button tag-strip-open"
         aria-expanded={open}
-        aria-controls={panelId}
+        aria-controls={open ? panelId : undefined}
         onClick={onToggleOpen}
       >
         {open ? 'Close the index' : `${copy.open} · ${liveCount}`}

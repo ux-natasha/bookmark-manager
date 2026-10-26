@@ -29,6 +29,8 @@ interface IndexCopy {
   bringBack: string;
   archivedToast: (count: number) => string;
   onceLabel: string;
+  // Shown in the open index when every tag has been archived.
+  allArchived: string;
 }
 
 const SPANS: Record<number, string> = { 3: '3 months', 6: '6 months', 12: 'a year' };
@@ -52,6 +54,7 @@ const DEFAULT_INDEX: IndexCopy = {
   bringBack: 'Bring them back',
   archivedToast: (n) => `Archived ${plural(n, 'tag')}`,
   onceLabel: 'Once · ',
+  allArchived: 'Every tag is archived. Bring them back below.',
 };
 
 const COPY: Record<Theme, Copy> = {
@@ -99,6 +102,7 @@ const COPY: Record<Theme, Copy> = {
       bringBack: 'Bring them all back',
       archivedToast: (n) => `${plural(n, 'tag')} left out of the next edition`,
       onceLabel: 'once: ',
+      allArchived: 'Every tag is out of print. Bring them back below.',
     },
   },
 };

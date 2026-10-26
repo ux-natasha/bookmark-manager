@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import { cleanTags } from './tagText';
 
 // How a bookmark got into the library. Useful later for filters ("everything I imported").
 export type BookmarkSource = 'panel' | 'context-menu' | 'import' | 'backup' | 'post' | 'library';
@@ -116,6 +117,20 @@ db.version(3).stores({
   previews: '[bookmarkId+kind], bookmarkId',
   tagMeta: 'tag, archivedAt',
 });
+
+// Tags saved before nested tags were tidied ("recipes / weeknight") would otherwise index as a parent of their own.
+// A separate version, so libraries already on version 3 get it too.
+db.version(4)
+  .stores({})
+  .upgrade((tx) =>
+    tx
+      .table<Bookmark>('bookmarks')
+      .toCollection()
+      .modify((b) => {
+        const tags = cleanTags(b.tags ?? []);
+        if (tags.length !== b.tags?.length || tags.some((t, i) => t !== b.tags[i])) b.tags = tags;
+      }),
+  );
 
 export function kindOf(b: Pick<Bookmark, 'kind'>): ItemKind {
   return b.kind ?? 'link';

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { MONTH } from './age';
 import { cleanTags, saveBookmark, updateBookmark } from './bookmarks';
 import { db, type Bookmark, type TagMeta } from './db';
-import { archiveTags, assignColorSlots, buildTagIndex, hasTag, tagStats, type IndexInput } from './tags';
+import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, tagStats, type IndexInput } from './tags';
 
 const NOW = Date.UTC(2026, 9, 26);
 
@@ -54,6 +54,17 @@ describe('buildTagIndex', () => {
     expect(r.children.map((c) => c.name)).toEqual(['weeknight']);
     expect(ix.letters.find((l) => l.letter === 'Q')?.present).toBe(false);
     expect(ix.letters[0].letter).toBe('#');
+  });
+
+  it('files accented Latin letters under their base letter, and other scripts after Z', () => {
+    const ix = index([item(['école']), item(['zines']), item(['кофе'])]);
+    expect(ix.groups.map((g) => g.letter)).toEqual(['E', 'Z', 'К']);
+    expect(ix.letters.at(-1)).toMatchObject({ letter: 'К', present: true });
+  });
+
+  it('counts nothing as live when every tag is archived', () => {
+    const ix = index([item(['a'])], { meta: [{ tag: 'a', archivedAt: NOW }] });
+    expect(ix).toMatchObject({ liveCount: 0, groups: [], mostUsed: [], archived: ['a'] });
   });
 
   it('keeps a parent when a child matches the search, showing only the matching children', () => {
@@ -157,6 +168,20 @@ describe('tag writes', () => {
     await updateBookmark(bookmark.id, { tags: ['a', 'b'] });
     expect(await db.tagMeta.get('a')).toBeUndefined();
     expect((await db.tagMeta.get('b'))?.lastUsedAt).toBeTypeOf('number');
+  });
+
+  it('brings an archived tag back when it is added to something again', async () => {
+    await db.tagMeta.put({ tag: 'old', archivedAt: 1, colorSlot: undefined });
+    const { bookmark } = await saveBookmark({ url: 'https://example.com', source: 'panel', tags: ['new'] });
+    await updateBookmark(bookmark.id, { tags: ['new', 'old'] });
+    expect((await db.tagMeta.get('old'))?.archivedAt).toBeUndefined();
+  });
+
+  it('writes colour slots without undoing a change made meanwhile', async () => {
+    const changes = assignColorSlots(tagStats([item(['a'])]), [{ tag: 'a' }]);
+    await db.tagMeta.put({ tag: 'a', lastUsedAt: 42 });
+    await applyColorSlots(changes);
+    expect(await db.tagMeta.get('a')).toEqual({ tag: 'a', lastUsedAt: 42, colorSlot: 1 });
   });
 
   it('archives with an undo that restores every record as it was', async () => {

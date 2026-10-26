@@ -135,16 +135,19 @@ function liveTree(live: string[]): Map<string, string[]> {
   return tree;
 }
 
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
 function matches(tag: string, query: string): boolean {
   return tag.includes(query) || tag.replace(/-/g, ' ').includes(query);
 }
 
+// Accented Latin letters file under their base letter ("école" under E); other scripts keep their own.
 function groupLetter(tag: string): string {
   const first = [...tag][0]?.toLocaleUpperCase() ?? '#';
+  const base = first.normalize('NFD').replace(/\p{M}/gu, '');
+  if (ALPHABET.includes(base)) return base;
   return /\p{L}/u.test(first) ? first : '#';
 }
-
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function letterOrder(a: string, b: string): number {
   const rank = (l: string) => (l === '#' ? 0 : ALPHABET.includes(l) ? 1 : 2);
@@ -271,8 +274,16 @@ async function patchMeta(tags: string[], patch: (current: TagMeta) => TagMeta): 
   });
 }
 
-export function markTagsUsed(tags: string[], now = Date.now()): Promise<void> {
-  return patchMeta(tags, (m) => ({ ...m, lastUsedAt: now }));
+// Picking a tag as a filter uses it. Adding it to something also brings it back if it was archived:
+// archived tags aren't suggested, so typing one in is deliberate.
+export function markTagsUsed(tags: string[], { revive = false, now = Date.now() } = {}): Promise<void> {
+  return patchMeta(tags, (m) => ({ ...m, lastUsedAt: now, ...(revive && { archivedAt: undefined }) }));
+}
+
+// Writes only the colour of each changed record, so a use or archive written meanwhile isn't undone.
+export function applyColorSlots(changes: TagMeta[]): Promise<void> {
+  const slots = new Map(changes.map((m) => [m.tag, m.colorSlot]));
+  return patchMeta([...slots.keys()], (m) => ({ ...m, colorSlot: slots.get(m.tag) }));
 }
 
 // Archives the tags and frees their colours. Resolves to an undo that puts every record back as it was.

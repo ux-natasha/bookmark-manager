@@ -12,7 +12,7 @@ import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } fro
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { pickForgotten } from '../lib/resurface';
-import { archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, unarchiveTags } from '../lib/tags';
+import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, unarchiveTags } from '../lib/tags';
 import { THEMES, ThemeContext, useThemeSetting, type Theme } from '../lib/theme';
 import { useTidyThreshold } from '../lib/tidyThreshold';
 import { AppearanceToggle, useAppearance } from './AppearanceToggle';
@@ -130,7 +130,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   useEffect(() => {
     if (!bookmarks || !tagMeta) return;
     const changes = assignColorSlots(stats, tagMeta);
-    if (changes.length) db.tagMeta.bulkPut(changes);
+    if (changes.length) applyColorSlots(changes);
   }, [bookmarks, stats, tagMeta]);
   // Measured when the tags or their metadata change; fading by the hour isn't worth a timer.
   const now = useMemo(() => Date.now(), [stats, tagMeta]);
