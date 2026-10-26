@@ -29,6 +29,14 @@ const COPY: Record<Theme, Copy> = {
     noResults: 'No frame on the sheet matches that, yet.',
     itemNoun: ['frame', 'frames'],
   },
+  covers: {
+    headline: ['Everything you ', 'kept'],
+    headlineBreak: false,
+    filedUnderLead: 'Showing things filed under',
+    emptyTitle: 'The shelf is empty',
+    noResults: 'Nothing on the shelf matches that, yet.',
+    itemNoun: ['cover', 'covers'],
+  },
 };
 
 export function copyFor(theme: Theme): Copy {

@@ -10,6 +10,9 @@ export type LinkStatus = 'ok' | 'gone' | 'unreachable' | 'restricted';
 
 export type PreviewKind = 'screenshot' | 'image';
 
+// What a link shows: one of its previews, or (in the Covers theme) a cover typeset from its details.
+export type PreviewPreference = PreviewKind | 'cover';
+
 // What was saved. Records from before pictures, quotes and notes have no kind, and are links.
 export type ItemKind = 'link' | 'image' | 'quote' | 'note';
 
@@ -41,6 +44,8 @@ export interface Bookmark {
   author?: string;
   publishedAt?: number;
   themeColor?: string;
+  // Extra details some covers use, read where they're cheap to get. Every template works without them.
+  details?: BookmarkDetails;
   enrichedAt?: number;
 
   linkStatus?: LinkStatus;
@@ -49,7 +54,7 @@ export interface Bookmark {
   checkFailures?: number;
 
   // Which preview to show when both a screenshot and the site's own image exist. Unset = automatic.
-  previewPreference?: PreviewKind;
+  previewPreference?: PreviewPreference;
 
   createdAt: number;
   updatedAt: number;
@@ -58,6 +63,16 @@ export interface Bookmark {
 
   // Soft delete: kept for undo now, and so a future sync can tell "deleted" from "never existed".
   deletedAt?: number;
+}
+
+export interface BookmarkDetails {
+  // Video length in seconds.
+  duration?: number;
+  // From schema.org Recipe data. Present, even if empty, when the page is a recipe.
+  recipe?: { totalTime?: string; yield?: string };
+  language?: string[];
+  // Position in a thread of posts.
+  thread?: { index: number; count: number };
 }
 
 // Preview images live in their own table so loading the bookmark list stays fast.

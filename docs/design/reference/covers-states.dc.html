@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Covers · States</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.lab{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#58534A}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 34px;align-items:end}
+.slab{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#58534A;min-height:28px}
+.item{display:flex;flex-direction:column;gap:10px;min-width:0}
+.cover{position:relative;aspect-ratio:3/4;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;padding:16px;border-radius:3px;transform-origin:0 100%;box-shadow:0 1px 0 rgba(0,0,0,.12),0 22px 26px -20px rgba(0,0,0,.6)}
+.spine{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(255,255,255,.06) 60%,transparent)}
+.title{font-family:Newsreader,Georgia,serif;font-size:16px;font-weight:500;line-height:1.22;color:#1F1D1A}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;font-family:'Geist Mono',monospace;font-size:10px;color:#58534A}
+.shelf{height:12px;margin:0 -10px;background:linear-gradient(180deg,#d8cfbd,#c6bba5);box-shadow:0 10px 14px -8px rgba(60,40,10,.45)}
+.btn{min-height:30px;padding:0 10px;border-radius:3px;border:1px solid rgba(31,29,26,.28);background:transparent;color:#1F1D1A;font:inherit;font-family:Geist,sans-serif;font-size:12px;cursor:pointer}
+.bodoni{font-family:'Bodoni Moda',Didot,serif}
+.mono{font-family:'Geist Mono',monospace}
+.bleach{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,248,230,.9),rgba(255,248,230,.25) 45%,transparent 75%)}
+.fox{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 30%,rgba(92,70,36,.42) 0 .9px,transparent 1.4px) 0 0/23px 19px,radial-gradient(circle at 70% 60%,rgba(92,70,36,.34) 0 .8px,transparent 1.2px) 0 0/17px 29px,radial-gradient(ellipse at 50% 45%,transparent 52%,rgba(130,96,40,.3))}
+.band{position:absolute;left:0;right:0;bottom:22%;height:30px;display:flex;align-items:center;justify-content:center;background:#A3302A;color:#FBF8F1;font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.14em;box-shadow:0 2px 0 rgba(0,0,0,.15),0 -1px 0 rgba(255,255,255,.2)}
+.press-a,.press-b{animation-duration:900ms;animation-timing-function:cubic-bezier(.2,.9,.25,1.15);animation-fill-mode:both}
+.press-a{animation-name:press-a}.press-b{animation-name:press-b}
+@keyframes press-a{0%{transform:translateY(46px);opacity:0}60%{opacity:1}100%{transform:none}}
+@keyframes press-b{0%{transform:translateY(46px);opacity:0}60%{opacity:1}100%{transform:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #ECE9E2; color: #1F1D1A; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 44px">
+  <h1 style="margin: 0; font-family: 'Bodoni Moda', Didot, serif; font-weight: 400; font-size: 72px; line-height: 0.95">States <span style="font-style: italic">and moments</span></h1>
+
+  <section style="display: flex; flex-direction: column; gap: 14px" aria-label="Cover states">
+    <span class="lab">A · A cover, state by state</span>
+    <div class="grid4">
+      <div class="item"><span class="slab">Rest</span>
+        <div class="cover" style="background: #24453B; color: #F1EDE3"><span class="spine"></span><span class="bodoni" style="font-size: 22px; font-weight: 600; letter-spacing: 0.03em; text-align: center">FIELD NOTES</span><span style="margin-top: auto; font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.05">Why every team needs a decision log</span></div>
+        <span class="title">Why every team needs a decision log</span><span class="meta"><span>Substack · this week</span></span>
+      </div>
+      <div class="item"><span class="slab">Hover · pulled forward, edit appears</span>
+        <div class="cover" style="background: #24453B; color: #F1EDE3; transform: translateY(-6px) rotate(-0.6deg); box-shadow: 0 1px 0 rgba(0,0,0,0.12), 0 30px 30px -20px rgba(0,0,0,0.6)"><span class="spine"></span><span class="bodoni" style="font-size: 22px; font-weight: 600; letter-spacing: 0.03em; text-align: center">FIELD NOTES</span><span style="margin-top: auto; font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.05">Why every team needs a decision log</span></div>
+        <span class="title" style="text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px">Why every team needs a decision log</span><span class="meta"><span>Substack · this week</span><span style="color: #1F1D1A; text-decoration: underline; text-underline-offset: 3px">Edit</span></span>
+      </div>
+      <div class="item"><span class="slab">Keyboard focus · a ruled frame</span>
+        <div class="cover" style="background: #24453B; color: #F1EDE3; outline: 2px solid #1F1D1A; outline-offset: 5px"><span class="spine"></span><span class="bodoni" style="font-size: 22px; font-weight: 600; letter-spacing: 0.03em; text-align: center">FIELD NOTES</span><span style="margin-top: auto; font-family: Newsreader, Georgia, serif; font-size: 22px; line-height: 1.05">Why every team needs a decision log</span></div>
+        <span class="title">Why every team needs a decision log</span><span class="meta"><span>Substack · this week</span><span style="color: #1F1D1A; text-decoration: underline; text-underline-offset: 3px">Edit</span></span>
+      </div>
+      <div class="item"><span class="slab">Sun-faded · take it down</span>
+        <div class="cover" style="background: radial-gradient(circle at 74% 30%, #F7D9A8 0 13%, transparent 13.5%), #7d9aa8; color: #10222B; filter: sepia(0.32) saturate(0.77) brightness(1.03); transform: rotate(-1.4deg)"><span class="spine"></span><span class="mono" style="font-size: 9px; letter-spacing: 0.06em">38.72° N · 9.14° W</span><span class="bodoni" style="margin-top: auto; font-size: 34px; line-height: 0.95">Lisbon</span><span class="bodoni" style="font-style: italic; font-size: 19px">in four days</span><div class="bleach" style="opacity: 0.35"></div><div class="fox" style="opacity: 0.55"></div></div>
+        <span class="title" style="color: #6B5C42">Lisbon in four days</span><span class="meta"><span>never opened, 14 mo.</span><button type="button" class="btn">Take down</button></span>
+      </div>
+    </div>
+    <div class="shelf"></div>
+
+    <div class="grid4" style="margin-top: 26px">
+      <div class="item"><span class="slab">Back in print · a band around it</span>
+        <div class="cover" style="background: radial-gradient(circle at 74% 30%, #F7D9A8 0 13%, transparent 13.5%), #7d9aa8; color: #10222B"><span class="spine"></span><span class="mono" style="font-size: 9px; letter-spacing: 0.06em">38.72° N · 9.14° W</span><span class="bodoni" style="margin-top: auto; font-size: 34px; line-height: 0.95">Lisbon</span><span class="bodoni" style="font-style: italic; font-size: 19px">in four days</span><span class="band">BACK IN PRINT</span></div>
+        <span class="title">Lisbon in four days</span><span class="meta"><span>back from 14 mo.</span></span>
+      </div>
+      <div class="item"><span class="slab">New · fresh off the press</span>
+        <div class="cover {{pressCls}}" style="background: #2F3B8F; color: #fff"><span class="spine"></span><span class="bodoni" style="font-size: 28px">typeroom</span><span style="margin-top: auto; font-family: Newsreader, Georgia, serif; font-size: 21px; line-height: 1.05">A field guide to typographic rhythm</span></div>
+        <span class="title">A field guide to typographic rhythm</span><span class="meta"><span>just now</span><button type="button" class="btn" onClick="{{replay}}">Replay</button></span>
+      </div>
+      <div class="item"><span class="slab">Dead link · out of print</span>
+        <div class="cover" style="background: #d9cfbb; color: #1f1d1a; filter: grayscale(1); opacity: 0.7"><span class="mono" style="font-size: 9px; letter-spacing: 0.08em">NEWS.YCOMBINATOR.COM</span><span style="margin-top: auto; font-size: 18px; font-weight: 600; line-height: 1.08">Show HN: a tiny local-first notes app</span><span style="position: absolute; top: 40%; left: 50%; margin-left: -60px; width: 120px; padding: 5px 0; text-align: center; transform: rotate(-8deg); border: 2px solid #1f1d1a; font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em">OUT OF PRINT</span></div>
+        <span class="title" style="color: #58534A">Show HN: a tiny local-first notes app</span><span class="meta"><span style="color: #8a2f1c">stopped answering Oct 9</span></span>
+      </div>
+      <div class="item"><span class="slab">Fetching · a proof, details on the way</span>
+        <div class="cover" style="background: #FBF8F1; color: #58534A; box-shadow: inset 0 0 0 1px rgba(31,29,26,0.18); justify-content: center; align-items: center; gap: 8px; text-align: center">
+          <span aria-hidden="true" style="position: absolute; top: 10px; left: 10px; width: 14px; height: 14px; border-top: 1px solid #58534A; border-left: 1px solid #58534A"></span>
+          <span aria-hidden="true" style="position: absolute; top: 10px; right: 10px; width: 14px; height: 14px; border-top: 1px solid #58534A; border-right: 1px solid #58534A"></span>
+          <span aria-hidden="true" style="position: absolute; bottom: 10px; left: 10px; width: 14px; height: 14px; border-bottom: 1px solid #58534A; border-left: 1px solid #58534A"></span>
+          <span aria-hidden="true" style="position: absolute; bottom: 10px; right: 10px; width: 14px; height: 14px; border-bottom: 1px solid #58534A; border-right: 1px solid #58534A"></span>
+          <span class="mono" style="font-size: 10px; letter-spacing: 0.14em">PROOF</span>
+          <span class="bodoni" style="font-size: 18px; font-style: italic; color: #1F1D1A">lisbon-in-four-days.com</span>
+        </div>
+        <span class="title" style="color: #58534A">Details on the way</span><span class="meta"><span>next try in 1.5 s</span></span>
+      </div>
+    </div>
+    <div class="shelf"></div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 14px" aria-label="Page states">
+    <span class="lab">B · Whole-shelf states</span>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab">Empty library · an empty shelf</span>
+        <div style="display: flex; flex-direction: column; justify-content: flex-end; min-height: 300px">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 20px 40px; text-align: center">
+            <span class="bodoni" style="font-size: 32px; font-style: italic; line-height: 1">The shelf is empty</span>
+            <span style="max-width: 280px; font-size: 13px; line-height: 1.5; color: #58534A">Press Alt+Shift+S on any page to save it, or right-click a link, picture or selected text.</span>
+            <button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 3px; border: 0; background: #1F1D1A; color: #ECE9E2; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer">Import your Edge favorites</button>
+          </div>
+          <div class="shelf" style="margin: 0"></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab">No results</span>
+        <div style="display: flex; flex-direction: column; justify-content: center; gap: 12px; min-height: 300px; padding: 0 8px">
+          <span class="mono" style="font-size: 10px; letter-spacing: 0.1em; color: #58534A">PICTURES · FILED UNDER WEDDING · “LISBON”</span>
+          <span class="bodoni" style="font-style: italic; font-size: 32px; line-height: 1.1">Nothing on the shelf matches that, yet.</span>
+          <button type="button" style="align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: transparent; color: #1F1D1A; font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">clear filters</button>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span class="slab">Loading · blank boards on the shelf</span>
+        <div aria-hidden="true" style="display: flex; flex-direction: column; justify-content: flex-end; min-height: 300px">
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; padding: 0 6px">
+            <div style="aspect-ratio: 3 / 4; border-radius: 3px; background: #DDD8CE"></div>
+            <div style="aspect-ratio: 3 / 4; border-radius: 3px; background: #DDD8CE"></div>
+            <div style="aspect-ratio: 3 / 4; border-radius: 3px; background: #DDD8CE"></div>
+          </div>
+          <div class="shelf" style="margin: 0"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 14px" aria-label="Dark">
+    <span class="lab">C · Dark mode · the reading room at night</span>
+    <div style="padding: 34px 34px 0; border-radius: 4px; background: #0D121A">
+      <div class="grid4">
+        <sc-for list="{{dark}}" as="d" hint-placeholder-count="4">
+          <div class="item">
+            <span class="slab" style="color: #AEB8C6">{{d.label}}</span>
+            <div class="cover" style="background: #F6EEDF; color: #4A1512; padding: 10px; filter: {{d.filter}}; transform: rotate({{d.lean}})">
+              <div style="flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 12px 8px; border: 1px solid #A3302A"><span class="mono" style="font-size: 8px; letter-spacing: 0.14em; color: #7E211D">SERIOUSKITCHEN.COM</span><span class="bodoni" style="margin: auto 0; font-style: italic; font-size: 22px; line-height: 1.05">Slow cooker ragù that actually tastes slow</span><span class="mono" style="font-size: 9px; color: #7E211D">6 HOURS · SERVES 6</span></div>
+              <div class="bleach" style="opacity: {{d.bleach}}"></div><div class="fox" style="opacity: {{d.fox}}"></div>
+              <sc-if value="{{d.band}}" hint-placeholder-val="{{false}}"><span class="band">BACK IN PRINT</span></sc-if>
+            </div>
+            <span class="title" style="color: {{d.ink}}">Slow cooker ragù</span><span class="meta" style="color: #AEB8C6"><span>{{d.age}}</span></span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="height: 12px; margin: 0 -34px; background: linear-gradient(180deg, #2a3342, #1c2330); box-shadow: 0 10px 14px -8px rgba(0,0,0,0.7)"></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2300}}'>
+class Component extends DCLogic {
+  state = { flip: false };
+  renderVals() {
+    const hexes = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hexes(a), B = hexes(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const dark = [[0, 'Today', false], [12, 'A year', false], [24, 'Two years', false], [0, 'Back in print', true]].map(([m, label, band]) => {
+      const t = m / 24;
+      return { label, band, filter: 'sepia(' + (t * 0.55).toFixed(2) + ') saturate(' + (1 - t * 0.4).toFixed(2) + ') brightness(' + (1 + t * 0.05).toFixed(2) + ')', bleach: (t * 0.6).toFixed(2), fox: (t * 0.95).toFixed(2), lean: (-t * 2.4).toFixed(2) + 'deg', ink: mix('#E7ECF3', '#B6A784', t), age: band ? 'back from 24 mo.' : m === 0 ? 'this week' : 'untouched ' + m + ' mo.' };
+    });
+    return { pressCls: this.state.flip ? 'press-b' : 'press-a', replay: () => this.setState({ flip: !this.state.flip }), dark };
+  }
+}
+</script>
+</body>
+</html>

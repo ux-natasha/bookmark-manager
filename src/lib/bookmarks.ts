@@ -1,4 +1,4 @@
-import { db, kindOf, type Bookmark, type BookmarkSource, type ItemKind, type PreviewKind } from './db';
+import { db, kindOf, type Bookmark, type BookmarkSource, type ItemKind, type PreviewPreference } from './db';
 import { normalizeUrl } from './normalize';
 
 export interface NewBookmark {
@@ -145,6 +145,6 @@ export async function purgeOldTrash(): Promise<number> {
   });
 }
 
-export async function setPreviewPreference(id: string, preference: PreviewKind | undefined): Promise<void> {
+export async function setPreviewPreference(id: string, preference: PreviewPreference | undefined): Promise<void> {
   await db.bookmarks.update(id, { previewPreference: preference, updatedAt: Date.now() });
 }

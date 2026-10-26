@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colour field · Components</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&amp;family=Geist:wght@400;500&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+:focus-visible{outline:2px solid #EEF0F4;outline-offset:3px}
+input::placeholder{color:#B3B9C5;font-style:italic}
+.lab{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#B3B9C5}
+.glass{position:relative;border-radius:22px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5);box-shadow:0 20px 40px -24px rgba(0,0,0,.6)}
+.serif{font-family:Newsreader,Georgia,serif}
+.mono{font-family:'Geist Mono',monospace}
+.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:#EEF0F4;font:inherit;font-size:13px;cursor:pointer;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.gbtn:hover{background:rgba(255,255,255,.12)}
+.gbtn:disabled{opacity:.35;cursor:default}
+.sbtn{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:#EEF0F4;color:#0E1116;font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.round{width:44px;padding:0}
+.pill{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid;background:transparent;font-family:Geist,system-ui,sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:box-shadow 260ms ease-out,background-color 260ms ease-out}
+.seg{flex:1;height:100%;transition:filter 400ms ease-out}
+.sw{position:relative;width:44px;height:44px;border-radius:50%;border:2px solid #0E1116;cursor:pointer;padding:0;transition:transform 200ms ease-out,box-shadow 260ms ease-out}
+.sw:hover{transform:translateY(-3px)}
+.ent{display:flex;align-items:flex-end;gap:8px;width:100%;min-height:32px;padding:3px 6px;margin:0 -6px;border:0;border-radius:10px;background:transparent;text-align:left;cursor:pointer;font-family:Newsreader,Georgia,serif;transition:color 500ms ease-out,box-shadow 300ms ease-out,background-color 300ms ease-out}
+.ent:hover .w,.lnk:hover .w{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.w{font-size:18px;line-height:1.25;padding-left:1em;text-indent:-1em;min-width:0;overflow-wrap:anywhere}
+.leader{flex:1 1 14px;min-width:14px;margin-bottom:6px;border-bottom:1.5px dotted currentColor;opacity:.35}
+.num{flex:none;font-family:'Geist Mono',monospace;font-size:11px;line-height:1.9}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;margin-bottom:8px;transition:background-color 500ms ease-out,box-shadow 500ms ease-out}
+.lnk{border:0;background:transparent;padding:0 2px;border-radius:6px;color:inherit;font-family:Newsreader,Georgia,serif;font-size:15.5px;cursor:pointer}
+.tseg{min-height:36px;padding:0 13px;border:0;border-radius:999px;background:transparent;color:#EEF0F4;font:inherit;font-size:13px;cursor:pointer}
+.tseg[aria-pressed="true"]{background:#EEF0F4;color:#0E1116}
+.menu-item{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 16px;border:0;border-radius:12px;background:transparent;width:100%;text-align:left;font:inherit;font-size:14px;color:#EEF0F4;cursor:pointer}
+.menu-item:hover{background:rgba(255,255,255,.08)}
+</style>
+</helmet>
+<div style="position: relative; overflow: hidden; width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #0E1116; color: #EEF0F4; font-family: Geist, system-ui, sans-serif; font-size: 14px; display: flex; flex-direction: column; gap: 40px">
+  <div aria-hidden="true" style="position: absolute; top: -200px; left: -150px; width: 640px; height: 640px; border-radius: 50%; background: #24453B; filter: blur(100px); opacity: 0.5"></div>
+  <div aria-hidden="true" style="position: absolute; top: -140px; right: -180px; width: 700px; height: 560px; border-radius: 50%; background: #E79A7A; filter: blur(100px); opacity: 0.42"></div>
+  <div aria-hidden="true" style="position: absolute; top: 1100px; left: 25%; width: 760px; height: 560px; border-radius: 50%; background: #3E6CA8; filter: blur(110px); opacity: 0.42"></div>
+  <div aria-hidden="true" style="position: absolute; top: 1900px; right: -100px; width: 600px; height: 600px; border-radius: 50%; background: #2F3B8F; filter: blur(110px); opacity: 0.45"></div>
+
+  <h1 style="position: relative; margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 400; font-size: 72px; line-height: 0.92; letter-spacing: -0.03em">Components, <span style="font-style: italic">in colour</span></h1>
+
+  <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Header and hero">
+    <span class="lab">A · Header and hero · the room is lit by what you kept</span>
+    <div class="glass" style="padding: 18px 22px 40px; display: flex; flex-direction: column; gap: 34px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+        <span class="serif" style="font-size: 26px; margin-right: auto">Bookmarks</span>
+        <button type="button" class="gbtn">More<svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <button type="button" class="gbtn round" aria-label="Switch to light mode"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.5 1.5M17.2 17.2l1.5 1.5M5.3 18.7l1.5-1.5M17.2 6.8l1.5-1.5"></path></svg></button>
+        <button type="button" class="sbtn">Add from a post</button>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px">
+        <h2 class="serif" style="margin: 0; font-weight: 400; font-size: 88px; line-height: 0.92; letter-spacing: -0.03em">Find it by how<br>it <span style="font-style: italic">looked.</span></h2>
+        <p style="margin: 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; font-size: 17px; color: #B3B9C5">All your <span class="pill" style="cursor: default; color: #8AB8F7; border-color: #8AB8F7">links</span> <span class="pill" style="cursor: default; color: #F4A184; border-color: #F4A184">quotes</span> <span class="pill" style="cursor: default; color: #EBCB66; border-color: #EBCB66">pictures</span> and <span class="pill" style="cursor: default; color: #8ED2A8; border-color: #8ED2A8">notes</span>, in their own colours.</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Look ahead">
+    <span class="lab">B · Look ahead · a light meter, colour drains month by month</span>
+    <div class="glass" role="group" aria-label="Look ahead" style="padding: 22px 26px 18px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center">
+      <span class="serif" style="font-size: 18px; font-style: italic; color: #B3B9C5">{{la.lead}}</span>
+      <div style="display: flex; align-items: center; gap: 18px">
+        <button type="button" class="gbtn round" aria-label="One month earlier" onClick="{{la.prev}}" disabled="{{la.atStart}}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"></path></svg></button>
+        <span class="serif" aria-live="polite" style="min-width: 300px; font-size: 52px; line-height: 1; letter-spacing: -0.02em">{{la.month}} <span style="font-style: italic; color: #B3B9C5">{{la.year}}</span></span>
+        <button type="button" class="gbtn round" aria-label="One month later" onClick="{{la.next}}" disabled="{{la.atEnd}}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"></path></svg></button>
+      </div>
+      <div style="position: relative; width: 100%; max-width: 860px; padding: 10px 0 4px">
+        <div style="display: flex; height: 26px; border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16)">
+          <sc-for list="{{la.segs}}" as="s" hint-placeholder-count="25"><button type="button" class="seg" aria-label="{{s.aria}}" aria-pressed="{{s.pressed}}" onClick="{{s.pick}}" style="border: 0; padding: 0; cursor: pointer; background: {{s.c}}; filter: {{s.f}}"></button></sc-for>
+        </div>
+        <div aria-hidden="true" style="position: absolute; top: 2px; left: {{la.knob}}; width: 42px; height: 42px; margin-left: -21px; border-radius: 50%; border: 2px solid #EEF0F4; background: rgba(255,255,255,0.12); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 0 28px {{la.glow}}; transition: left 400ms cubic-bezier(.3,1.3,.5,1)"></div>
+        <div aria-hidden="true" class="mono" style="display: flex; justify-content: space-between; margin-top: 14px; font-size: 10px; color: #B3B9C5"><span>NOW</span><span>6 MO</span><span>1 YR</span><span>18 MO</span><span>2 YRS</span></div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 14px; font-size: 13px; color: #B3B9C5">
+        <span>{{la.status}}</span>
+        <sc-if value="{{la.isToday}}" hint-placeholder-val="{{true}}"><button type="button" class="gbtn">Bring back three</button></sc-if>
+        <sc-if value="{{la.notToday}}" hint-placeholder-val="{{false}}"><button type="button" class="gbtn" onClick="{{la.reset}}">Back to today</button></sc-if>
+      </div>
+    </div>
+  </section>
+
+  <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Search by colour">
+    <span class="lab">C · Search by colour · swatches come from your own previews</span>
+    <div class="glass" style="padding: 16px 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px">
+      <span class="serif" style="font-size: 20px; font-style: italic">Search by colour</span>
+      <div role="group" aria-label="Colours" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{swatches}}" as="w" hint-placeholder-count="8"><button type="button" class="sw" aria-pressed="{{w.pressed}}" aria-label="{{w.aria}}" onClick="{{w.pick}}" style="background: {{w.c}}; box-shadow: {{w.ring}}"></button></sc-for>
+      </div>
+      <span style="margin-left: auto; font-size: 13px; color: #B3B9C5">{{swLabel}}</span>
+    </div>
+  </section>
+
+  <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Tag strip">
+    <span class="lab">D · Tag strip · picked tags fill with their colour and glow</span>
+    <div class="glass" style="padding: 14px 22px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+        <span class="serif" style="font-size: 20px; font-style: italic; margin-right: 6px">Most used</span>
+        <sc-for list="{{top}}" as="t" hint-placeholder-count="6"><button type="button" class="pill" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}" style="color: {{t.fg}}; border-color: {{t.c}}; background: {{t.bg}}; box-shadow: {{t.glow}}">{{t.name}}<span class="mono" style="font-size: 10px; font-weight: 400; opacity: 0.8">{{t.k}}</span></button></sc-for>
+        <button type="button" class="gbtn" style="margin-left: auto" onClick="{{toggleIx}}" aria-expanded="{{ixOpen}}">{{ixLabel}}</button>
+      </div>
+      <sc-if value="{{hasSel}}" hint-placeholder-val="{{true}}">
+        <p style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); font-family: Newsreader, Georgia, serif; font-size: 19px; font-style: italic; color: #B3B9C5">Showing things filed under
+          <sc-for list="{{selPills}}" as="s" hint-placeholder-count="2"><button type="button" class="pill" onClick="{{s.pick}}" aria-label="Remove filter: {{s.n}}" style="min-height: 32px; font-style: normal; color: #0E1116; border-color: {{s.c}}; background: {{s.c}}; box-shadow: 0 0 20px {{s.c}}">{{s.n}}<svg aria-hidden="true" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></sc-for>
+          <button type="button" onClick="{{clear}}" style="min-height: 32px; border: 0; background: transparent; color: #EEF0F4; font-family: Geist, sans-serif; font-style: normal; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">clear</button>
+        </p>
+      </sc-if>
+    </div>
+  </section>
+
+  <sc-if value="{{ixOpen}}" hint-placeholder-val="{{true}}">
+    <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Tag index">
+      <span class="lab">E · The index on glass · unused tags lose their colour, then their glow</span>
+      <div class="glass" style="padding: 24px 28px 26px; display: flex; flex-direction: column; gap: 18px">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px">
+          <label style="display: flex; align-items: center; gap: 10px; flex: 0 1 300px; height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.14)">
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input type="search" aria-label="Find a tag" value="{{query}}" onChange="{{onQuery}}" placeholder="Find a tag" style="flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 14px; outline: none; color: inherit">
+          </label>
+          <span style="font-size: 12px; color: #B3B9C5">Picking a tag closes the index. Shift-click to pick several.</span>
+          <span class="serif" style="margin-left: auto; font-size: 18px; font-style: italic; color: #B3B9C5">Tidy up tags not used in</span>
+          <div role="group" aria-label="Tidy up threshold" style="display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.24)">
+            <sc-for list="{{tidy}}" as="t" hint-placeholder-count="4"><button type="button" class="tseg" aria-pressed="{{t.pressed}}" onClick="{{t.pick}}">{{t.label}}</button></sc-for>
+          </div>
+        </div>
+        <sc-if value="{{tidying}}" hint-placeholder-val="{{true}}">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 16px; border-radius: 16px; background: rgba(140,146,156,0.14); border: 1px dashed rgba(255,255,255,0.22)">
+            <span class="serif" style="font-size: 19px">{{staleLabel}}</span>
+            <span style="flex: 1; min-width: 200px; font-size: 13px; color: #B3B9C5">They’ve gone grey below. Archived tags leave the index but stay on the things they’re on.</span>
+            <button type="button" class="sbtn">Archive {{staleCount}}</button>
+          </div>
+        </sc-if>
+        <div style="columns: 3 260px; column-gap: 44px">
+          <sc-for list="{{groups}}" as="g" hint-placeholder-count="12">
+            <section style="margin-bottom: 24px" aria-label="{{g.ch}}">
+              <h3 class="serif" style="break-after: avoid; margin: 0 0 6px; font-weight: 300; font-style: italic; font-size: 64px; line-height: 0.85; letter-spacing: -0.03em">{{g.ch}}</h3>
+              <sc-for list="{{g.entries}}" as="e" hint-placeholder-count="3">
+                <button type="button" class="ent" aria-pressed="{{e.pressed}}" onClick="{{e.pick}}" style="color: {{e.ink}}; background: {{e.selBg}}; box-shadow: {{e.selGlow}}"><span aria-hidden="true" class="dot" style="background: {{e.dot}}; box-shadow: {{e.dotGlow}}"></span><span class="w" style="font-style: {{e.style}}">{{e.name}}</span><span aria-hidden="true" class="leader"></span><span class="num">{{e.right}}</span></button>
+                <sc-for list="{{e.kids}}" as="k" hint-placeholder-count="0"><button type="button" class="ent" aria-pressed="{{k.pressed}}" onClick="{{k.pick}}" style="padding-left: 32px; min-height: 30px; color: {{k.ink}}; background: {{k.selBg}}; box-shadow: {{k.selGlow}}"><span class="w" style="font-size: 16px; font-style: {{k.style}}"><span aria-hidden="true" style="opacity: 0.5">— </span>{{k.name}}</span><span aria-hidden="true" class="leader"></span><span class="num" style="font-size: 10.5px">{{k.right}}</span></button></sc-for>
+              </sc-for>
+              <sc-if value="{{g.hasOnce}}" hint-placeholder-val="{{false}}"><p style="margin: 4px 0 0; padding-left: 1em; text-indent: -1em; font-family: Newsreader, Georgia, serif; font-size: 15.5px; line-height: 1.75; color: #B3B9C5"><span class="mono" style="font-size: 9.5px; letter-spacing: 0.08em">ONCE · </span><sc-for list="{{g.once}}" as="o" hint-placeholder-count="3"><button type="button" class="lnk" aria-pressed="{{o.pressed}}" onClick="{{o.pick}}" style="color: {{o.ink}}; background: {{o.selBg}}"><span class="w" style="font-size: 15.5px; padding: 0; text-indent: 0">{{o.name}}</span></button>{{o.sep}}</sc-for></p></sc-if>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <section style="position: relative; display: flex; flex-direction: column; gap: 12px" aria-label="Kinds">
+    <span class="lab">F · Kind pills, source and sort</span>
+    <div class="glass" style="padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+      <sc-for list="{{kinds}}" as="k" hint-placeholder-count="5"><button type="button" class="pill" aria-pressed="{{k.pressed}}" onClick="{{k.pick}}" style="color: {{k.fg}}; border-color: {{k.c}}; background: {{k.bg}}; box-shadow: {{k.glow}}">{{k.label}}<span class="mono" style="font-size: 10px; font-weight: 400; opacity: 0.8">{{k.n}}</span></button></sc-for>
+      <span style="margin-left: auto; display: flex; gap: 8px">
+        <button type="button" class="gbtn">All sources<svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></button>
+        <button type="button" class="gbtn">Newest first<svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"></path></svg></button>
+      </span>
+    </div>
+  </section>
+
+  <section style="position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px" aria-label="Small parts">
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">G · Buttons</span>
+      <div class="glass" style="padding: 20px; display: flex; flex-wrap: wrap; gap: 10px">
+        <button type="button" class="sbtn">Add from a post</button>
+        <button type="button" class="gbtn">Bring back</button>
+        <button type="button" class="gbtn" disabled>Check links</button>
+        <button type="button" style="min-height: 44px; border: 0; background: transparent; color: #EEF0F4; font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">clear filters</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">H · More menu</span>
+      <div class="glass" role="menu" aria-label="More" style="padding: 6px">
+        <button type="button" role="menuitem" class="menu-item">New note</button>
+        <button type="button" role="menuitem" class="menu-item">Import favorites</button>
+        <button type="button" role="menuitem" class="menu-item">Check links</button>
+        <button type="button" role="menuitem" class="menu-item">Back up</button>
+        <button type="button" role="menuitem" class="menu-item">Restore</button>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <span class="lab">I · Toast</span>
+      <div role="status" class="glass" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 8px 0 20px; border-radius: 999px; font-size: 13px">
+        <span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 50%; background: #EBCB66; box-shadow: 0 0 14px #EBCB66"></span>Brought back 3 things<button type="button" style="margin-left: auto; min-height: 44px; padding: 0 14px; border: 0; background: transparent; color: #EEF0F4; font: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">Undo</button>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2500}}'>
+class Component extends DCLogic {
+  state = { query: '', sel: ['design', 'travel'], month: 8, ixOpen: true, tidy: 12, kind: 'all', swatch: 1 };
+
+  renderVals() {
+    const st = this.state;
+    const COLOR = { work: ['#c47a52', '#9A4F2B'], design: ['#4d6fa3', '#2F5288'], reading: ['#c4688a', '#9C3E62'], travel: ['#5f98a8', '#2E6E7E'], recipes: ['#b4893f', '#80601E'], type: ['#6f8a3e', '#4A6224'], dev: ['#8a857a', '#5C584F'], video: ['#7b93c4', '#4B63A0'] };
+    const multi = [
+      ['work', 24], ['design', 19], ['reading', 17], ['travel', 14], ['recipes', 12], ['type', 9], ['dev', 8], ['video', 7],
+      ['inspiration', 6], ['recipes/weeknight', 5], ['gifts', 5], ['lisbon', 4], ['typography-specimens', 4], ['side-project', 4],
+      ['recipes/baking', 3], ['finance', 3], ['health', 3], ['music', 3], ['film', 3], ['architecture', 3], ['writing', 3],
+      ['things-to-read-on-the-flight-to-lisbon', 2], ['Q4 planning: design system review', 2], ['kitchen renovation ideas (maybe)', 2],
+      ['home/kitchen renovation/lighting ideas', 2], ['recipes/vegetarian', 2], ['books', 2], ['newsletters', 2], ['photography', 2],
+      ['interiors', 2], ['learning', 2], ['career', 2], ['ai', 2], ['climbing', 2], ['birthday-ideas', 2], ['home', 2], ['wedding', 2]
+    ];
+    const singles = ['aalto', 'airport-lounges', 'ambient', 'analog', 'bauhaus', 'bikes', 'bookbinding', 'brutalism', 'cameras', 'ceramics', 'chess', 'coffee', 'crosswords', 'dataviz', 'denim', 'dumplings', 'espresso', 'gardening', 'hiking', 'illustration', 'interview prep for the staff role', 'jazz', 'kerning', 'keyboards', 'lamps', 'linocut', 'maps', 'matcha', 'mushrooms', 'origami', 'papers-to-cite-in-the-thesis-chapter-3', 'pens', 'podcasts', 'posters-for-the-hallway', 'pottery', 'risograph', 'sourdough', 'swiss-style', 'trains', 'woodwork', 'zines'];
+    const hash = (s) => s.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const all = multi.map(([n, k]) => ({ n, k })).concat(singles.map((n) => ({ n, k: 1 }))).map((t) => ({ ...t, last: t.k >= 7 ? hash(t.n) % 2 : t.k >= 3 ? 1 + (hash(t.n) % 6) : 2 + (hash(t.n) % 21) }));
+    const pretty = (n) => n.replace(/-/g, ' ');
+    const sel = st.sel ?? [];
+    const toggle = (n) => this.setState({ sel: sel.includes(n) ? sel.filter((x) => x !== n) : sel.concat(n) });
+    const tint = (n) => (COLOR[n.split('/')[0]] ? COLOR[n.split('/')[0]][0] + '55' : 'rgba(235,212,150,0.9)');
+    const mark = (on, n) => (on ? 'linear-gradient(transparent 55%, ' + tint(n) + ' 55% 92%, transparent 92%)' : 'transparent');
+    const q = (st.query ?? '').trim().toLowerCase();
+    const hit = (n) => !q || n.toLowerCase().includes(q) || pretty(n).toLowerCase().includes(q);
+    const buildGroups = (decorate) => {
+      const map = {};
+      all.filter((t) => !t.n.includes('/')).forEach((t) => {
+        const kids = all.filter((x) => x.n.startsWith(t.n + '/'));
+        const self = hit(t.n);
+        const shownKids = kids.filter((x) => self || hit(x.n));
+        if (!self && !shownKids.length) return;
+        const ch = t.n[0].toUpperCase();
+        const g = (map[ch] = map[ch] ?? { ch, entries: [], once: [] });
+        const on = sel.includes(t.n);
+        const base = { name: pretty(t.n), raw: t.n, k: t.k, last: t.last, pressed: on, pick: () => toggle(t.n), mark: mark(on, t.n), style: on ? 'italic' : 'normal', c: COLOR[t.n] ? COLOR[t.n][0] : 'transparent', ...decorate(t, on) };
+        if (t.k === 1 && !kids.length) g.once.push(base);
+        else g.entries.push({ ...base, kids: shownKids.map((x) => { const kon = sel.includes(x.n); return { name: pretty(x.n.slice(t.n.length + 1)).replace(/\//g, ' / '), raw: x.n, k: x.k, last: x.last, pressed: kon, pick: () => toggle(x.n), mark: mark(kon, x.n), style: kon ? 'italic' : 'normal', ...decorate(x, kon) }; }) });
+      });
+      return Object.values(map).sort((a, b) => a.ch.localeCompare(b.ch)).map((g) => {
+        g.entries.sort((a, b) => a.name.localeCompare(b.name));
+        g.once.sort((a, b) => a.name.localeCompare(b.name));
+        const total = g.entries.length + g.entries.reduce((s, e) => s + e.kids.length, 0) + g.once.length;
+        return { ...g, id: g.ch.toLowerCase(), total, count: total + (total === 1 ? ' tag' : ' tags'), hasOnce: g.once.length > 0, once: g.once.map((o, i) => ({ ...o, sep: i < g.once.length - 1 ? ', ' : '' })) };
+      });
+    };
+    const selWords = sel.map((n, i) => ({ n: pretty(n.split('/').pop()), ink: COLOR[n.split('/')[0]] ? COLOR[n.split('/')[0]][1] : '#1f1d1a', sep: i === sel.length - 1 ? '' : i === sel.length - 2 ? ' and ' : ', ', pick: () => toggle(n) }));
+
+    const DARKINK = { work: '#E8A985', design: '#9DB7E3', reading: '#E79BB8', travel: '#93C6D3', recipes: '#E0BD74', type: '#A9C77A', dev: '#C2BCAF', video: '#A9BCE6' };
+    const hexes = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hexes(a), B = hexes(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const m = st.month;
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const mi = 9 + m;
+    const set = (v) => this.setState({ month: Math.max(0, Math.min(24, v)) });
+    const O = [0, 0.1, 0.5, 14, 2, 9, 4, 1, 6, 14, 11, 16, 3, 0.5, 20, 7, 12];
+    const lost = (k) => O.filter((o) => o + k >= 12).length;
+    const PAL = ['#24453B', '#3E6CA8', '#E79A7A', '#A3302A', '#2F3B8F', '#6E8A63', '#c4688a', '#EBCB66'];
+    const segs = Array.from({ length: 25 }, (_, i) => ({
+      c: PAL[i % PAL.length],
+      f: 'saturate(' + (1 - (i / 24) * 0.92).toFixed(2) + ') brightness(' + (1 - (i / 24) * 0.1).toFixed(2) + ')',
+      pressed: i === m,
+      aria: i === 0 ? 'Today' : MONTHS[(9 + i) % 12] + ' ' + (2026 + Math.floor((9 + i) / 12)),
+      pick: () => set(i)
+    }));
+    const swDefs = [['#24453B', 'Deep green', 3], ['#3E6CA8', 'Blue', 4], ['#E79A7A', 'Coral', 2], ['#A3302A', 'Red', 2], ['#2F3B8F', 'Indigo', 2], ['#6E8A63', 'Moss', 1], ['#EEF0F2', 'Pale grey', 4], ['#2A2F3A', 'Charcoal', 2]];
+    const isStale = (t) => st.tidy > 0 && t.last + m >= st.tidy && !sel.includes(t.n);
+    const groups = buildGroups((t, on) => {
+      const root = t.n.split('/')[0];
+      const col = COLOR[root] && !t.n.includes('/') ? COLOR[root][0] : null;
+      const fade = on ? 0 : Math.min(1, (t.last + m) / 18);
+      const c = col || '#B3B9C5';
+      return {
+        ink: mix('#EEF0F4', '#8C929C', fade),
+        dot: col ? mix(col, '#5A5F68', fade) : 'transparent',
+        dotGlow: col && fade < 0.4 ? '0 0 10px ' + col : 'none',
+        selBg: on ? (COLOR[root] ? COLOR[root][0] + '33' : 'rgba(255,255,255,0.12)') : 'transparent',
+        selGlow: on ? '0 0 24px ' + (COLOR[root] ? COLOR[root][0] + '88' : 'rgba(255,255,255,0.3)') : 'none',
+        right: st.tidy > 0 ? (t.last + m === 0 ? 'now' : (t.last + m) + ' mo') : String(t.k)
+      };
+    });
+    const stale = all.filter(isStale);
+    const tagFill = (n) => (COLOR[n.split('/')[0]] ? COLOR[n.split('/')[0]][0] : '#B3B9C5');
+    const kindDefs = [['all', 'Everything', 18, '#EEF0F4'], ['link', 'Links', 8, '#8AB8F7'], ['quote', 'Quotes', 3, '#F4A184'], ['picture', 'Pictures', 4, '#EBCB66'], ['note', 'Notes', 3, '#8ED2A8']];
+    return {
+      la: {
+        lead: m === 0 ? 'Your library now,' : 'Your library as it’ll look in',
+        month: MONTHS[mi % 12], year: String(2026 + Math.floor(mi / 12)),
+        atStart: m === 0, atEnd: m === 24, prev: () => set(m - 1), next: () => set(m + 1), reset: () => set(0),
+        isToday: m === 0, notToday: m > 0,
+        status: (m === 0 ? '' : 'By then ') + lost(m) + ' of 18 things ' + (m === 0 ? 'have' : 'will have') + ' lost their colour',
+        segs, knob: ((m + 0.5) / 25 * 100).toFixed(2) + '%', glow: PAL[m % PAL.length]
+      },
+      swatches: swDefs.map(([c, name, n], i) => ({ c, aria: name + ' things, ' + n, pressed: i === st.swatch, ring: i === st.swatch ? '0 0 0 2px #EEF0F4, 0 0 26px ' + c : '0 0 0 1px rgba(255,255,255,0.18)', pick: () => this.setState({ swatch: i === st.swatch ? null : i }) })),
+      swLabel: st.swatch == null ? 'Pick a colour to see things that looked like it' : swDefs[st.swatch][2] + ' ' + swDefs[st.swatch][1].toLowerCase() + ' things',
+      top: all.filter((t) => !t.n.includes('/')).sort((a, b) => b.k - a.k).slice(0, 6).map((t) => {
+        const on = sel.includes(t.n); const c = COLOR[t.n][0];
+        return { name: pretty(t.n), k: t.k, pressed: on, c, fg: on ? '#0E1116' : DARKINK[t.n], bg: on ? c : 'transparent', glow: on ? '0 0 22px ' + c : 'none', pick: () => toggle(t.n) };
+      }),
+      ixOpen: st.ixOpen, toggleIx: () => this.setState({ ixOpen: !st.ixOpen }),
+      ixLabel: st.ixOpen ? 'Close the index' : 'Open the index · ' + all.length,
+      hasSel: sel.length > 0,
+      selPills: sel.map((n) => ({ n: pretty(n.split('/').pop()), c: tagFill(n), pick: () => toggle(n) })),
+      clear: () => this.setState({ sel: [] }),
+      query: st.query, onQuery: (e) => this.setState({ query: e.target.value }),
+      tidy: [[0, 'Off'], [3, '3 months'], [6, '6 months'], [12, 'a year']].map(([v, l]) => ({ label: l, pressed: v === st.tidy, pick: () => this.setState({ tidy: v }) })),
+      tidying: st.tidy > 0 && stale.length > 0,
+      staleCount: stale.length,
+      staleLabel: (m === 0 ? '' : 'By ' + MONTHS[mi % 12] + ' ' + (2026 + Math.floor(mi / 12)) + ', ') + stale.length + ' tags ' + (m === 0 ? 'haven’t' : 'won’t have') + ' been used in ' + (st.tidy === 12 ? 'a year' : st.tidy + ' months'),
+      groups,
+      kinds: kindDefs.map(([id, label, n, c]) => { const on = id === st.kind; return { label, n, c, pressed: on, fg: on ? '#0E1116' : c, bg: on ? c : 'transparent', glow: on ? '0 0 22px ' + c + '99' : 'none', pick: () => this.setState({ kind: id }) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

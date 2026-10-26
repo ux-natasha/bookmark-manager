@@ -26,6 +26,7 @@ const BY_HOST: [string[], Platform][] = [
   [['dev.to'], { id: 'devto', label: 'DEV' }],
   [['github.com', 'github.io'], { id: 'github', label: 'GitHub' }],
   [['gitlab.com'], { id: 'gitlab', label: 'GitLab' }],
+  [['codeberg.org'], { id: 'codeberg', label: 'Codeberg' }],
   [['codepen.io'], { id: 'codepen', label: 'CodePen' }],
   [['npmjs.com'], { id: 'npm', label: 'npm' }],
   [['stackoverflow.com'], { id: 'stackoverflow', label: 'Stack Overflow' }],

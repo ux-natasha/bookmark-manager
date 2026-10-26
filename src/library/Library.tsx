@@ -6,6 +6,8 @@ import { deleteBookmark, restoreBookmark } from '../lib/bookmarks';
 import { isDeadLink, kindOf, type Bookmark, type ItemKind } from '../lib/db';
 import { useBookmarks, useEnrichProgress, useTagCounts, useToast } from '../lib/hooks';
 import { saveSequence } from '../lib/codes';
+import { plateNumbers } from '../lib/covers';
+import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } from '../lib/linksShow';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { pickForgotten } from '../lib/resurface';
@@ -18,6 +20,7 @@ import { ImportDialog } from './ImportDialog';
 import { JotNote } from './JotNote';
 import { MoreMenu } from './MoreMenu';
 import { PostDialog } from './PostDialog';
+import { Rack, RackLoading } from './Rack';
 import { Sheet } from './Sheet';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
@@ -64,14 +67,24 @@ function usePlatformCounts(bookmarks: Bookmark[] | undefined) {
 
 export function Library() {
   const { theme, setTheme } = useThemeSetting();
+  const { linksShow, setLinksShow } = useLinksShowSetting();
   return (
     <ThemeContext.Provider value={theme}>
-      <LibraryPage theme={theme} setTheme={setTheme} />
+      <LinksShowContext.Provider value={linksShow}>
+        <LibraryPage theme={theme} setTheme={setTheme} linksShow={linksShow} setLinksShow={setLinksShow} />
+      </LinksShowContext.Provider>
     </ThemeContext.Provider>
   );
 }
 
-function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Theme) => void }) {
+interface PageProps {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  linksShow: LinksShow;
+  setLinksShow: (value: LinksShow) => void;
+}
+
+function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const bookmarks = useBookmarks();
   const tagCounts = useTagCounts(bookmarks);
   const platformCounts = usePlatformCounts(bookmarks);
@@ -81,6 +94,7 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
   const { appearance, isDark, toggle: toggleAppearance, setAppearance } = useAppearance();
   const copy = copyFor(theme);
   const contact = theme === 'contact';
+  const covers = theme === 'covers';
 
   const [query, setQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -141,6 +155,7 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
   const editing = editingId ? bookmarks?.find((b) => b.id === editingId) : undefined;
   const deadCount = useMemo(() => bookmarks?.filter(isDeadLink).length ?? 0, [bookmarks]);
   const sequence = useMemo(() => saveSequence(bookmarks ?? []), [bookmarks]);
+  const plates = useMemo(() => plateNumbers(bookmarks ?? []), [bookmarks]);
   const filtersActive = selectedTags.length > 0 || kindFilter !== null || platformFilter !== null || deadOnly;
   const clearFilters = () => {
     setSelectedTags([]);
@@ -204,6 +219,8 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
   const renderItems = (items: Bookmark[]) =>
     contact ? (
       <Sheet bookmarks={items} sequence={sequence} arrivedIds={arrivedIds} {...cardProps} />
+    ) : covers ? (
+      <Rack bookmarks={items} plates={plates} arrivedIds={arrivedIds} {...cardProps} />
     ) : (
       <div className="grid">
         {items.map((b) => (
@@ -221,6 +238,15 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
           </p>
         )}
         <p className="wordmark">Bookmarks</p>
+        {covers && (
+          <p className="dateline">
+            <span>{volumeLine(bookmarks)}</span>
+            <span>
+              {bookmarks?.length ? summaryLine(bookmarks.length, kindCounts) : '0 kept'}
+              {fetching > 0 && ` · ${fetching} fetching`}
+            </span>
+          </p>
+        )}
         <div className="header-actions">
           <MoreMenu
             items={[
@@ -259,9 +285,9 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
 
       <section className="hero">
         <div className="hero-main">
-          {/* The Contact sheet theme moves these into the header and the kind list. */}
-          {!contact && !!bookmarks?.length && <p className="summary-line">{summaryLine(bookmarks.length, kindCounts)}</p>}
-          {!contact && progress?.running && progress.total > 0 && (
+          {/* The Contact sheet theme moves these into the header and the kind list; Covers, into the dateline. */}
+          {theme === 'default' && !!bookmarks?.length && <p className="summary-line">{summaryLine(bookmarks.length, kindCounts)}</p>}
+          {theme === 'default' && progress?.running && progress.total > 0 && (
             <div className="enrich-progress" role="status">
               <span>
                 Fetching previews and details… {progress.done} of {progress.total}
@@ -269,11 +295,14 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
               <progress value={progress.done} max={progress.total} />
             </div>
           )}
-          <h1 className="headline">
-            {copy.headline[0]}
-            {copy.headlineBreak && <br />}
-            <em>{copy.headline[1]}</em>.
-          </h1>
+          <div className="headline-row">
+            <h1 className="headline">
+              {copy.headline[0]}
+              {copy.headlineBreak && <br />}
+              <em>{copy.headline[1]}</em>.
+            </h1>
+            {covers && <LinksShowControl value={linksShow} onChange={setLinksShow} />}
+          </div>
           <div className="hero-fields">
             <label className="search-field">
               <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -352,6 +381,8 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
             Import your Edge favorites
           </button>
         </section>
+      ) : !bookmarks ? (
+        covers && <RackLoading />
       ) : (
         bookmarks && (
           <main className="library-main">
@@ -429,11 +460,11 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
 
             {filtered.length === 0 ? (
               <div className="no-results">
-                {contact && (
+                {theme !== 'default' && (
                   <p className="no-results-filters">
                     {[
-                      `0 ${copy.itemNoun[1]}`,
-                      kindFilter && KIND_CODES[kindFilter],
+                      contact && `0 ${copy.itemNoun[1]}`,
+                      kindFilter && (contact ? KIND_CODES[kindFilter] : KIND_LABELS[kindFilter][1]),
                       selectedTags.length > 0 && `filed under ${selectedTags.map(tagLabel).join(', ')}`,
                       platformFilter && (platformCounts.find((p) => p.id === platformFilter)?.label ?? platformFilter),
                       deadOnly && 'may be dead',
@@ -483,6 +514,25 @@ function LibraryPage({ theme, setTheme }: { theme: Theme; setTheme: (theme: Them
       {importing && <ImportDialog onClose={() => setImporting(false)} />}
       {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
       <ToastView toast={toast} onDone={hideToast} />
+    </div>
+  );
+}
+
+// The Covers theme's "Links show": a typeset cover, the site's image or a screenshot, for every link
+// that hasn't been given its own choice in Edit.
+function LinksShowControl({ value, onChange }: { value: LinksShow; onChange: (value: LinksShow) => void }) {
+  return (
+    <div className="links-show">
+      <span className="links-show-label" id="links-show-label">
+        Links show
+      </span>
+      <div className="segmented" role="group" aria-labelledby="links-show-label">
+        {LINKS_SHOW.map(({ id, label }) => (
+          <button key={id} type="button" aria-pressed={value === id} onClick={() => onChange(id)}>
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -590,6 +640,15 @@ function tagLabel(tag: string): string {
 function summaryLine(total: number, kindCounts: { kind: ItemKind; count: number }[]): string {
   const kinds = kindCounts.map(({ kind, count }) => `${count} ${count === 1 ? KIND_LABELS[kind][0] : KIND_LABELS[kind][1].toLowerCase()}`);
   return [`${total} kept`, ...kinds].join(' · ');
+}
+
+// "VOL. 1 · OCTOBER 2026". The volume is the years since the first save, plus one.
+function volumeLine(bookmarks: Bookmark[] | undefined): string {
+  const now = new Date();
+  const first = (bookmarks ?? []).reduce((min, b) => Math.min(min, b.createdAt), now.getTime());
+  const volume = Math.floor((now.getTime() - first) / (365.25 * 24 * 3600 * 1000)) + 1;
+  const month = now.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+  return `Vol. ${volume} · ${month}`;
 }
 
 function countNoun(count: number, kind: ItemKind | null, mixed: boolean, itemNoun: [string, string]): string {

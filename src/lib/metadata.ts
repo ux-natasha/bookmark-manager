@@ -13,6 +13,10 @@ export interface PageMeta {
   themeColor?: string;
   canonicalUrl?: string;
   generator?: string;
+  // Video length in seconds (video:duration, or itemprop="duration" as ISO 8601).
+  duration?: number;
+  // schema.org Recipe data from JSON-LD. An empty object means "a recipe, without those fields".
+  recipe?: { totalTime?: string; yield?: string };
   // Raw hints used by platform detection (e.g. Substack sites on their own domains).
   hints: string[];
 }
@@ -122,6 +126,54 @@ export function parseHtmlMeta(html: string, pageUrl: string): PageMeta {
     themeColor: clean(get('theme-color'), 30),
     canonicalUrl: resolve(links.get('canonical') ?? get('og:url'), base),
     generator: clean(get('generator'), 100),
+    duration: parseDuration(get('video:duration', 'og:video:duration', 'duration')),
+    recipe: findRecipe(head),
     hints,
   };
+}
+
+// Seconds, from a plain number or an ISO 8601 duration ("PT18M42S").
+export function parseDuration(value: string | undefined): number | undefined {
+  if (!value) return undefined;
+  const text = value.trim();
+  if (/^\d+(\.\d+)?$/.test(text)) return Number(text) || undefined;
+  const m = text.match(/^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$/i);
+  if (!m || !m.slice(1).some(Boolean)) return undefined;
+  const [d, h, min, sec] = m.slice(1).map((v) => Number(v ?? 0));
+  return d * 86400 + h * 3600 + min * 60 + sec || undefined;
+}
+
+// The first schema.org Recipe in the page's JSON-LD, including ones inside @graph or arrays.
+export function findRecipe(head: string): PageMeta['recipe'] {
+  for (const [, json] of head.matchAll(/<script\b[^>]*type=["']?application\/ld\+json["']?[^>]*>([\s\S]*?)<\/script>/gi)) {
+    let data: unknown;
+    try {
+      data = JSON.parse(json);
+    } catch {
+      continue;
+    }
+    const recipe = findOfType(data, 'Recipe');
+    if (!recipe) continue;
+    const rawYield = Array.isArray(recipe.recipeYield) ? recipe.recipeYield[0] : recipe.recipeYield;
+    return {
+      totalTime: typeof recipe.totalTime === 'string' ? recipe.totalTime : undefined,
+      yield: typeof rawYield === 'string' || typeof rawYield === 'number' ? String(rawYield) : undefined,
+    };
+  }
+  return undefined;
+}
+
+function findOfType(node: unknown, type: string, depth = 0): Record<string, unknown> | undefined {
+  if (!node || typeof node !== 'object' || depth > 4) return undefined;
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const found = findOfType(item, type, depth + 1);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  const record = node as Record<string, unknown>;
+  const types = ([] as unknown[]).concat(record['@type']);
+  if (types.includes(type)) return record;
+  return findOfType(record['@graph'], type, depth + 1);
 }

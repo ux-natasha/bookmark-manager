@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Covers · Shelf-wear chart</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.row{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));gap:0 34px;align-items:end;padding:22px 0 0}
+.shelf{grid-column:2 / -1;height:12px;margin-top:-1px;background:linear-gradient(180deg,#d8cfbd,#c6bba5);box-shadow:0 10px 14px -8px rgba(60,40,10,.45)}
+.cover{position:relative;aspect-ratio:3/4;overflow:hidden;box-sizing:border-box;display:flex;flex-direction:column;border-radius:3px;transform-origin:0 100%;box-shadow:0 1px 0 rgba(0,0,0,.12),0 18px 22px -18px rgba(0,0,0,.55)}
+.fill{flex:1;min-height:0;display:flex;flex-direction:column}
+.spine{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(90deg,rgba(0,0,0,.22),rgba(255,255,255,.06) 60%,transparent)}
+.bleach{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,248,230,.9),rgba(255,248,230,.25) 45%,transparent 75%)}
+.fox{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 30%,rgba(92,70,36,.42) 0 .9px,transparent 1.4px) 0 0/23px 19px,radial-gradient(circle at 70% 60%,rgba(92,70,36,.34) 0 .8px,transparent 1.2px) 0 0/17px 29px,radial-gradient(ellipse at 50% 45%,transparent 52%,rgba(130,96,40,.3))}
+.mono{font-family:'Geist Mono',monospace}
+.bodoni{font-family:'Bodoni Moda',Didot,serif}
+.sprockets{position:absolute;left:0;right:0;height:13px;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(255,255,255,.75) 5px 11px,transparent 11px 16px) 0 50%/100% 6px no-repeat,#0b0d11}
+.pic-tiles{background:radial-gradient(circle,#E9EEF5 0 4px,transparent 4.5px) 13px 13px/26px 26px,repeating-conic-gradient(#3E6CA8 0 25%,#E9EEF5 0 50%) 0 0/26px 26px}
+</style>
+</helmet>
+<div style="width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #ECE9E2; color: #1F1D1A; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 22px">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 10px">
+    <h1 style="margin: 0; font-family: 'Bodoni Moda', Didot, serif; font-weight: 400; font-size: 72px; line-height: 0.95; letter-spacing: -0.01em">Shelf-wear <span style="font-style: italic">chart</span></h1>
+    <span class="mono" style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #58534A; text-align: right; line-height: 1.6">Each cover, untouched for<br>0 · 6 · 12 · 24 months</span>
+  </div>
+  <div class="row" style="padding: 0">
+    <span></span>
+    <sc-for list="{{cols}}" as="h" hint-placeholder-count="4"><div style="display: flex; flex-direction: column; gap: 2px"><span class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #58534A">{{h.kicker}}</span><span class="bodoni" style="font-size: 26px; font-style: italic">{{h.label}}</span></div></sc-for>
+  </div>
+
+  <sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+    <div>
+      <div class="row">
+        <div style="display: flex; flex-direction: column; gap: 4px; align-self: center">
+          <span class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #58534A">{{r.code}}</span>
+          <span style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.15">{{r.name}}</span>
+        </div>
+        <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+          <div class="cover" style="background: {{c.bg}}; color: {{c.fg}}; padding: {{c.pad}}; filter: {{c.filter}}; transform: rotate({{c.lean}})">
+            <sc-if value="{{c.spine}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" class="spine"></span></sc-if>
+            <sc-if value="{{c.isArticle}}" hint-placeholder-val="{{true}}"><div class="fill"><span class="bodoni" style="font-size: 21px; font-weight: 600; letter-spacing: 0.03em; line-height: 1; text-align: center">FIELD NOTES</span><span class="mono" style="margin-top: 6px; padding: 4px 0; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; font-size: 8px; letter-spacing: 0.08em; text-align: center; opacity: 0.8">A NEWSLETTER</span><span style="margin-top: auto; font-family: Newsreader, Georgia, serif; font-size: 19px; line-height: 1.05">Why every team needs a decision log</span></div></sc-if>
+            <sc-if value="{{c.isVideo}}" hint-placeholder-val="{{false}}"><div class="fill"><span aria-hidden="true" class="sprockets" style="top: 0"></span><span aria-hidden="true" class="sprockets" style="bottom: 0"></span><span class="mono" style="font-size: 8.5px; letter-spacing: 0.1em; opacity: 0.75">YOUTUBE · PART 2</span><span style="margin-top: 10px; font-size: 18px; font-weight: 600; line-height: 1.05">Colour theory for interfaces</span><span class="mono" style="margin-top: auto; display: flex; justify-content: space-between; font-size: 9px"><span>5:10</span><span>18:42</span></span></div></sc-if>
+            <sc-if value="{{c.isRecipe}}" hint-placeholder-val="{{false}}"><div class="fill" style="align-items: center; text-align: center; padding: 10px 6px; border: 1px solid #A3302A"><span class="mono" style="font-size: 7.5px; letter-spacing: 0.14em; color: #7E211D">SERIOUSKITCHEN.COM</span><span class="bodoni" style="margin: auto 0; font-style: italic; font-size: 20px; line-height: 1.05">Slow cooker ragù that actually tastes slow</span><span class="mono" style="font-size: 8.5px; color: #7E211D">6 HOURS · SERVES 6</span></div></sc-if>
+            <sc-if value="{{c.isGuide}}" hint-placeholder-val="{{false}}"><div class="fill"><span class="mono" style="font-size: 8px; letter-spacing: 0.06em">38.72° N · 9.14° W</span><span class="bodoni" style="margin-top: auto; font-size: 30px; line-height: 0.95">Lisbon</span><span class="bodoni" style="font-style: italic; font-size: 17px">in four days</span></div></sc-if>
+            <sc-if value="{{c.isQuote}}" hint-placeholder-val="{{false}}"><div class="fill" style="justify-content: center; gap: 12px"><span aria-hidden="true" style="width: 26px; height: 3px; background: #2F3B8F"></span><span style="font-family: Newsreader, Georgia, serif; font-size: 18px; line-height: 1.12">Measure is how far the eye can travel before it gets tired.</span></div></sc-if>
+            <sc-if value="{{c.isPicture}}" hint-placeholder-val="{{false}}"><div class="fill"><div class="pic-tiles" style="flex: 1"></div><span style="display: flex; justify-content: space-between; align-items: baseline; padding: 8px 10px 9px; color: #211E19"><span style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 12px">Blue and white tiles</span><span class="mono" style="font-size: 8px">PLATE 3</span></span></div></sc-if>
+            <sc-if value="{{c.isNote}}" hint-placeholder-val="{{false}}"><div class="fill"><span class="mono" style="display: flex; justify-content: space-between; height: 26px; font-size: 8px; color: #5E574A">YOUR NOTE<span>OCT 22</span></span><span style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 16px; line-height: 22px">Ragù: tomato paste, not passata. Brown it longer than feels right.</span></div></sc-if>
+            <div aria-hidden="true" class="bleach" style="opacity: {{c.bleach}}"></div>
+            <div aria-hidden="true" class="fox" style="opacity: {{c.fox}}"></div>
+          </div>
+        </sc-for>
+      </div>
+      <div class="row" style="padding: 0"><span></span><div class="shelf"></div></div>
+    </div>
+  </sc-for>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(31,29,26,0.2)">
+    <sc-for list="{{legend}}" as="l" hint-placeholder-count="4">
+      <div style="display: flex; flex-direction: column; gap: 6px"><span class="mono" style="font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #58534A">{{l.k}}</span><span style="font-family: Newsreader, Georgia, serif; font-size: 17px; line-height: 1.3">{{l.v}}</span></div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ages = [[0, 'Today', 'New on the shelf'], [6, 'In 6 months', 'Shelf-worn'], [12, 'In a year', 'Sun-faded'], [24, 'In two years', 'Forgotten']];
+    const kinds = [
+      { k: 'Article', key: 'isArticle', code: 'Link · newsletter', bg: '#24453B', fg: '#F1EDE3', pad: '14px', spine: true },
+      { k: 'Video', key: 'isVideo', code: 'Link · video', bg: '#1E2129', fg: '#F2F4F7', pad: '22px 14px', spine: false },
+      { k: 'Recipe', key: 'isRecipe', code: 'Link · recipe', bg: '#F6EEDF', fg: '#4A1512', pad: '8px', spine: false },
+      { k: 'Guide', key: 'isGuide', code: 'Link · travel guide', bg: 'radial-gradient(circle at 74% 30%, #F7D9A8 0 13%, transparent 13.5%), #7d9aa8', fg: '#10222B', pad: '14px', spine: true },
+      { k: 'Quote', key: 'isQuote', code: 'Quote · broadside', bg: '#FBF8F1', fg: '#211E19', pad: '16px', spine: true },
+      { k: 'Picture', key: 'isPicture', code: 'Picture · plate', bg: '#FBF8F1', fg: '#211E19', pad: '0', spine: false },
+      { k: 'Note', key: 'isNote', code: 'Note · lined card', bg: 'repeating-linear-gradient(180deg, transparent 0 21px, rgba(47,74,107,0.22) 21px 22px) 0 44px / 100% 100% no-repeat, #FFFDF6', fg: '#211E19', pad: '16px 14px', spine: false }
+    ];
+    const keys = kinds.map((x) => x.key);
+    const rows = kinds.map((x) => ({
+      code: x.code, name: x.k,
+      cells: ages.map(([m]) => {
+        const t = m / 24;
+        const flags = {}; keys.forEach((kk) => { flags[kk] = kk === x.key; });
+        return { ...flags, bg: x.bg, fg: x.fg, pad: x.pad, spine: x.spine,
+          filter: 'sepia(' + (t * 0.55).toFixed(2) + ') saturate(' + (1 - t * 0.4).toFixed(2) + ') brightness(' + (1 + t * 0.05).toFixed(2) + ')',
+          bleach: (t * 0.6).toFixed(2), fox: (t * 0.95).toFixed(2), lean: (-t * 2.4).toFixed(2) + 'deg' };
+      })
+    }));
+    return {
+      cols: ages.map(([, a, b]) => ({ kicker: a, label: b })),
+      rows,
+      legend: [
+        { k: 'Sun', v: 'Fades the top of the cover first, as if it faced a window.' },
+        { k: 'Paper', v: 'Yellows toward sepia; colours lose about half their strength.' },
+        { k: 'Foxing', v: 'Brown specks and a warm edge creep in after six months.' },
+        { k: 'Lean', v: 'Forgotten covers slump up to 2.4° against their neighbour.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

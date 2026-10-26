@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { TagInput } from '../components/TagInput';
 import { setPreviewPreference, updateBookmark } from '../lib/bookmarks';
-import { isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind } from '../lib/db';
+import { coverFor } from '../lib/covers';
+import { isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind, type PreviewPreference } from '../lib/db';
 import { formatDate } from '../lib/hooks';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
+import { linkShows, useLinksShow } from '../lib/linksShow';
 import { pickPreview, usePreviews, usePreviewUrl, usePreviewUrlOfKind } from '../lib/previews';
+import { useTheme } from '../lib/theme';
+import { Cover } from './Cover';
 
 interface Props {
   bookmark: Bookmark;
@@ -14,9 +18,10 @@ interface Props {
   onDelete: (bookmark: Bookmark) => void;
 }
 
-const PREVIEW_LABELS: Record<PreviewKind, string> = {
+const PREVIEW_LABELS: Record<PreviewPreference, string> = {
   screenshot: 'Screenshot',
   image: "Site's image",
+  cover: 'Cover',
 };
 
 const HEADINGS: Record<ItemKind, string> = {
@@ -173,16 +178,26 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
 }
 
 // Shows the available previews side by side when there's a choice, and lets you pick one.
+// The Covers theme adds the typeset cover as a choice.
 function PreviewPicker({ bookmark }: { bookmark: Bookmark }) {
+  const covers = useTheme() === 'covers';
+  const linksShow = useLinksShow();
   const previews = usePreviews(bookmark.id);
   const screenshotUrl = usePreviewUrlOfKind(previews, 'screenshot');
   const imageUrl = usePreviewUrlOfKind(previews, 'image');
   if (!previews?.length) return null;
 
-  const shown = pickPreview(bookmark, previews)?.kind;
-  const options = (['screenshot', 'image'] as const)
+  const images = (['screenshot', 'image'] as const)
     .map((kind) => ({ kind, url: kind === 'screenshot' ? screenshotUrl : imageUrl }))
     .filter((o): o is { kind: PreviewKind; url: string } => !!o.url);
+  const options: { kind: PreviewPreference; url?: string }[] = covers ? [{ kind: 'cover' }, ...images] : images;
+  const wanted = linkShows(bookmark.previewPreference, linksShow);
+  // Same rule as the rack: the chosen preview if it exists, else the cover.
+  const shown: PreviewPreference | undefined = covers
+    ? images.some((o) => o.kind === wanted)
+      ? wanted
+      : 'cover'
+    : pickPreview(bookmark, previews)?.kind;
 
   return (
     <fieldset className="preview-picker">
@@ -196,7 +211,13 @@ function PreviewPicker({ bookmark }: { bookmark: Bookmark }) {
             disabled={options.length < 2}
             onChange={() => setPreviewPreference(bookmark.id, kind)}
           />
-          <img src={url} alt="" />
+          {url ? (
+            <img src={url} alt="" />
+          ) : (
+            <span className="preview-cover">
+              <Cover spec={coverFor(bookmark)} createdAt={bookmark.createdAt} />
+            </span>
+          )}
           <span className="small">{PREVIEW_LABELS[kind]}</span>
         </label>
       ))}

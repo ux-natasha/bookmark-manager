@@ -211,6 +211,13 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
       publishedAt: meta.publishedAt ?? bookmark.publishedAt,
       themeColor: meta.themeColor ?? bookmark.themeColor,
     });
+    if (meta.duration || meta.recipe) {
+      patch.details = {
+        ...bookmark.details,
+        ...(meta.duration && { duration: meta.duration }),
+        ...(meta.recipe && { recipe: meta.recipe }),
+      };
+    }
     // Only replace titles that are just a link; never overwrite one you or your favorites gave it.
     if (meta.title && looksUntitled(bookmark)) patch.title = meta.title;
   }

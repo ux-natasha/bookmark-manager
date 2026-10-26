@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeEntities, parseHtmlMeta } from './metadata';
+import { decodeEntities, findRecipe, parseDuration, parseHtmlMeta } from './metadata';
 import { detectPlatform } from './platform';
 
 const page = (head: string) => `<!doctype html><html><head>${head}</head><body><meta property="og:title" content="body tag, ignored"></body></html>`;
@@ -70,5 +70,22 @@ describe('detectPlatform', () => {
   it('recognises self-hosted platforms from the generator tag', () => {
     const meta = parseHtmlMeta(page(`<meta name="generator" content="WordPress 6.5">`), 'https://blog.example.com');
     expect(detectPlatform('https://blog.example.com', meta)?.label).toBe('WordPress');
+  });
+});
+
+describe('cover details', () => {
+  it('reads video durations in seconds or ISO 8601', () => {
+    expect(parseDuration('1122')).toBe(1122);
+    expect(parseDuration('PT18M42S')).toBe(1122);
+    expect(parseDuration('PT1H')).toBe(3600);
+    expect(parseDuration('soon')).toBeUndefined();
+    expect(parseHtmlMeta(page('<meta property="video:duration" content="95">'), 'https://vimeo.com/1').duration).toBe(95);
+  });
+
+  it('finds schema.org Recipe data, including inside @graph', () => {
+    const ld = (json: string) => `<script type="application/ld+json">${json}</script>`;
+    expect(findRecipe(ld('{"@type":"Recipe","totalTime":"PT6H","recipeYield":["6","6 servings"]}'))).toEqual({ totalTime: 'PT6H', yield: '6' });
+    expect(findRecipe(ld('{"@graph":[{"@type":"WebPage"},{"@type":["Recipe"],"recipeYield":4}]}'))).toEqual({ totalTime: undefined, yield: '4' });
+    expect(findRecipe(ld('{"@type":"Article"}') + ld('not json'))).toBeUndefined();
   });
 });

@@ -51,17 +51,20 @@ export function CardLink({
   bookmark,
   onEdit,
   className = 'card-link',
+  ariaLabel,
   children,
 }: {
   bookmark: Bookmark;
   onEdit: (b: Bookmark) => void;
   className?: string;
+  // Set when the visible content is decoration (a typeset cover) rather than a readable name.
+  ariaLabel?: string;
   children: ReactNode;
 }) {
   const href = bookmark.url || bookmark.imageUrl;
   if (!href) {
     return (
-      <button type="button" className={className} onClick={() => onEdit(bookmark)}>
+      <button type="button" className={className} aria-label={ariaLabel} onClick={() => onEdit(bookmark)}>
         {children}
       </button>
     );
@@ -70,6 +73,7 @@ export function CardLink({
   return (
     <a
       className={className}
+      aria-label={ariaLabel}
       href={href}
       target="_blank"
       rel="noreferrer"

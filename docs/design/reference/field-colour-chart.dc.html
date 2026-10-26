@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Colour field · Colour chart</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;family=Geist:wght@400;500&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.chart{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));gap:18px 22px}
+.hd{display:flex;flex-direction:column;gap:2px;font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#B3B9C5}
+.hd b{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:26px;letter-spacing:-.01em;text-transform:none;color:#EEF0F4}
+.slot{position:relative;padding:14px 10px 10px;min-width:0}
+.halo{position:absolute;inset:16% 8% 2%;border-radius:24px;filter:blur(30px);pointer-events:none}
+.glass{position:relative;display:flex;flex-direction:column;gap:10px;padding:9px 9px 12px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:0 20px 40px -24px rgba(0,0,0,.6)}
+.img{position:relative;border-radius:12px;overflow:hidden}
+.title{font-family:Newsreader,Georgia,serif;font-size:17px;font-weight:500;line-height:1.2;padding:0 5px}
+.row{display:flex;align-items:center;gap:6px;padding:0 5px;font-size:11.5px;color:#B3B9C5}
+.pill{display:inline-flex;align-items:center;height:21px;padding:0 8px;border-radius:999px;border:1px solid;font-size:11.5px;font-weight:500}
+.pic-tiles{background:radial-gradient(circle,#E9EEF5 0 4px,transparent 4.5px) 13px 13px/26px 26px,repeating-conic-gradient(#3E6CA8 0 25%,#E9EEF5 0 50%) 0 0/26px 26px}
+.pic-sun{background:radial-gradient(circle at 64% 44%,#F7D9A8 0 10%,transparent 10.5%),linear-gradient(180deg,transparent 63%,#2F4A6B 63%),linear-gradient(180deg,#D47E66,#F0B48C 63%)}
+</style>
+</helmet>
+<div style="position: relative; overflow: hidden; width: 1280px; box-sizing: border-box; padding: 56px 56px 72px; background: #0E1116; color: #EEF0F4; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 34px">
+  <div aria-hidden="true" style="position: absolute; top: -200px; right: -160px; width: 700px; height: 600px; border-radius: 50%; background: #E79A7A; filter: blur(110px); opacity: 0.32"></div>
+  <div aria-hidden="true" style="position: absolute; top: 900px; left: -220px; width: 640px; height: 640px; border-radius: 50%; background: #3E6CA8; filter: blur(110px); opacity: 0.3"></div>
+  <div aria-hidden="true" style="position: absolute; bottom: -200px; right: 10%; width: 640px; height: 520px; border-radius: 50%; background: #24453B; filter: blur(110px); opacity: 0.35"></div>
+  <div style="position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px">
+    <h1 style="margin: 0; font-family: Newsreader, Georgia, serif; font-weight: 400; font-size: 72px; line-height: 0.92; letter-spacing: -0.03em">Colour <span style="font-style: italic">chart</span></h1>
+    <span style="font-family: 'Geist Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #B3B9C5; text-align: right; line-height: 1.6">Each thing, untouched for<br>0 · 6 · 12 · 24 months</span>
+  </div>
+  <div class="chart" style="position: relative">
+    <span></span>
+    <sc-for list="{{cols}}" as="h" hint-placeholder-count="4"><div class="hd"><span>{{h.kicker}}</span><b>{{h.label}}</b></div></sc-for>
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+      <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 20px">
+        <span class="pill" style="align-self: flex-start; color: {{r.kc}}; border-color: {{r.kc}}">{{r.kind}}</span>
+        <span style="font-family: Newsreader, Georgia, serif; font-style: italic; font-size: 19px; line-height: 1.15">{{r.name}}</span>
+      </div>
+      <sc-for list="{{r.cells}}" as="c" hint-placeholder-count="4">
+        <div class="slot">
+          <div aria-hidden="true" class="halo" style="background: {{c.halo}}; opacity: {{c.haloOp}}"></div>
+          <div class="glass" style="border-style: {{c.edge}}">
+            <sc-if value="{{c.hasImg}}" hint-placeholder-val="{{true}}">
+              <div class="img {{c.pic}}" style="aspect-ratio: {{c.ratio}}; background: {{c.bg}}; color: {{c.fg}}; filter: {{c.filter}}">
+                <sc-if value="{{c.hasInner}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; padding: 10px; display: flex; align-items: flex-end; font-family: Newsreader, Georgia, serif; font-size: 15px; line-height: 1.1">{{c.inner}}</span></sc-if>
+                <sc-if value="{{c.isVideo}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"></path></svg></span></sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{c.isText}}" hint-placeholder-val="{{false}}"><p style="margin: 0; padding: 8px 6px 2px; font-family: Newsreader, Georgia, serif; font-style: {{c.textStyle}}; font-size: 18px; line-height: 1.2; color: {{c.ink}}">{{c.text}}</p></sc-if>
+            <sc-if value="{{c.hasTitle}}" hint-placeholder-val="{{true}}"><span class="title" style="color: {{c.ink}}">{{c.title}}</span></sc-if>
+            <span class="row"><span class="pill" style="color: {{c.pc}}; border-color: {{c.pc}}; border-style: {{c.edge}}">{{c.word}}</span>{{c.age}}</span>
+          </div>
+        </div>
+      </sc-for>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const mix = (a, b, t) => { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',') + ')'; };
+    const K = { link: '#8AB8F7', quote: '#F4A184', picture: '#EBCB66', note: '#8ED2A8' };
+    const ages = [[0, 'Today', 'In full colour'], [6, 'In 6 months', 'Cooling'], [12, 'In a year', 'Greying'], [24, 'In two years', 'Colourless']];
+    const kinds = [
+      { kind: 'link', word: 'article', name: 'Link', img: true, ratio: '1.91 / 1', bg: '#24453B', fg: '#F1EDE3', inner: 'Why every team needs a decision log', halo: '#24453B', title: 'Why every team needs a decision log' },
+      { kind: 'link', word: 'video', name: 'Video', img: true, video: true, ratio: '16 / 9', bg: '#2A2F3A', bgImg: 'radial-gradient(ellipse at 28% 40%, #4d6fa3 0, transparent 58%), radial-gradient(ellipse at 78% 66%, #c47a52 0, transparent 52%)', halo: '#4d6fa3', title: 'Colour theory for interfaces' },
+      { kind: 'link', word: 'post', name: 'Post', text: '40 tools I use to design faster.', textStyle: 'normal', halo: '#c4688a' },
+      { kind: 'link', word: 'recipe', name: 'Recipe', img: true, ratio: '3 / 2', bg: '#A3302A', bgImg: 'radial-gradient(circle at 50% 54%, #7E211D 0 17%, #B5452F 17% 21%, #F4E9DA 21% 33%, #DCCAB0 33% 36%, transparent 36.5%)', halo: '#A3302A', title: 'Slow cooker ragù' },
+      { kind: 'quote', word: 'quote', name: 'Quote', text: '“Measure is how far the eye can travel before it gets tired.”', textStyle: 'italic', halo: '#2F3B8F' },
+      { kind: 'picture', word: 'picture', name: 'Picture, cool', img: true, pic: 'pic-tiles', ratio: '4 / 3', bg: '#E9EEF5', halo: '#3E6CA8' },
+      { kind: 'picture', word: 'picture', name: 'Picture, warm', img: true, pic: 'pic-sun', ratio: '3 / 2', bg: '#E79A7A', halo: '#E79A7A' },
+      { kind: 'note', word: 'note', name: 'Your note', text: 'Ragù: tomato paste, not passata. Brown it longer than feels right.', textStyle: 'italic', halo: '#E5BE4A' }
+    ];
+    const rows = kinds.map((k) => ({
+      kind: k.kind === 'link' ? k.word : k.kind, kc: K[k.kind], name: k.name,
+      cells: ages.map(([m]) => {
+        const t = m / 24;
+        const aged = t >= 0.5;
+        const imgBg = k.bgImg ? k.bgImg + ', ' + k.bg : k.bg;
+        return {
+          halo: k.halo, haloOp: (0.42 * (1 - t)).toFixed(2),
+          edge: aged ? 'dashed' : 'solid',
+          hasImg: !!k.img, pic: k.pic ?? '', ratio: k.ratio ?? '1 / 1', bg: k.pic ? '' : imgBg, fg: k.fg ?? '#fff',
+          filter: 'saturate(' + (1 - t * 0.92).toFixed(2) + ') brightness(' + (1 - t * 0.08).toFixed(2) + ')',
+          hasInner: !!k.inner, inner: k.inner ?? '', isVideo: !!k.video,
+          isText: !!k.text, text: k.text ?? '', textStyle: k.textStyle ?? 'normal',
+          hasTitle: !!k.title, title: k.title ?? '',
+          ink: mix('#EEF0F4', '#8C929C', t),
+          pc: aged ? '#B3B9C5' : K[k.kind], word: k.word,
+          age: m === 0 ? 'this week' : m + ' mo.'
+        };
+      })
+    }));
+    return { cols: ages.map(([, a, b]) => ({ kicker: a, label: b })), rows };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { codeKind, itemCode, subKind } from '../lib/codes';
 import { isDeadLink, kindOf, type Bookmark } from '../lib/db';
 import { formatDate } from '../lib/hooks';
@@ -6,6 +6,7 @@ import { hostnameOf } from '../lib/normalize';
 import { platformById } from '../lib/platform';
 import { fallbackColor, usePreviewUrl } from '../lib/previews';
 import { CardLink } from './BookmarkCard';
+import { useFinished, useFresh } from './useFresh';
 
 // The Contact sheet theme's grid: every item is a frame on one hairline sheet, in row order.
 // Replaces the card grid (and, later, the masonry) when that theme is on.
@@ -50,22 +51,9 @@ export function Sheet({ bookmarks, sequence, arrivedIds, onEdit, onTagClick }: P
   );
 }
 
-// Ids that should play the develop animation right now: each id once, for 1.4s after it's added.
+// Ids that should play the develop animation right now.
 export function useDevelop(ids: Set<string>): Set<string> {
-  const [developing, setDeveloping] = useState<Set<string>>(() => new Set());
-  const seen = useRef(new Set(ids));
-  useEffect(() => {
-    const fresh = [...ids].filter((id) => !seen.current.has(id));
-    if (!fresh.length) return;
-    fresh.forEach((id) => seen.current.add(id));
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setDeveloping((current) => new Set([...current, ...fresh]));
-    const timer = setTimeout(() => {
-      setDeveloping((current) => new Set([...current].filter((id) => !fresh.includes(id))));
-    }, DEVELOP_MS);
-    return () => clearTimeout(timer);
-  }, [ids]);
-  return developing;
+  return useFresh(ids, DEVELOP_MS);
 }
 
 interface CellProps {
@@ -84,16 +72,7 @@ function SheetCell({ bookmark, sequence, developing, onEdit, onTagClick }: CellP
   const [ratio, setRatio] = useState<number>();
   // A link waiting for its details is an unexposed frame; it develops in when they arrive.
   const unexposed = kind === 'link' && !bookmark.enrichedAt && !previewUrl;
-  const wasUnexposed = useRef(unexposed);
-  const [exposedNow, setExposedNow] = useState(false);
-  useEffect(() => {
-    if (wasUnexposed.current && !unexposed) {
-      setExposedNow(true);
-      const timer = setTimeout(() => setExposedNow(false), DEVELOP_MS);
-      wasUnexposed.current = false;
-      return () => clearTimeout(timer);
-    }
-  }, [unexposed]);
+  const exposedNow = useFinished(unexposed, DEVELOP_MS);
 
   const classes = ['sheet-cell', `sheet-cell-${kind}`];
   if (kind === 'quote') classes.push('span2');

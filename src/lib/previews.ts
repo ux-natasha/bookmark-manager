@@ -13,8 +13,9 @@ export interface PreviewChoice {
 // (their site image is usually just an avatar) and the site's own image for everything else.
 export function pickPreview(bookmark: Bookmark, available: Preview[]): Preview | undefined {
   const byKind = (kind: PreviewKind) => available.find((p) => p.kind === kind);
-  const preferred: PreviewKind =
-    bookmark.previewPreference ?? (platformById(bookmark.platform)?.social ? 'screenshot' : 'image');
+  // "Cover" only means something in the Covers theme; everywhere else it's automatic.
+  const choice = bookmark.previewPreference === 'cover' ? undefined : bookmark.previewPreference;
+  const preferred: PreviewKind = choice ?? (platformById(bookmark.platform)?.social ? 'screenshot' : 'image');
   return byKind(preferred) ?? byKind(preferred === 'image' ? 'screenshot' : 'image');
 }
 
@@ -42,7 +43,8 @@ export function usePreviewUrl(bookmark: Bookmark): string | undefined {
   return useObjectUrl(previews ? pickPreview(bookmark, previews)?.blob : undefined);
 }
 
-export function usePreviewUrlOfKind(previews: Preview[] | undefined, kind: PreviewKind): string | undefined {
+// No kind: nothing to show (and no object URL made).
+export function usePreviewUrlOfKind(previews: Preview[] | undefined, kind: PreviewKind | undefined): string | undefined {
   return useObjectUrl(previews?.find((p) => p.kind === kind)?.blob);
 }
 
