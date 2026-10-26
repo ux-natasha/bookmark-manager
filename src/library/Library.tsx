@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import { NoteForm } from '../components/NoteForm';
+import { DISCARD_MESSAGE, NoteForm } from '../components/NoteForm';
 import { ToastView } from '../components/ToastView';
 import { exportBackup, restoreBackup } from '../lib/backup';
 import { addMonths, isFaded, monthsUntouched, patina } from '../lib/age';
@@ -16,7 +16,7 @@ import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } fro
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { pickForgotten } from '../lib/resurface';
-import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, unarchiveTags } from '../lib/tags';
+import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, toggleTagSelection, unarchiveTags } from '../lib/tags';
 import { THEMES, ThemeContext, useThemeSetting, type Theme } from '../lib/theme';
 import { useTidyThreshold } from '../lib/tidyThreshold';
 import { AgeContext, type Revived } from './ageContext';
@@ -41,6 +41,7 @@ import { Sheet } from './Sheet';
 import { lookupFor, slotStyle, TagLookContext, useTagLook } from './tagLook';
 import { TagIndex } from './TagIndex';
 import { TagStrip } from './TagStrip';
+import { TrashDialog } from './TrashDialog';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
 
@@ -132,6 +133,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const [writingNote, setWritingNote] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [viewingTrash, setViewingTrash] = useState(false);
   const [addingFromPost, setAddingFromPost] = useState(false);
   // Look ahead: months from today, 0 to 24. Never saved and never written to the database; a reload goes back to today.
   const [lookAheadMonths, setLookAheadMonths] = useState(0);
@@ -284,7 +286,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const toggleTag = (tag: string) => {
     // Picking a tag counts as using it, so tidy-up leaves it alone.
     if (!selectedTags.includes(tag) && tag !== UNTAGGED) markTagsUsed([tag]);
-    setSelectedTags((tags) => (tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]));
+    setSelectedTags((tags) => toggleTagSelection(tags, tag, UNTAGGED));
     setVisible(PAGE_SIZE);
   };
 
@@ -475,6 +477,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                   items={[
                     { label: 'New note', run: () => setWritingNote('') },
                     { label: 'Import favorites', run: () => setImporting(true) },
+                    { label: 'Recently deleted', run: () => setViewingTrash(true) },
                     { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
                     { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
                     { label: 'Restore', run: () => restoreInput.current?.click() },
@@ -752,6 +755,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
               />
             )}
             {importing && <ImportDialog onClose={() => setImporting(false)} />}
+            {viewingTrash && <TrashDialog onClose={() => setViewingTrash(false)} />}
             {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
             <ToastView toast={toast} onDone={hideToast} />
           </div>
@@ -933,13 +937,22 @@ function countNoun(count: number, kind: ItemKind | null, mixed: boolean, itemNou
 
 function NoteDialog({ allTags, initialText, onClose }: { allTags: string[]; initialText: string; onClose: (saved: boolean) => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const dirty = useRef(false);
   useEffect(() => {
     dialogRef.current?.showModal();
   }, []);
   return (
-    <dialog ref={dialogRef} className="dialog" onClose={() => onClose(false)}>
+    <dialog
+      ref={dialogRef}
+      className="dialog"
+      onClose={() => onClose(false)}
+      // Esc asks before throwing away a note that's been started.
+      onCancel={(e) => {
+        if (dirty.current && !window.confirm(DISCARD_MESSAGE)) e.preventDefault();
+      }}
+    >
       <h2>New note</h2>
-      <NoteForm allTags={allTags} source="library" initialText={initialText} onDone={onClose} />
+      <NoteForm allTags={allTags} source="library" initialText={initialText} onDone={onClose} dirtyRef={dirty} />
     </dialog>
   );
 }

@@ -301,3 +301,11 @@ export async function archiveTags(tags: string[], now = Date.now()): Promise<() 
 export function unarchiveTags(tags: string[]): Promise<void> {
   return patchMeta(tags, (m) => ({ ...m, archivedAt: undefined }));
 }
+
+// The filter's tag selection after picking `tag`. "Untagged" excludes every real tag, so picking it clears
+// them, and picking a real tag clears it: otherwise the two together would match nothing.
+export function toggleTagSelection(selected: string[], tag: string, untagged: string): string[] {
+  if (selected.includes(tag)) return selected.filter((t) => t !== tag);
+  if (tag === untagged) return [untagged];
+  return [...selected.filter((t) => t !== untagged), tag];
+}

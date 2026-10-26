@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { patina } from './age';
 import { db } from './db';
-import { deleteBookmark, dustOff, findByUrl, liveBookmarks, markOpened, saveBookmark, undoDustOff, updateBookmark } from './bookmarks';
+import { deleteBookmark, dustOff, findByUrl, liveBookmarks, markOpened, restoreBookmark, retitleNote, saveBookmark, trashDaysLeft, trashedBookmarks, undoDustOff, updateBookmark } from './bookmarks';
 import { planImport, type FavoriteItem } from './importer';
 import { normalizeUrl } from './normalize';
 import { pickForgotten } from './resurface';
@@ -161,5 +161,42 @@ describe('pickForgotten', () => {
     const picked = pickForgotten(await liveBookmarks(), 4);
     expect(picked).toHaveLength(4);
     expect(new Set(picked.map((b) => b.id)).size).toBe(4);
+  });
+});
+
+describe('retitleNote', () => {
+  const before = { title: 'Buy milk', text: 'Buy milk\nand eggs' };
+  it('follows the first line when the title was only that', () => {
+    expect(retitleNote(before, 'Buy milk', 'Call mum\nand eggs')).toBe('Call mum');
+  });
+  it('keeps a title that was written', () => {
+    expect(retitleNote({ title: 'Shopping', text: 'Buy milk' }, 'Shopping', 'Call mum')).toBe('Shopping');
+  });
+  it('keeps a title changed in the same edit', () => {
+    expect(retitleNote(before, 'Errands', 'Call mum')).toBe('Errands');
+  });
+  it('falls back when the text is emptied', () => {
+    expect(retitleNote(before, 'Buy milk', '  ')).toBe('Untitled note');
+  });
+});
+
+describe('recently deleted', () => {
+  it('lists deleted items, newest deletion first, and restoring removes them', async () => {
+    const a = (await saveBookmark({ url: 'https://a.com', source: 'panel' })).bookmark;
+    const b = (await saveBookmark({ kind: 'note', url: '', text: 'a note', source: 'library' })).bookmark;
+    await saveBookmark({ url: 'https://c.com', source: 'panel' });
+    await deleteBookmark(a.id);
+    await new Promise((r) => setTimeout(r, 5));
+    await deleteBookmark(b.id);
+    expect((await trashedBookmarks()).map((x) => x.id)).toEqual([b.id, a.id]);
+    await restoreBookmark(b.id);
+    expect((await trashedBookmarks()).map((x) => x.id)).toEqual([a.id]);
+  });
+
+  it('counts the days left of the 30', () => {
+    const day = 24 * 60 * 60 * 1000;
+    expect(trashDaysLeft(0, 0)).toBe(30);
+    expect(trashDaysLeft(0, 10 * day + 1)).toBe(20);
+    expect(trashDaysLeft(0, 40 * day)).toBe(0);
   });
 });

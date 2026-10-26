@@ -49,8 +49,8 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
   await db.transaction('rw', db.bookmarks, db.tagMeta, async () => {
     if (Array.isArray(parsed.tagMeta)) await mergeTagMeta(parsed.tagMeta);
     for (const incoming of incomingList) {
-      // Notes have no link; everything else does.
-      if (!incoming.url && kindOf(incoming) !== 'note') continue;
+      // Only links need an address. Notes, and quotes and pictures saved from pages with none (local files), don't.
+      if (!incoming.url && kindOf(incoming) === 'link') continue;
       const normalizedUrl = incoming.url ? normalizeUrl(incoming.url) : '';
       const sameId = incoming.id ? await db.bookmarks.get(incoming.id) : undefined;
       // Only links are matched by address: one page can have many saved pictures and quotes.
@@ -71,8 +71,8 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
           createdAt: incoming.createdAt ?? Date.now(),
           updatedAt: incoming.updatedAt ?? Date.now(),
           source: incoming.source ?? 'backup',
-          // Backups don't include pictures, so saved pictures are downloaded again.
-          enrichedAt: kindOf(incoming) === 'image' ? undefined : incoming.enrichedAt,
+          // Backups don't include previews or pictures, so links and pictures are fetched again.
+          enrichedAt: kindOf(incoming) === 'link' || kindOf(incoming) === 'image' ? undefined : incoming.enrichedAt,
           deletedAt: undefined,
         });
         added++;
@@ -92,7 +92,8 @@ export async function restoreBackup(file: File): Promise<RestoreResult> {
         dustedAt: Math.max(current.dustedAt ?? 0, incoming.dustedAt ?? 0) || undefined,
         createdAt: Math.min(current.createdAt, incoming.createdAt ?? current.createdAt),
         updatedAt: Math.max(current.updatedAt, incoming.updatedAt ?? 0),
-        deletedAt: undefined,
+        // Something deleted here stays deleted: an older backup doesn't bring it back.
+        deletedAt: current.deletedAt,
       });
       merged++;
     }

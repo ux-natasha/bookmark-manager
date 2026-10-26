@@ -19,15 +19,20 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
     readFavorites()
       .then(planImport)
       .then((plan) => setPhase({ name: 'review', plan }))
-      .catch((err: Error) => setPhase({ name: 'error', message: err.message }));
+      .catch((err: Error) => setPhase({ name: 'error', message: `Couldn't read favorites: ${err.message}` }));
   }, []);
 
   const start = async (plan: ImportPlan) => {
     setPhase({ name: 'importing', done: 0, total: plan.toImport.length });
-    const added = await runImport(plan, { foldersAsTags }, (done, total) =>
-      setPhase({ name: 'importing', done, total }),
-    );
-    setPhase({ name: 'finished', added });
+    try {
+      const added = await runImport(plan, { foldersAsTags }, (done, total) =>
+        setPhase({ name: 'importing', done, total }),
+      );
+      setPhase({ name: 'finished', added });
+    } catch (err) {
+      // Without this the dialog stays on "importing", where it can't be closed.
+      setPhase({ name: 'error', message: `The import stopped: ${(err as Error).message}. Anything imported before then was kept.` });
+    }
     sendToBackground({ type: 'enrich-pending' });
   };
 
@@ -46,7 +51,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
 
       {phase.name === 'reading' && <p>Reading your favorites…</p>}
 
-      {phase.name === 'error' && <p className="error">Couldn't read favorites: {phase.message}</p>}
+      {phase.name === 'error' && <p className="error">{phase.message}</p>}
 
       {phase.name === 'review' && <Review plan={phase.plan} foldersAsTags={foldersAsTags} setFoldersAsTags={setFoldersAsTags} />}
 

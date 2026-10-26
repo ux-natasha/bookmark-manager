@@ -80,7 +80,8 @@ export function detectPlatform(url: string, meta?: PageMeta): Platform | undefin
   }
   if (!meta) return undefined;
 
-  for (const hint of meta.hints) if (BY_HINT[hint]) return BY_HINT[hint];
+  // enrichBookmark passes a bare {} when the page couldn't be read.
+  for (const hint of meta.hints ?? []) if (BY_HINT[hint]) return BY_HINT[hint];
   if (meta.generator) {
     for (const [pattern, platform] of BY_GENERATOR) if (pattern.test(meta.generator)) return platform;
   }

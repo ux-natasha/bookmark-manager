@@ -53,6 +53,14 @@ function firstLine(text: string | undefined): string {
   return line.length > 80 ? `${line.slice(0, 80)}…` : line;
 }
 
+// A note's title when the person edits it. A title that was only the first line of the text follows the text;
+// one that was written, or changed in the same edit, stays.
+export function retitleNote(before: { title: string; text?: string }, title: string, text: string): string {
+  const wasAutomatic = before.title === firstLine(before.text);
+  if (!wasAutomatic || title !== before.title) return title;
+  return firstLine(text) || 'Untitled note';
+}
+
 export async function saveBookmark(input: NewBookmark): Promise<SaveResult> {
   const kind = input.kind ?? 'link';
   const normalizedUrl = input.url ? normalizeUrl(input.url) : '';
@@ -159,6 +167,16 @@ export async function undoDustOff(snapshot: DustSnapshot[]): Promise<void> {
   await db.transaction('rw', db.bookmarks, () =>
     Promise.all(snapshot.map(({ id, dustedAt }) => db.bookmarks.update(id, { dustedAt }))),
   );
+}
+
+// Deleted things are kept this long, newest deletion first, so they can be brought back.
+export async function trashedBookmarks(): Promise<Bookmark[]> {
+  const all = await db.bookmarks.where('deletedAt').above(0).toArray();
+  return all.sort((a, b) => b.deletedAt! - a.deletedAt!);
+}
+
+export function trashDaysLeft(deletedAt: number, now = Date.now()): number {
+  return Math.max(0, Math.ceil((deletedAt + TRASH_RETENTION_MS - now) / (24 * 60 * 60 * 1000)));
 }
 
 export async function liveBookmarks(): Promise<Bookmark[]> {

@@ -196,6 +196,8 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
   const platform = detectPlatform(page.finalUrl, meta as PageMeta) ?? detectPlatform(bookmark.url);
   const now = Date.now();
   const failed = page.status === 'unreachable';
+  // Offline, every site looks dead. Leave the bookmark as it was so it's tried again later and no failure is counted.
+  if (failed && typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
   const patch: Partial<Bookmark> = {
     linkStatus: page.status,

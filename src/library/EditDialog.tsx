@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { TagInput } from '../components/TagInput';
-import { setPreviewPreference, updateBookmark } from '../lib/bookmarks';
+import { DISCARD_MESSAGE } from '../components/NoteForm';
+import { retitleNote, setPreviewPreference, updateBookmark } from '../lib/bookmarks';
 import { coverFor } from '../lib/covers';
 import { isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind, type PreviewPreference } from '../lib/db';
 import { formatDate } from '../lib/hooks';
@@ -44,10 +45,27 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
     dialogRef.current?.showModal();
   }, []);
 
+  const hasText = kind === 'quote' || kind === 'note';
+  const dirty =
+    title !== bookmark.title ||
+    note !== bookmark.note ||
+    text !== (bookmark.text ?? '') ||
+    JSON.stringify(tags) !== JSON.stringify(bookmark.tags);
+  // A quote is its words; a note needs words or a title. Saving either empty would leave a blank card.
+  const canSave = kind === 'quote' ? !!text.trim() : kind === 'note' ? !!text.trim() || !!title.trim() : true;
+
+  // Esc, Cancel and the like ask first when something has been changed.
+  const requestClose = () => {
+    if (dirty && !window.confirm(DISCARD_MESSAGE)) return;
+    onClose();
+  };
+
   const save = async () => {
-    const hasText = kind === 'quote' || kind === 'note';
+    if (!canSave) return;
+    const nextTitle = title.trim() || bookmark.url || bookmark.title;
     await updateBookmark(bookmark.id, {
-      title: title.trim() || bookmark.url || bookmark.title,
+      // A note titled by its first line keeps following it.
+      title: kind === 'note' ? retitleNote(bookmark, nextTitle, text) : nextTitle,
       tags,
       note,
       ...(hasText && { text: text.trim() }),
@@ -69,7 +87,16 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
   ].filter(Boolean);
 
   return (
-    <dialog ref={dialogRef} className="dialog" onClose={onClose}>
+    <dialog
+      ref={dialogRef}
+      className="dialog"
+      onClose={onClose}
+      onCancel={(e) => {
+        if (!dirty) return;
+        e.preventDefault();
+        requestClose();
+      }}
+    >
       <form
         method="dialog"
         onSubmit={(e) => {
@@ -165,10 +192,10 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
             </button>
           )}
           <span className="spacer" />
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={requestClose}>
             Cancel
           </button>
-          <button type="submit" className="primary">
+          <button type="submit" className="primary" disabled={!canSave}>
             Save
           </button>
         </div>

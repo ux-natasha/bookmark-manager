@@ -40,6 +40,47 @@ describe('restoreBackup', () => {
     expect((await db.bookmarks.get('c'))?.dustedAt).toBe(70);
   });
 
+  it('keeps quotes and pictures saved from pages with no address, but not links without one', async () => {
+    const base = { tags: [], createdAt: 1, updatedAt: 1, openCount: 0, url: '' };
+    const result = await restoreBackup(
+      backupFile({
+        version: 2,
+        bookmarks: [
+          { ...base, id: 'q', kind: 'quote', title: 'Q', text: 'words' },
+          { ...base, id: 'p', kind: 'image', title: 'P', imageUrl: 'https://img.example/p.png' },
+          { ...base, id: 'l', title: 'no address' },
+        ],
+      }),
+    );
+    expect(result.added).toBe(2);
+    expect(await db.bookmarks.get('q')).toBeTruthy();
+    expect(await db.bookmarks.get('l')).toBeUndefined();
+  });
+
+  it('has restored links and pictures fetched again, since backups carry no previews', async () => {
+    const base = { tags: [], createdAt: 1, updatedAt: 1, openCount: 0, enrichedAt: 99 };
+    await restoreBackup(
+      backupFile({
+        version: 2,
+        bookmarks: [
+          { ...base, id: 'a', url: 'https://a.com', title: 'A' },
+          { ...base, id: 'q', kind: 'quote', url: 'https://a.com', title: 'Q', text: 't' },
+        ],
+      }),
+    );
+    expect((await db.bookmarks.get('a'))?.enrichedAt).toBeUndefined();
+    expect((await db.bookmarks.get('q'))?.enrichedAt).toBe(99);
+  });
+
+  it('does not bring back something deleted here', async () => {
+    await db.bookmarks.add({
+      id: 'd', url: 'https://d.com', normalizedUrl: 'd.com', title: 'D', note: '', tags: [], source: 'panel',
+      createdAt: 1, updatedAt: 1, openCount: 0, deletedAt: 5,
+    });
+    await restoreBackup(backupFile({ version: 2, bookmarks: [{ id: 'd', url: 'https://d.com', title: 'D', tags: [], createdAt: 1, updatedAt: 9, openCount: 0 }] }));
+    expect((await db.bookmarks.get('d'))?.deletedAt).toBe(5);
+  });
+
   it('merges tag metadata: un-archive wins, latest use wins, local colour wins', async () => {
     await db.tagMeta.bulkPut([
       { tag: 'a', colorSlot: 1, lastUsedAt: 10, archivedAt: 5 },

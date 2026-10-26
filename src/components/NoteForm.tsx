@@ -9,13 +9,23 @@ interface Props {
   // Text carried over from somewhere shorter, such as the library's Jot a note field.
   initialText?: string;
   onDone: (saved: boolean) => void;
+  // Kept up to date with whether there's anything typed, so the dialog around this form can ask before Esc discards it.
+  dirtyRef?: { current: boolean };
 }
 
+export const DISCARD_MESSAGE = 'Discard what you wrote?';
+
 // Writing a new note. The title is optional: without one, the note's first line is used.
-export function NoteForm({ allTags, source, initialText = '', onDone }: Props) {
+export function NoteForm({ allTags, source, initialText = '', onDone, dirtyRef }: Props) {
   const [title, setTitle] = useState('');
   const [text, setText] = useState(initialText);
   const [tags, setTags] = useState<string[]>([]);
+  const dirty = !!title.trim() || text !== initialText || tags.length > 0;
+  if (dirtyRef) dirtyRef.current = dirty;
+  const cancel = () => {
+    if (dirty && !window.confirm(DISCARD_MESSAGE)) return;
+    onDone(false);
+  };
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   // Focus goes to the note itself, after a dialog opening around this form has moved focus to the first field.
@@ -66,7 +76,7 @@ export function NoteForm({ allTags, source, initialText = '', onDone }: Props) {
 
       <div className="dialog-actions">
         <span className="spacer" />
-        <button type="button" onClick={() => onDone(false)}>
+        <button type="button" onClick={cancel}>
           Cancel
         </button>
         <button type="submit" className="primary" disabled={!text.trim() && !title.trim()}>
