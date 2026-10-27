@@ -950,6 +950,12 @@ button.card-link:hover {
   outline: none;
 }
 
+/* From the keyboard, that hand-off still needs to show where focus went. */
+.look-ahead:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 .look-ahead-lead {
   font: italic 17px var(--font-serif);
   color: var(--text-muted);
