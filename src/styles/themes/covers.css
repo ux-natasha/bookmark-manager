@@ -172,9 +172,7 @@
 }
 
 .links-show-label {
-  font: 10.5px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
   color: var(--text-muted);
 }
 
@@ -246,9 +244,7 @@
 
 [data-theme='covers'] .no-results-filters {
   margin: 0 0 12px;
-  font: 10px var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
   color: var(--text-muted);
 }
 
@@ -330,9 +326,7 @@
 
 [data-theme='covers'] .more-menu-group {
   padding: 12px 16px 2px;
-  font: 10px var(--font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
 }
 
 /* 6.7 Toast: an erratum slip */
@@ -352,9 +346,7 @@
 
 [data-theme='covers'] .toast::before {
   content: 'Erratum';
-  font: 9.5px var(--font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
   color: var(--erratum-label);
 }
 
@@ -1120,9 +1112,7 @@ button.rack-link:hover:not(:disabled) {
 }
 
 [data-theme='covers'] .tag-strip-lead {
-  font: 10.5px var(--font-mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
 }
 
 [data-theme='covers'] button.tag-strip-tag {
@@ -1661,8 +1651,6 @@ button.spine:focus-visible {
 
 [data-theme='covers'] .fold-action {
   font: 11px var(--font-sans, sans-serif);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

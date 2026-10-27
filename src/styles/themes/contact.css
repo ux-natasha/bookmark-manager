@@ -105,15 +105,11 @@
   border-color: var(--text);
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 [data-theme='contact'] button.link {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 [data-theme='contact'] .icon-button,
@@ -201,8 +197,6 @@
 
 [data-theme='contact'] .jot-note .primary {
   font: 11px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* 4.3 Kind bar and text-style selects */
@@ -247,8 +241,6 @@
 
 [data-theme='contact'] .labelled-select-name {
   font: 11px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -258,8 +250,6 @@
   border: 0;
   background: transparent;
   font: 11px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 [data-theme='contact'] .pill-select option {
@@ -280,8 +270,6 @@
 }
 
 [data-theme='contact'] .filed-under-lead {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .filed-under-x {
@@ -318,8 +306,6 @@
 }
 
 [data-theme='contact'] .result-count {
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* 6.1 No results, empty library */
@@ -327,8 +313,6 @@
   margin: 0 0 12px;
   font: 11px var(--font-mono);
   font-style: normal;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 [data-theme='contact'] .no-results p:not(.no-results-filters) {
@@ -373,9 +357,7 @@
 [data-theme='contact'] .more-menu-list::before {
   content: 'More';
   padding: 12px 16px;
-  font: 10.5px var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
   color: var(--text-muted);
 }
 
@@ -399,9 +381,7 @@
 [data-theme='contact'] .more-menu-group {
   padding: 10px 16px 6px;
   border-top: 1px solid var(--border);
-  font: 10.5px var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
 }
 
 /* 4.9 Toast */
@@ -410,8 +390,6 @@
   padding: 0 18px;
   box-shadow: none;
   font: 11px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* 4.4 The sheet */
@@ -628,10 +606,8 @@ button.sheet-link:hover:not(:disabled) {
   align-items: center;
   justify-content: center;
   padding: 12px;
-  font: 10px var(--font-mono);
-  letter-spacing: 0.06em;
+  font: 11px var(--font-mono);
   text-align: center;
-  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -785,8 +761,6 @@ button.sheet-link:hover:not(:disabled) {
 /* On a line of its own, so the age text always gets the full row beside Edit. */
 .sheet-tags {
   flex-basis: 100%;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .sheet-tags button.sheet-tag.is-archived {
@@ -822,8 +796,6 @@ button.sheet-link:hover:not(:disabled) {
 .sheet-meta button.sheet-edit {
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   opacity: 0;
   transition: opacity 150ms ease-out;
 }
@@ -1011,9 +983,7 @@ button.sheet-link:hover:not(:disabled) {
 [data-theme='contact'] .ix-hint,
 [data-theme='contact'] .ix-tidy .segmented button,
 [data-theme='contact'] .ix-tidy button {
-  font: 10.5px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
 }
 
 [data-theme='contact'] .ix-tidy-lead {
@@ -1284,9 +1254,7 @@ button.film-frame:focus-visible {
 [data-theme='contact'] .dust-button {
   border: 1px solid var(--text);
   border-radius: 0;
-  font: 10px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font: 11px var(--font-mono);
 }
 
 /* Reprinted: the cell is circled in grease pencil and lit as new paper, for the session. */

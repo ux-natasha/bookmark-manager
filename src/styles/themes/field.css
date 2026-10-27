@@ -763,8 +763,6 @@ button.swatch[aria-pressed='true'] {
 
 [data-theme='field'] .no-results-filters {
   font: 11px var(--font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 @media (max-width: 719px) {
