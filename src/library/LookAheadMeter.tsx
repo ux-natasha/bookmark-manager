@@ -64,7 +64,7 @@ export function LookAheadMeter({ months, onChange, fadedCount, total, refresh, c
           <span
             className="meter-knob"
             aria-hidden="true"
-            style={{ left: position(months), '--glow': colorAt(months) } as CSSProperties}
+            style={{ '--x': (months + 0.5) / SEGMENTS, '--glow': colorAt(months) } as CSSProperties}
           />
         </div>
         <div className="meter-scale" aria-hidden="true">

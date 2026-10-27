@@ -823,6 +823,7 @@ button.swatch[aria-pressed='true'] {
 
 .meter-track {
   position: relative;
+  container-type: inline-size;
   height: 44px;
 }
 
@@ -869,14 +870,17 @@ button.meter-hit:focus-visible {
   top: 50%;
   width: 42px;
   height: 42px;
+  left: 0;
   margin: -21px 0 0 -21px;
+  /* --x is the knob's place along the track, 0 to 1. */
+  transform: translateX(calc(var(--x, 0) * 100cqi));
   border: 2px solid var(--text);
   border-radius: 50%;
   background: rgb(255 255 255 / 0.12);
   box-shadow: 0 0 28px var(--glow);
   pointer-events: none;
   transition:
-    left 400ms var(--ease-spring),
+    transform 400ms var(--ease-out-expo),
     box-shadow 400ms ease-out;
 }
 
@@ -996,12 +1000,14 @@ button.meter-hit:focus-visible {
   content: '';
   position: absolute;
   top: -4px;
-  left: calc(var(--m, 0) * (100% - 3px));
+  left: 0;
+  /* The mark is 72px wide, so the needle travels 69px. */
+  transform: translateX(calc(var(--m, 0) * 69px));
   width: 3px;
   height: 16px;
   border-radius: 2px;
   background: var(--text);
-  transition: left 260ms ease-out;
+  transition: transform 260ms var(--ease-out-expo);
 }
 
 [data-theme='field'] .look-ahead-fold {

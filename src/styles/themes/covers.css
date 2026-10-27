@@ -1041,7 +1041,7 @@ button.rack-link:hover:not(:disabled) {
 
 /* 8. New: fresh off the press */
 .rack-item.is-pressing .cover {
-  animation: cover-press 900ms cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+  animation: cover-press 900ms var(--ease-out-expo) both;
 }
 
 @keyframes cover-press {
@@ -1437,7 +1437,7 @@ button.spine {
   transform-origin: 50% 100%;
   /* Later issues lean a little more. */
   transform: rotate(calc(var(--m) * -1.6deg));
-  transition: transform 320ms var(--ease-spring);
+  transition: transform 320ms var(--ease-out-expo);
 }
 
 button.spine:hover:not(:disabled) {
@@ -1636,18 +1636,19 @@ button.spine:focus-visible {
   top: 0;
   left: 14px;
   width: 14px;
-  height: 22px;
+  height: 46px;
   background: var(--accent);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
-  transition: height 320ms cubic-bezier(0.2, 0.8, 0.2, 1.2);
+  /* The ribbon is always 46px tall; the clip reveals 22, 30 or 46px of it so the notch keeps its shape. */
+  clip-path: polygon(0 0, 100% 0, 100% 22px, 50% 17px, 0 22px);
+  transition: clip-path 320ms var(--ease-out-expo);
 }
 
 [data-theme='covers'] .look-ahead-fold[data-open='true'] .fold-mark {
-  height: 46px;
+  clip-path: polygon(0 0, 100% 0, 100% 46px, 50% 36px, 0 46px);
 }
 
 [data-theme='covers'] .fold-handle:hover .fold-mark {
-  height: 30px;
+  clip-path: polygon(0 0, 100% 0, 100% 30px, 50% 23px, 0 30px);
 }
 
 [data-theme='covers'] .look-ahead-fold[data-open='true'] .fold-handle:hover .fold-mark {

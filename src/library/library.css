@@ -994,17 +994,19 @@ button.card-link:hover {
 
 .look-ahead-tick {
   width: 7px;
-  height: 8px;
-  border-radius: 4px;
+  /* Every tick is 22px; the clip shows the bottom 8, 14 or 22px so the rounded ends never stretch. */
+  --tick-h: 8px;
+  height: 22px;
   background: var(--border-strong);
+  clip-path: inset(calc(100% - var(--tick-h)) 0 0 round 4px);
   transition:
-    height 300ms var(--ease-spring),
+    clip-path 300ms var(--ease-out-expo),
     background-color 300ms ease-out;
 }
 
 /* Each January is taller, to mark the year. */
 .look-ahead-tick[data-january='true'] {
-  height: 14px;
+  --tick-h: 14px;
 }
 
 .look-ahead-tick[data-state='done'] {
@@ -1012,7 +1014,7 @@ button.card-link:hover {
 }
 
 .look-ahead-tick[data-state='now'] {
-  height: 22px;
+  --tick-h: 22px;
   background: var(--text);
 }
 
