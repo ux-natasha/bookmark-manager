@@ -867,7 +867,7 @@ button.sheet-link:hover:not(:disabled) {
 }
 
 /* 9. Responsive */
-@media (max-width: 720px) {
+@media (max-width: 719px) {
   [data-theme='contact'] .library-header {
     display: flex;
     flex-wrap: wrap;
@@ -1292,7 +1292,7 @@ button.film-frame:focus-visible {
   animation-delay: var(--delay, 0ms);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 719px) {
   .film-slot {
     flex-basis: 38px;
   }

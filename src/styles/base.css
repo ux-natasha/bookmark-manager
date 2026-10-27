@@ -1,6 +1,8 @@
 /* Design tokens for the Default theme (docs/design/library-interactions.md, section 4).
    Everything visual is driven by these so a later theme can swap them on :root.
-   Appearance: <html data-appearance="light|dark"> forces a mode; anything else follows the system. */
+   Appearance: <html data-appearance="light|dark"> forces a mode; anything else follows the system.
+   Breakpoints (media queries can't read custom properties, so they live here): every query is written
+   max-width one below the step, i.e. 479px, 719px, 859px, 1099px. */
 
 @font-face {
   font-family: 'Newsreader';
