@@ -3,191 +3,468 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Folia: A visual bookmark manager</title>
-<meta name="description" content="Folia is a little library of the internet. A visual bookmark manager for Chrome and Edge that keeps everything in your browser.">
+<title>Folia: keep what's worth coming back to</title>
+<meta name="description" content="Folia is a visual bookmark manager for Chrome and Edge. Save pages, pictures, quotes and notes, find them by colour, and keep everything in your own browser.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #f3ede3;
-    --paper-2: #ebe3d5;
-    --ink: #2e2a24;
-    --muted: #7a7266;
-    --olive: #5d6b3a;
-    --olive-dark: #46522a;
-    --plum: #3a1f2b;
-    --rose: #d4a296;
-    --line: #dcd2c2;
-    --serif: "Cormorant Garamond", Georgia, serif;
-    --sans: Inter, system-ui, sans-serif;
+    --olive: oklch(0.5 0.08 125);
+    --olive-ink: oklch(0.38 0.07 125);
+    --forest: oklch(0.27 0.045 128);
+    --forest-2: oklch(0.32 0.05 128);
+    --leaf: oklch(0.93 0.025 85);
+    --leaf-dim: oklch(0.82 0.03 110);
+    --bg: oklch(0.975 0.005 125);
+    --bg-2: oklch(0.945 0.012 125);
+    --ink: oklch(0.23 0.02 125);
+    --ink-2: oklch(0.42 0.02 125);
+    --line: oklch(0.88 0.012 125);
+    --rose: oklch(0.74 0.075 35);
+    --star: oklch(0.86 0.12 90);
+
+    --display: "Gloock", "Iowan Old Style", Georgia, serif;
+    --body: "Figtree", system-ui, sans-serif;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+    --gutter: clamp(16px, 4vw, 40px);
+    --z-sticky: 10;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 clamp(16px, 1.1vw, 18px)/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   img { max-width: 100%; display: block; }
   a { color: inherit; }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
-  .eyebrow { font: 500 12px/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  p { text-wrap: pretty; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter); }
+  :focus-visible { outline: 2px solid var(--star); outline-offset: 3px; border-radius: 4px; }
+  kbd { font: 600 .82em/1 var(--body); padding: .25em .5em; border-radius: 6px; border: 1px solid currentColor; opacity: .9; white-space: nowrap; }
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
-  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-  .brand img { width: 36px; height: 36px; }
-  .brand span { font: italic 500 30px/1 var(--serif); color: var(--olive-dark); }
-  nav a { margin-left: 28px; text-decoration: none; font-size: 15px; color: var(--muted); }
-  nav a:hover { color: var(--ink); }
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px; border-radius: 999px; font: 600 15px/1 var(--body); text-decoration: none; transition: transform .4s var(--ease), background .25s; }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-leaf { background: var(--leaf); color: var(--forest); }
+  .btn-leaf:hover { background: #fff; }
+  .btn-line { color: var(--leaf); box-shadow: inset 0 0 0 1px oklch(0.93 0.025 85 / .35); }
+  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--leaf); }
+  .btn-olive { background: var(--olive-ink); color: var(--leaf); }
+  .btn-olive:hover { background: var(--forest); }
 
-  .btn { display: inline-block; padding: 14px 26px; border-radius: 999px; background: var(--olive); color: var(--paper); text-decoration: none; font-weight: 500; font-size: 15px; transition: background .2s; }
-  .btn:hover { background: var(--olive-dark); }
-  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
-  .btn.ghost:hover { background: var(--paper-2); }
+  /* ---------- Hero ---------- */
+  .hero { background: var(--forest); color: var(--leaf); position: relative; overflow: hidden; }
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; position: relative; z-index: 2; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font: 400 28px/1 var(--display); }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; box-shadow: 0 0 0 1px oklch(0.93 0.025 85 / .2); }
+  .bar nav { display: flex; gap: 28px; align-items: center; font-size: 15px; }
+  .bar nav a:not(.btn) { text-decoration: none; color: var(--leaf-dim); transition: color .2s; }
+  .bar nav a:not(.btn):hover { color: var(--leaf); }
+  .bar .btn { padding: 11px 20px; }
 
-  .hero { text-align: center; padding: 72px 0 40px; }
-  .hero h1 { font: 400 clamp(48px, 9vw, 104px)/.95 var(--serif); margin: 22px 0 18px; color: var(--olive-dark); letter-spacing: -.01em; }
-  .hero h1 em { font-style: italic; }
-  .hero p { max-width: 560px; margin: 0 auto 34px; color: var(--muted); font-size: 19px; }
-  .hero .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .shot { margin: 64px auto 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 80px -30px rgba(46,42,36,.35); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding: clamp(40px, 7vw, 96px) 0 clamp(72px, 9vw, 128px); }
+  .hero h1 { font-size: clamp(2.75rem, 6.4vw, 5.6rem); line-height: .98; }
+  .hero h1 .star { display: inline-block; width: .42em; height: .42em; vertical-align: .55em; margin-left: .06em; color: var(--star); animation: twinkle 5s var(--ease) infinite; }
+  .lede { font-size: clamp(17px, 1.35vw, 20px); color: var(--leaf-dim); max-width: 34ch; margin: 28px 0 36px; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .meta { margin-top: 28px; font-size: 14px; color: var(--leaf-dim); }
 
-  section { padding: 96px 0; }
-  .section-head { max-width: 620px; margin-bottom: 52px; }
-  .section-head h2 { font: 400 clamp(36px, 5vw, 54px)/1.05 var(--serif); margin: 16px 0 14px; }
-  .section-head h2 em { color: var(--olive); }
-  .section-head p { color: var(--muted); margin: 0; }
+  /* The pile of keepings */
+  .pile { position: relative; aspect-ratio: 1 / .92; }
+  .keep { position: absolute; border-radius: 14px; overflow: hidden; background: var(--bg); color: var(--ink); box-shadow: 0 1px 0 oklch(1 0 0 / .4) inset, 0 30px 60px -24px oklch(0.1 0.03 128 / .7);
+          transform: translate(var(--x, 0), var(--y, 0)) rotate(var(--r, 0deg));
+          animation: settle 1.3s var(--ease) both; animation-delay: var(--d, 0s); transition: transform .6s var(--ease); }
+  .pile:hover .keep { transform: translate(var(--x, 0), var(--y, 0)) rotate(calc(var(--r, 0deg) * .4)); }
+  .keep.shot { left: 0; top: 4%; width: 78%; --r: -3deg; --d: .1s; }
+  .keep.shot img { aspect-ratio: 16 / 10.5; object-fit: cover; object-position: top left; width: 100%; }
+  .keep.quote { right: 0; top: 0; width: 44%; padding: 22px 22px 18px; background: var(--leaf); --r: 4deg; --d: .35s; }
+  .keep.quote blockquote { margin: 0; font: 400 clamp(17px, 1.6vw, 22px)/1.2 var(--display); }
+  .keep.quote cite { display: block; margin-top: 14px; font: 500 12px/1.3 var(--body); font-style: normal; color: var(--ink-2); }
+  .keep.note { left: 10%; bottom: 0; width: 40%; padding: 18px 20px; background: var(--star); --r: -5deg; --d: .55s; }
+  .keep.note strong { display: block; font: 400 19px/1.15 var(--display); margin-bottom: 6px; }
+  .keep.note span { font-size: 13px; line-height: 1.45; display: block; }
+  .keep.swatch { right: 4%; bottom: 6%; width: 38%; aspect-ratio: 1.25; background: var(--rose); --r: 3deg; --d: .75s; display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; }
+  .keep.swatch b { font: 400 22px/1 var(--display); }
+  .keep.swatch small { font-size: 12px; margin-top: 6px; opacity: .8; }
+  .tag { position: absolute; top: 10px; left: 10px; font: 600 11px/1 var(--body); padding: 6px 9px; border-radius: 99px; background: oklch(0.23 0.02 125 / .78); color: var(--leaf); }
 
-  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
-  .feature { background: var(--paper); padding: 34px 30px; }
-  .feature .num { font: italic 400 22px/1 var(--serif); color: var(--olive); }
-  .feature h3 { font: 500 26px/1.15 var(--serif); margin: 14px 0 10px; }
-  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+  @keyframes settle { from { opacity: 0; transform: translate(var(--x, 0), calc(var(--y, 0px) + 60px)) rotate(calc(var(--r, 0deg) * 4)); } }
+  @keyframes twinkle { 0%, 80%, 100% { transform: scale(1) rotate(0); } 88% { transform: scale(1.35) rotate(45deg); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
+  .hero-copy > * { animation: rise 1s var(--ease) both; }
+  .hero-copy > *:nth-child(2) { animation-delay: .1s; }
+  .hero-copy > *:nth-child(3) { animation-delay: .2s; }
+  .hero-copy > *:nth-child(4) { animation-delay: .3s; }
 
-  .split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center; }
-  .split img { border-radius: 14px; border: 1px solid var(--line); }
-  .split ul { list-style: none; padding: 0; margin: 28px 0 0; }
-  .split li { padding: 14px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
-  .split li strong { color: var(--ink); font-weight: 500; }
+  /* ---------- Shared section bits ---------- */
+  section { padding: clamp(80px, 11vw, 150px) 0; }
+  .h2 { font-size: clamp(2.2rem, 4.4vw, 3.8rem); line-height: 1.02; }
+  .intro { color: var(--ink-2); max-width: 52ch; margin: 22px 0 0; font-size: clamp(17px, 1.25vw, 19px); }
 
-  .themes { background: var(--paper-2); }
-  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .theme-grid figure { margin: 0; }
-  .theme-grid img { border-radius: 12px; border: 1px solid var(--line); aspect-ratio: 4/3; object-fit: cover; object-position: top; width: 100%; }
-  .theme-grid figcaption { margin-top: 12px; font: italic 400 21px/1 var(--serif); }
+  /* ---------- Kinds ---------- */
+  .kinds-head { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: clamp(44px, 6vw, 72px); }
+  .kinds-head .intro { margin: 0; justify-self: end; }
+  .kinds { display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: auto auto; gap: 18px; }
+  .kind { border-radius: 18px; overflow: hidden; position: relative; min-height: 220px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .kind h3 { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.05; }
+  .kind p { margin: 8px 0 0; font-size: 15px; max-width: 38ch; }
+  .kind-link { grid-row: span 2; background: var(--bg-2); }
+  .kind-link img { flex: 1; object-fit: cover; object-position: top left; width: 100%; min-height: 260px; border-bottom: 1px solid var(--line); }
+  .kind-link .txt { padding: 26px 28px 28px; }
+  .kind-link p { color: var(--ink-2); }
+  .kind-quote { background: var(--forest); color: var(--leaf); padding: 28px; }
+  .kind-quote .big { font: 400 clamp(22px, 2vw, 28px)/1.15 var(--display); margin-bottom: auto; padding-bottom: 28px; }
+  .kind-quote .big::before { content: "\201C"; display: block; font-size: 2.4em; line-height: .6; color: var(--star); margin-bottom: 8px; }
+  .kind-quote p { color: var(--leaf-dim); }
+  .kind-pic { background: var(--rose); padding: 28px; }
+  .kind-pic .frames { display: flex; gap: 8px; margin-bottom: auto; padding-bottom: 28px; }
+  .kind-pic .frames i { flex: 1; aspect-ratio: .8; border-radius: 8px; background: var(--c); box-shadow: inset 0 0 0 1px oklch(0 0 0 / .08); }
+  .kind-note { background: var(--star); padding: 28px; grid-column: span 2; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+  .kind-note .paper { font: 400 clamp(19px, 1.6vw, 22px)/1.3 var(--display); max-width: 26ch; }
+  .kind-note .paper small { display: block; font: 400 14px/1.5 var(--body); margin-top: 8px; }
+  .kind-note .txt { max-width: 36ch; }
+  .kind-note kbd { border-color: oklch(0.23 0.02 125 / .5); }
 
-  .privacy { text-align: center; }
-  .privacy .section-head { margin: 0 auto; }
-  .pills { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
-  .pills span { border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; font-size: 14px; color: var(--muted); }
+  /* ---------- Colour search ---------- */
+  .colour { background: var(--bg-2); }
+  .colour-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 88px); align-items: center; }
+  .picker { display: flex; gap: 10px; flex-wrap: wrap; margin: 34px 0 14px; }
+  .picker button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--c); cursor: pointer; box-shadow: inset 0 0 0 1px oklch(0 0 0 / .1); transition: transform .35s var(--ease), box-shadow .25s; }
+  .picker button:hover { transform: scale(1.1); }
+  .picker button[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--bg-2), 0 0 0 5px var(--ink); }
+  .picked { font-size: 14px; color: var(--ink-2); min-height: 1.6em; }
+  .wall { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 14px; border-radius: 18px; background: var(--bg); border: 1px solid var(--line); }
+  .wall i { aspect-ratio: .78; border-radius: 7px; background: var(--c); transition: opacity .5s var(--ease), transform .5s var(--ease), filter .5s var(--ease); }
+  .wall i.off { opacity: .14; transform: scale(.88); filter: grayscale(1); }
+  .wall-cap { margin-top: 14px; font-size: 14px; color: var(--ink-2); }
 
-  .cta { background: var(--olive); color: var(--paper); border-radius: 24px; padding: 80px 32px; text-align: center; position: relative; overflow: hidden; }
-  .cta h2 { font: italic 400 clamp(40px, 6vw, 68px)/1 var(--serif); margin: 0 0 12px; }
-  .cta p { opacity: .8; margin: 0 0 32px; letter-spacing: .24em; text-transform: uppercase; font-size: 12px; }
-  .cta .btn { background: var(--paper); color: var(--olive-dark); }
-  .cta .btn:hover { background: #fff; }
+  /* ---------- Fading ---------- */
+  .fade-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 88px); align-items: center; }
+  .shelf { display: flex; gap: 12px; align-items: flex-end; }
+  .shelf figure { margin: 0; flex: 1; transition: opacity .9s var(--ease), filter .9s var(--ease), transform .9s var(--ease); }
+  .shelf .tile { aspect-ratio: .75; border-radius: 12px; background: var(--c); }
+  .shelf figcaption { font-size: 12px; color: var(--ink-2); margin-top: 8px; }
+  .shelf figure:nth-child(1) { opacity: 1; }
+  .shelf figure:nth-child(2) { opacity: .78; filter: saturate(.7); }
+  .shelf figure:nth-child(3) { opacity: .55; filter: saturate(.4); }
+  .shelf figure:nth-child(4) { opacity: .36; filter: saturate(.15); }
+  .shelf figure:nth-child(5) { opacity: .2; filter: saturate(0); }
+  .shelf figure.back { opacity: 1; filter: none; transform: translateY(-14px); }
+  .shelf figure.back .tile { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--olive); }
+  .fade-sec .btn { margin-top: 30px; border: 0; cursor: pointer; }
 
-  footer { padding: 48px 0; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 14px; flex-wrap: wrap; gap: 16px; }
+  /* ---------- From a post ---------- */
+  .post-sec { background: var(--olive-ink); color: var(--leaf); }
+  .post-sec .intro { color: var(--leaf-dim); }
+  .post-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 56px); margin-top: clamp(44px, 6vw, 72px); align-items: start; }
+  .post { background: var(--bg); color: var(--ink); border-radius: 18px; padding: 24px 26px; font-size: 16px; }
+  .post .who { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; font-size: 14px; color: var(--ink-2); }
+  .post .who i { width: 36px; height: 36px; border-radius: 50%; background: var(--rose); }
+  .post .who b { color: var(--ink); font-weight: 600; display: block; }
+  .post p { margin: 0 0 10px; }
+  .post mark { background: oklch(0.86 0.12 90 / .55); color: inherit; padding: 0 3px; border-radius: 4px; }
+  .found { list-style: none; margin: 0; padding: 0; }
+  .found li { display: flex; gap: 14px; align-items: center; padding: 16px 0; border-bottom: 1px solid oklch(0.93 0.025 85 / .18); }
+  .found li:first-child { border-top: 1px solid oklch(0.93 0.025 85 / .18); }
+  .found .tick { flex: none; width: 22px; height: 22px; border-radius: 6px; background: var(--leaf); color: var(--forest); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+  .found .tick.no { background: transparent; box-shadow: inset 0 0 0 1.5px var(--leaf-dim); }
+  .found b { font-weight: 600; display: block; }
+  .found small { color: var(--leaf-dim); font-size: 13px; }
+  .platforms { margin-top: 26px; font-size: 14px; color: var(--leaf-dim); }
 
-  @media (max-width: 860px) {
-    nav a:not(.btn) { display: none; }
-    .features, .theme-grid { grid-template-columns: 1fr; }
-    .split { grid-template-columns: 1fr; gap: 36px; }
-    section { padding: 64px 0; }
+  /* ---------- Themes ---------- */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 36px 0 26px; }
+  .tabs button { font: 500 15px/1 var(--body); padding: 12px 18px; border-radius: 99px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); cursor: pointer; transition: background .25s, color .25s, border-color .25s; }
+  .tabs button:hover { color: var(--ink); border-color: var(--ink-2); }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .stage { position: relative; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-2); aspect-ratio: 16 / 9.5; box-shadow: 0 40px 80px -40px oklch(0.27 0.045 128 / .45); }
+  .stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; opacity: 0; transform: scale(1.02); transition: opacity .6s var(--ease), transform 1s var(--ease); }
+  .stage img.on { opacity: 1; transform: none; }
+  .stage-cap { margin-top: 16px; color: var(--ink-2); font-size: 15px; min-height: 1.6em; }
+
+  /* ---------- Privacy ---------- */
+  .privacy { background: var(--forest); color: var(--leaf); text-align: left; }
+  .privacy .h2 { font-size: clamp(2.6rem, 7vw, 6rem); line-height: .95; }
+  .privacy .h2 span { display: block; }
+  .privacy .h2 span:nth-child(2) { color: var(--leaf-dim); padding-left: clamp(0px, 8vw, 120px); }
+  .privacy .h2 span:nth-child(3) { color: var(--star); padding-left: clamp(0px, 16vw, 240px); }
+  .privacy-foot { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: clamp(56px, 7vw, 96px); padding-top: 32px; border-top: 1px solid oklch(0.93 0.025 85 / .2); color: var(--leaf-dim); font-size: 15px; }
+  .privacy-foot b { color: var(--leaf); font-weight: 600; display: block; margin-bottom: 6px; }
+
+  /* ---------- Install ---------- */
+  .install-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 88px); }
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; gap: 6px 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .steps li:first-child { border-top: 1px solid var(--line); }
+  .steps li::before { content: counter(s); grid-row: span 2; font: 400 34px/1 var(--display); color: var(--olive); }
+  .steps b { font-weight: 600; }
+  .steps span { color: var(--ink-2); font-size: 15px; }
+  code { font: 500 .9em/1 ui-monospace, Consolas, monospace; background: var(--bg-2); padding: .2em .45em; border-radius: 5px; }
+
+  footer { border-top: 1px solid var(--line); padding: 36px 0 48px; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); }
+  footer .brand { font-size: 24px; color: var(--ink); }
+  footer .brand img { width: 28px; height: 28px; box-shadow: none; border-radius: 7px; }
+
+  @media (max-width: 900px) {
+    .bar nav a:not(.btn) { display: none; }
+    .hero-grid, .colour-grid, .fade-sec, .post-grid, .install-grid, .kinds-head { grid-template-columns: 1fr; }
+    .kinds-head .intro { justify-self: start; }
+    .kinds { grid-template-columns: 1fr 1fr; }
+    .kind-link { grid-column: span 2; grid-row: auto; }
+    .pile { max-width: 560px; width: 100%; margin: 0 auto; }
+  }
+  @media (max-width: 560px) {
+    .kinds { grid-template-columns: 1fr; }
+    .kind-link, .kind-note { grid-column: auto; }
+    .wall { grid-template-columns: repeat(4, 1fr); }
+    .shelf figcaption { display: none; }
+    .keep.quote { width: 52%; }
+    .keep.note { width: 50%; left: 2%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <a class="brand" href="#"><img src="logo.svg" alt=""><span>folia</span></a>
-    <nav>
-      <a href="#features">Features</a>
-      <a href="#themes">Themes</a>
-      <a href="#privacy">Privacy</a>
-      <a class="btn" href="#install" style="padding:10px 20px">Get Folia</a>
-    </nav>
-  </header>
 
-  <div class="hero">
-    <div class="eyebrow">A little library of the internet</div>
-    <h1><em>Folia</em><br>a visual bookmark manager</h1>
-    <p>Save the pages, pictures, quotes and notes worth coming back to, and recognise them by how they looked. For Chrome, Edge and other Chromium browsers.</p>
-    <div class="actions">
-      <a class="btn" href="#install">Add to your browser</a>
-      <a class="btn ghost" href="#features">See how it works</a>
-    </div>
-    <div class="shot"><img src="img/library-light.png" alt="The Folia library showing bookmarks as visual cards"></div>
-  </div>
-</div>
-
-<section id="features">
+<header class="hero">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Features</div>
-      <h2>Bookmarks you'll <em>want</em> to look at.</h2>
-      <p>Folia turns a list of forgotten links into a library you can browse.</p>
+    <div class="bar">
+      <a class="brand" href="#"><img src="logo.svg" alt="">folia</a>
+      <nav aria-label="Main">
+        <a href="#kinds">What it keeps</a>
+        <a href="#colour">Colour search</a>
+        <a href="#themes">Themes</a>
+        <a href="#privacy">Privacy</a>
+        <a class="btn btn-leaf" href="#install">Install</a>
+      </nav>
     </div>
-    <div class="features">
-      <div class="feature"><div class="num">i.</div><h3>Save in one click</h3><p>Press Alt+Shift+S, or right-click a link, picture or selected text to keep it without leaving the page.</p></div>
-      <div class="feature"><div class="num">ii.</div><h3>Visual by default</h3><p>Every bookmark gets a preview, either a screenshot or the site's own image.</p></div>
-      <div class="feature"><div class="num">iii.</div><h3>Links, quotes, pictures, notes</h3><p>Everything lives together in one library, filterable by kind and searchable by text.</p></div>
-      <div class="feature"><div class="num">iv.</div><h3>Find it by colour</h3><p>Pick a colour and see everything that looked like it.</p></div>
-      <div class="feature"><div class="num">v.</div><h3>Links from posts</h3><p>Paste a post from X, Bluesky, Mastodon, Reddit or Hacker News and save the links it mentions.</p></div>
-      <div class="feature"><div class="num">vi.</div><h3>Refresh my memory</h3><p>Bookmarks you haven't opened fade, and old favourites come back to find you.</p></div>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Keep the parts of the internet you'd like to see again<svg class="star" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M6 0l1.6 4.4L12 6 7.6 7.6 6 12 4.4 7.6 0 6l4.4-1.6z"/></svg></h1>
+        <p class="lede">Folia is a bookmark manager you'll actually look at. Every page, picture, quote and note is saved as you saw it, so you find things by how they looked.</p>
+        <div class="actions">
+          <a class="btn btn-leaf" href="#install">Add to Chrome or Edge</a>
+          <a class="btn btn-line" href="#kinds">See what it keeps</a>
+        </div>
+        <p class="meta">Free and open source. Lives entirely in your browser.</p>
+      </div>
+
+      <div class="pile" aria-hidden="true">
+        <div class="keep shot"><img src="img/library-light.png" alt=""><span class="tag">Link</span></div>
+        <div class="keep quote"><blockquote>Collect things that make you want to make things.</blockquote><cite>Saved from a newsletter, March</cite></div>
+        <div class="keep note"><strong>Kitchen shelf ideas</strong><span>Oak, not pine. Check the one with brass brackets.</span></div>
+        <div class="keep swatch"><b>Terracotta</b><small>14 bookmarks this colour</small></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="kinds">
+  <div class="wrap">
+    <div class="kinds-head">
+      <h2 class="h2">Not just links. Whatever caught your eye.</h2>
+      <p class="intro">Press <kbd>Alt+Shift+S</kbd> to save the page you're on, or right-click a link, a picture or some selected text. It all lands in one library you can filter and search.</p>
+    </div>
+
+    <div class="kinds">
+      <article class="kind kind-link">
+        <img src="img/library-dark.png" alt="The Folia library in dark mode, a grid of page previews" loading="lazy">
+        <div class="txt">
+          <h3>Pages, with a picture</h3>
+          <p>Each one gets a screenshot or the site's own preview image. Pages with neither get a card in the site's brand colour.</p>
+        </div>
+      </article>
+      <article class="kind kind-quote">
+        <div class="big">The good part of an article, without the rest of it.</div>
+        <h3>Quotes</h3>
+        <p>Select text and keep it, linked back to where you found it.</p>
+      </article>
+      <article class="kind kind-pic">
+        <div class="frames" aria-hidden="true"><i style="--c:oklch(0.55 0.09 150)"></i><i style="--c:oklch(0.9 0.05 80)"></i><i style="--c:oklch(0.42 0.06 30)"></i></div>
+        <h3>Pictures</h3>
+        <p>Right-click an image to keep a copy, tied to the page it was on.</p>
+      </article>
+      <article class="kind kind-note">
+        <div class="paper">Gift for Sam: the ceramic lamp, not the glass one.<small>Your own notes, with tags.</small></div>
+        <div class="txt"><h3>Notes</h3><p>Write one from the library or the side panel. The first line becomes its title; <kbd>Ctrl+Enter</kbd> saves.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="colour" class="colour">
+  <div class="wrap colour-grid">
+    <div>
+      <h2 class="h2">Can't remember the name? Remember it was green.</h2>
+      <p class="intro">Memory is visual. Pick a colour and Folia shows everything that looked like it. Try it:</p>
+      <div class="picker" role="group" aria-label="Pick a colour">
+        <button style="--c:oklch(0.58 0.11 145)" data-h="green" aria-label="Green" aria-pressed="true"></button>
+        <button style="--c:oklch(0.66 0.13 40)" data-h="orange" aria-label="Terracotta" aria-pressed="false"></button>
+        <button style="--c:oklch(0.55 0.12 255)" data-h="blue" aria-label="Blue" aria-pressed="false"></button>
+        <button style="--c:oklch(0.86 0.13 92)" data-h="yellow" aria-label="Yellow" aria-pressed="false"></button>
+        <button style="--c:oklch(0.25 0.01 125)" data-h="dark" aria-label="Near black" aria-pressed="false"></button>
+      </div>
+      <p class="picked" aria-live="polite"></p>
+    </div>
+    <div>
+      <div class="wall" id="wall" aria-hidden="true"></div>
+      <p class="wall-cap">A library of 24 bookmarks, filtered by colour.</p>
     </div>
   </div>
 </section>
 
 <section>
-  <div class="wrap split">
-    <div>
-      <div class="eyebrow">Colour search</div>
-      <h2 style="font:400 clamp(36px,5vw,54px)/1.05 var(--serif);margin:16px 0 14px">Remember it was <em style="color:var(--olive)">green?</em></h2>
-      <p style="color:var(--muted);margin:0">You don't always remember a name, but you often remember a feeling. Folia lets you search the way memory works.</p>
-      <ul>
-        <li><strong>Brand-colour cards</strong> for pages with no preview</li>
-        <li><strong>Platform detection</strong> for Substack, YouTube, GitHub and more</li>
-        <li><strong>Dead link checks</strong> run quietly in the background</li>
-      </ul>
+  <div class="wrap fade-sec">
+    <div class="shelf" id="shelf" aria-hidden="true">
+      <figure><div class="tile" style="--c:oklch(0.62 0.12 40)"></div><figcaption>Last week</figcaption></figure>
+      <figure><div class="tile" style="--c:oklch(0.55 0.1 150)"></div><figcaption>2 months</figcaption></figure>
+      <figure><div class="tile" style="--c:oklch(0.55 0.12 255)"></div><figcaption>6 months</figcaption></figure>
+      <figure><div class="tile" style="--c:oklch(0.8 0.13 85)"></div><figcaption>A year</figcaption></figure>
+      <figure><div class="tile" style="--c:oklch(0.5 0.13 340)"></div><figcaption>Forgotten</figcaption></figure>
     </div>
-    <img src="img/search-by-colour.png" alt="Searching bookmarks by colour">
+    <div>
+      <h2 class="h2">Old bookmarks fade. Good ones come back.</h2>
+      <p class="intro">Things you haven't opened in a while slowly lose their colour, so the library shows what you actually use. When you're curious, <em>Refresh my memory</em> pulls a few forgotten ones back into the light.</p>
+      <button class="btn btn-olive" id="refresh" type="button">Refresh my memory</button>
+    </div>
   </div>
 </section>
 
-<section id="themes" class="themes">
+<section class="post-sec">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Themes</div>
-      <h2>Four ways to <em>browse</em>, each in light and dark.</h2>
+    <h2 class="h2">Someone posted ten great links. Keep all ten.</h2>
+    <p class="intro">Paste a post's address or its text. Folia finds the links, follows shortened ones to the real page, strips the tracking tags, and lets you pick which to save.</p>
+    <div class="post-grid">
+      <div class="post">
+        <div class="who"><i></i><span><b>A designer you follow</b>Bluesky · 2h</span></div>
+        <p>Tools I keep coming back to this year: <mark>figma.com/community</mark> for kits, <mark>bit.ly/3type-scale</mark> (a great type scale calculator), and <mark>coolors.co</mark> when I'm stuck on a palette.</p>
+        <p>Also this long read on craft: <mark>essays.example.com/the-slow-w…</mark></p>
+      </div>
+      <ul class="found">
+        <li><span class="tick">✓</span><span><b>figma.com/community</b><small>Figma Community</small></span></li>
+        <li><span class="tick">✓</span><span><b>typescale.example.com</b><small>Followed from bit.ly to the real page</small></span></li>
+        <li><span class="tick">✓</span><span><b>coolors.co</b><small>Coolors, palette generator</small></span></li>
+        <li><span class="tick no"></span><span><b>essays.example.com</b><small>Address was cut short, so it's the home page. Left unticked.</small></span></li>
+      </ul>
     </div>
-    <div class="theme-grid">
-      <figure><img src="img/theme-contact-sheet.png" alt="Contact sheet theme" loading="lazy"><figcaption>Contact sheet</figcaption></figure>
-      <figure><img src="img/theme-covers.png" alt="Covers theme" loading="lazy"><figcaption>Covers</figcaption></figure>
-      <figure><img src="img/theme-colour-field.png" alt="Colour field theme" loading="lazy"><figcaption>Colour field</figcaption></figure>
+    <p class="platforms">Works with X, Bluesky, Mastodon, Reddit, Hacker News and LinkedIn. For posts behind a login, open the post and use <em>Find links in this post</em>.</p>
+  </div>
+</section>
+
+<section id="themes">
+  <div class="wrap">
+    <h2 class="h2">Four ways to browse. Each in light and dark.</h2>
+    <div class="tabs" role="tablist" aria-label="Themes">
+      <button role="tab" aria-selected="true" data-i="0">Library</button>
+      <button role="tab" aria-selected="false" data-i="1">Contact sheet</button>
+      <button role="tab" aria-selected="false" data-i="2">Covers</button>
+      <button role="tab" aria-selected="false" data-i="3">Colour field</button>
     </div>
+    <div class="stage">
+      <img class="on" src="img/library-light.png" alt="Library theme: a calm grid of previews with titles and tags">
+      <img src="img/theme-contact-sheet.png" alt="Contact sheet theme: a dense masonry of previews, like a photographer's proof sheet" loading="lazy">
+      <img src="img/theme-covers.png" alt="Covers theme: large previews set like book and magazine covers" loading="lazy">
+      <img src="img/theme-colour-field.png" alt="Colour field theme: bookmarks arranged as blocks of their main colour" loading="lazy">
+    </div>
+    <p class="stage-cap" aria-live="polite">The everyday view: previews, titles and tags, at a comfortable size.</p>
   </div>
 </section>
 
 <section id="privacy" class="privacy">
   <div class="wrap">
-    <div class="section-head">
-      <div class="eyebrow">Privacy</div>
-      <h2>Your library stays <em>yours</em>.</h2>
-      <p>Everything is stored locally in your browser. Back up to a JSON file whenever you like, and bring in your Edge favorites in a click.</p>
+    <h2 class="h2"><span>No account.</span><span>No server.</span><span>No tracking.</span></h2>
+    <div class="privacy-foot">
+      <p><b>Everything stays in your browser.</b>Your library is stored locally. Nothing is sent anywhere, because there's nowhere to send it.</p>
+      <p><b>Back up whenever you like.</b>Export a JSON file and restore it on any machine. Uninstalling deletes the library, so keep a copy.</p>
+      <p><b>Bring your old bookmarks.</b>Import Edge favorites in one go, duplicates skipped. Dead links get checked quietly in the background.</p>
     </div>
-    <div class="pills"><span>No account</span><span>No server</span><span>No tracking</span><span>Import &amp; back up</span></div>
   </div>
 </section>
 
-<div class="wrap" id="install">
-  <div class="cta">
-    <h2>Things worth coming back to.</h2>
-    <p>Free for Chrome &amp; Edge</p>
-    <a class="btn" href="https://github.com/ux-natasha/bookmark-manager">Get Folia on GitHub</a>
+<section id="install">
+  <div class="wrap install-grid">
+    <div>
+      <h2 class="h2">Start your library in two minutes.</h2>
+      <p class="intro">Folia isn't in the web stores yet, so you load it yourself. It works in Chrome, Edge and other Chromium browsers.</p>
+      <p style="margin-top:32px"><a class="btn btn-olive" href="https://github.com/ux-natasha/bookmark-manager">Get the code on GitHub</a></p>
+    </div>
+    <ol class="steps">
+      <li><b>Build it</b><span>Run <code>npm install</code>, then <code>npm run build</code>. This makes a <code>dist</code> folder.</span></li>
+      <li><b>Open extensions</b><span>Go to <code>chrome://extensions</code> or <code>edge://extensions</code> and turn on Developer mode.</span></li>
+      <li><b>Load it</b><span>Click <em>Load unpacked</em> and choose the <code>dist</code> folder.</span></li>
+      <li><b>Pin it</b><span>Pin Folia to the toolbar, then press <kbd>Alt+Shift+S</kbd> on any page worth keeping.</span></li>
+    </ol>
   </div>
-  <footer>
-    <a class="brand" href="#"><img src="logo.svg" alt="" style="width:28px;height:28px"><span style="font-size:24px">folia</span></a>
-    <span>A little library of the internet.</span>
-  </footer>
-</div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="logo.svg" alt="">folia</a>
+    <span>A little library of the internet. MIT licensed.</span>
+  </div>
+</footer>
+
+<script>
+  // Colour search demo
+  const hues = {
+    green: ['oklch(0.58 0.11 145)','oklch(0.68 0.09 135)','oklch(0.45 0.08 150)','oklch(0.75 0.1 130)','oklch(0.52 0.1 160)'],
+    orange: ['oklch(0.66 0.13 40)','oklch(0.58 0.12 35)','oklch(0.74 0.1 50)','oklch(0.5 0.1 30)'],
+    blue: ['oklch(0.55 0.12 255)','oklch(0.68 0.09 240)','oklch(0.42 0.1 265)','oklch(0.78 0.07 230)'],
+    yellow: ['oklch(0.86 0.13 92)','oklch(0.8 0.14 85)','oklch(0.9 0.09 100)'],
+    dark: ['oklch(0.25 0.01 125)','oklch(0.3 0.02 260)','oklch(0.22 0.02 40)'],
+  };
+  const order = ['green','orange','blue','yellow','dark','green','blue','orange','green','dark','yellow','blue','orange','green','blue','green','orange','dark','yellow','green','blue','orange','dark','green'];
+  const wall = document.getElementById('wall');
+  const count = {};
+  order.forEach((h, i) => {
+    const t = document.createElement('i');
+    const list = hues[h];
+    t.style.setProperty('--c', list[(count[h] = (count[h] ?? -1) + 1) % list.length]);
+    t.dataset.h = h;
+    wall.append(t);
+  });
+  const picked = document.querySelector('.picked');
+  const pick = btn => {
+    document.querySelectorAll('.picker button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    const h = btn.dataset.h;
+    let n = 0;
+    wall.querySelectorAll('i').forEach(t => { const on = t.dataset.h === h; t.classList.toggle('off', !on); n += on; });
+    picked.textContent = `${n} bookmarks look ${btn.getAttribute('aria-label').toLowerCase()}.`;
+  };
+  document.querySelectorAll('.picker button').forEach(b => b.addEventListener('click', () => pick(b)));
+  pick(document.querySelector('.picker button'));
+
+  // Refresh my memory
+  const figs = [...document.querySelectorAll('#shelf figure')];
+  let last = -1;
+  document.getElementById('refresh').addEventListener('click', () => {
+    let i;
+    do { i = 2 + Math.floor(Math.random() * 3); } while (i === last);
+    last = i;
+    figs.forEach((f, j) => f.classList.toggle('back', j === i));
+  });
+
+  // Theme tabs
+  const caps = [
+    'The everyday view: previews, titles and tags, at a comfortable size.',
+    'Contact sheet: everything at once, packed like a photographer’s proofs.',
+    'Covers: big previews, for browsing slowly.',
+    'Colour field: your library as a wall of colour.',
+  ];
+  const tabs = [...document.querySelectorAll('.tabs button')];
+  const imgs = [...document.querySelectorAll('.stage img')];
+  const cap = document.querySelector('.stage-cap');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    const i = +t.dataset.i;
+    tabs.forEach(b => b.setAttribute('aria-selected', b === t));
+    imgs.forEach((im, j) => im.classList.toggle('on', j === i));
+    cap.textContent = caps[i];
+  }));
+</script>
 </body>
 </html>
