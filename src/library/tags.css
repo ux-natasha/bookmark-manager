@@ -100,7 +100,7 @@ button.tag-strip-tag:hover:not(:disabled) {
 
 .tag-strip-count {
   margin-left: 2px;
-  font: 10px var(--font-mono);
+  font: 11px var(--font-mono);
 }
 
 .tag-strip-open {
@@ -435,7 +435,7 @@ button.ix-sub {
 }
 
 .ix-once {
-  font: 10px var(--font-mono);
+  font: 11px var(--font-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }

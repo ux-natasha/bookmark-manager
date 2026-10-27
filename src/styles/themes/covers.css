@@ -136,7 +136,7 @@
   margin: 0;
   padding: 6px 0;
   border-bottom: 1px solid var(--text);
-  font: 10px / 1.5 var(--font-mono);
+  font: 11px / 1.5 var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -458,7 +458,7 @@ button.rack-link:hover:not(:disabled) {
   align-items: center;
   gap: 8px;
   min-height: 30px;
-  font: 10.5px var(--font-mono);
+  font: 11px var(--font-mono);
   color: var(--text-muted);
 }
 
@@ -1219,7 +1219,7 @@ button.rack-link:hover:not(:disabled) {
 
 [data-theme='covers'] .ix-page-note,
 [data-theme='covers'] .ix-folio {
-  font: 10px var(--font-mono);
+  font: 11px var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -1318,7 +1318,7 @@ button.rack-link:hover:not(:disabled) {
 [data-theme='covers'] .ix-erratum-label {
   display: block;
   flex-basis: 100%;
-  font: 10px var(--font-mono);
+  font: 11px var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--erratum-label);
@@ -1602,7 +1602,7 @@ button.spine:focus-visible {
   height: 30px;
   background: var(--ribbon);
   color: var(--ribbon-text);
-  font: 10px var(--font-mono);
+  font: 11px var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
