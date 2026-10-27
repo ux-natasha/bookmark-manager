@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folia: A visual bookmark manager</title>
+<meta name="description" content="Folia is a little library of the internet. A visual bookmark manager for Chrome and Edge that keeps everything in your browser.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f3ede3;
+    --paper-2: #ebe3d5;
+    --ink: #2e2a24;
+    --muted: #7a7266;
+    --olive: #5d6b3a;
+    --olive-dark: #46522a;
+    --plum: #3a1f2b;
+    --rose: #d4a296;
+    --line: #dcd2c2;
+    --serif: "Cormorant Garamond", Georgia, serif;
+    --sans: Inter, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .eyebrow { font: 500 12px/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--muted); }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand img { width: 36px; height: 36px; }
+  .brand span { font: italic 500 30px/1 var(--serif); color: var(--olive-dark); }
+  nav a { margin-left: 28px; text-decoration: none; font-size: 15px; color: var(--muted); }
+  nav a:hover { color: var(--ink); }
+
+  .btn { display: inline-block; padding: 14px 26px; border-radius: 999px; background: var(--olive); color: var(--paper); text-decoration: none; font-weight: 500; font-size: 15px; transition: background .2s; }
+  .btn:hover { background: var(--olive-dark); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover { background: var(--paper-2); }
+
+  .hero { text-align: center; padding: 72px 0 40px; }
+  .hero h1 { font: 400 clamp(48px, 9vw, 104px)/.95 var(--serif); margin: 22px 0 18px; color: var(--olive-dark); letter-spacing: -.01em; }
+  .hero h1 em { font-style: italic; }
+  .hero p { max-width: 560px; margin: 0 auto 34px; color: var(--muted); font-size: 19px; }
+  .hero .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .shot { margin: 64px auto 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 80px -30px rgba(46,42,36,.35); }
+
+  section { padding: 96px 0; }
+  .section-head { max-width: 620px; margin-bottom: 52px; }
+  .section-head h2 { font: 400 clamp(36px, 5vw, 54px)/1.05 var(--serif); margin: 16px 0 14px; }
+  .section-head h2 em { color: var(--olive); }
+  .section-head p { color: var(--muted); margin: 0; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .feature { background: var(--paper); padding: 34px 30px; }
+  .feature .num { font: italic 400 22px/1 var(--serif); color: var(--olive); }
+  .feature h3 { font: 500 26px/1.15 var(--serif); margin: 14px 0 10px; }
+  .feature p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; align-items: center; }
+  .split img { border-radius: 14px; border: 1px solid var(--line); }
+  .split ul { list-style: none; padding: 0; margin: 28px 0 0; }
+  .split li { padding: 14px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+  .split li strong { color: var(--ink); font-weight: 500; }
+
+  .themes { background: var(--paper-2); }
+  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .theme-grid figure { margin: 0; }
+  .theme-grid img { border-radius: 12px; border: 1px solid var(--line); aspect-ratio: 4/3; object-fit: cover; object-position: top; width: 100%; }
+  .theme-grid figcaption { margin-top: 12px; font: italic 400 21px/1 var(--serif); }
+
+  .privacy { text-align: center; }
+  .privacy .section-head { margin: 0 auto; }
+  .pills { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+  .pills span { border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; font-size: 14px; color: var(--muted); }
+
+  .cta { background: var(--olive); color: var(--paper); border-radius: 24px; padding: 80px 32px; text-align: center; position: relative; overflow: hidden; }
+  .cta h2 { font: italic 400 clamp(40px, 6vw, 68px)/1 var(--serif); margin: 0 0 12px; }
+  .cta p { opacity: .8; margin: 0 0 32px; letter-spacing: .24em; text-transform: uppercase; font-size: 12px; }
+  .cta .btn { background: var(--paper); color: var(--olive-dark); }
+  .cta .btn:hover { background: #fff; }
+
+  footer { padding: 48px 0; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 14px; flex-wrap: wrap; gap: 16px; }
+
+  @media (max-width: 860px) {
+    nav a:not(.btn) { display: none; }
+    .features, .theme-grid { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; gap: 36px; }
+    section { padding: 64px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#"><img src="logo.svg" alt=""><span>folia</span></a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#themes">Themes</a>
+      <a href="#privacy">Privacy</a>
+      <a class="btn" href="#install" style="padding:10px 20px">Get Folia</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow">A little library of the internet</div>
+    <h1><em>Folia</em><br>a visual bookmark manager</h1>
+    <p>Save the pages, pictures, quotes and notes worth coming back to, and recognise them by how they looked. For Chrome, Edge and other Chromium browsers.</p>
+    <div class="actions">
+      <a class="btn" href="#install">Add to your browser</a>
+      <a class="btn ghost" href="#features">See how it works</a>
+    </div>
+    <div class="shot"><img src="img/library-light.png" alt="The Folia library showing bookmarks as visual cards"></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Features</div>
+      <h2>Bookmarks you'll <em>want</em> to look at.</h2>
+      <p>Folia turns a list of forgotten links into a library you can browse.</p>
+    </div>
+    <div class="features">
+      <div class="feature"><div class="num">i.</div><h3>Save in one click</h3><p>Press Alt+Shift+S, or right-click a link, picture or selected text to keep it without leaving the page.</p></div>
+      <div class="feature"><div class="num">ii.</div><h3>Visual by default</h3><p>Every bookmark gets a preview, either a screenshot or the site's own image.</p></div>
+      <div class="feature"><div class="num">iii.</div><h3>Links, quotes, pictures, notes</h3><p>Everything lives together in one library, filterable by kind and searchable by text.</p></div>
+      <div class="feature"><div class="num">iv.</div><h3>Find it by colour</h3><p>Pick a colour and see everything that looked like it.</p></div>
+      <div class="feature"><div class="num">v.</div><h3>Links from posts</h3><p>Paste a post from X, Bluesky, Mastodon, Reddit or Hacker News and save the links it mentions.</p></div>
+      <div class="feature"><div class="num">vi.</div><h3>Refresh my memory</h3><p>Bookmarks you haven't opened fade, and old favourites come back to find you.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap split">
+    <div>
+      <div class="eyebrow">Colour search</div>
+      <h2 style="font:400 clamp(36px,5vw,54px)/1.05 var(--serif);margin:16px 0 14px">Remember it was <em style="color:var(--olive)">green?</em></h2>
+      <p style="color:var(--muted);margin:0">You don't always remember a name, but you often remember a feeling. Folia lets you search the way memory works.</p>
+      <ul>
+        <li><strong>Brand-colour cards</strong> for pages with no preview</li>
+        <li><strong>Platform detection</strong> for Substack, YouTube, GitHub and more</li>
+        <li><strong>Dead link checks</strong> run quietly in the background</li>
+      </ul>
+    </div>
+    <img src="img/search-by-colour.png" alt="Searching bookmarks by colour">
+  </div>
+</section>
+
+<section id="themes" class="themes">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Themes</div>
+      <h2>Four ways to <em>browse</em>, each in light and dark.</h2>
+    </div>
+    <div class="theme-grid">
+      <figure><img src="img/theme-contact-sheet.png" alt="Contact sheet theme" loading="lazy"><figcaption>Contact sheet</figcaption></figure>
+      <figure><img src="img/theme-covers.png" alt="Covers theme" loading="lazy"><figcaption>Covers</figcaption></figure>
+      <figure><img src="img/theme-colour-field.png" alt="Colour field theme" loading="lazy"><figcaption>Colour field</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="privacy">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Privacy</div>
+      <h2>Your library stays <em>yours</em>.</h2>
+      <p>Everything is stored locally in your browser. Back up to a JSON file whenever you like, and bring in your Edge favorites in a click.</p>
+    </div>
+    <div class="pills"><span>No account</span><span>No server</span><span>No tracking</span><span>Import &amp; back up</span></div>
+  </div>
+</section>
+
+<div class="wrap" id="install">
+  <div class="cta">
+    <h2>Things worth coming back to.</h2>
+    <p>Free for Chrome &amp; Edge</p>
+    <a class="btn" href="https://github.com/ux-natasha/bookmark-manager">Get Folia on GitHub</a>
+  </div>
+  <footer>
+    <a class="brand" href="#"><img src="logo.svg" alt="" style="width:28px;height:28px"><span style="font-size:24px">folia</span></a>
+    <span>A little library of the internet.</span>
+  </footer>
+</div>
+</body>
+</html>
