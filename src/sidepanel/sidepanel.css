@@ -66,10 +66,7 @@ button.full {
 
 .panel-recent h2 {
   margin: 0 0 var(--space-2);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+  font-size: var(--text-md);
 }
 
 .panel-recent ul {

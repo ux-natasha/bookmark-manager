@@ -100,6 +100,12 @@
   --dur-fast: 220ms;
   --dur-age: 600ms;
 
+  /* Page-wide layers. Dialogs use showModal(), so the top layer already puts them above all of these;
+     the small numbers inside cards and covers only order their own parts. */
+  --z-dropdown: 10;
+  --z-menu: 20;
+  --z-toast: 100;
+
   --radius: 10px;
   --radius-sm: 6px;
   --space-1: 4px;
@@ -376,7 +382,7 @@ select:focus-visible {
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: var(--z-dropdown);
   margin: 2px 0 0;
   padding: var(--space-1);
   list-style: none;
@@ -411,7 +417,7 @@ select:focus-visible {
   padding: 10px 18px;
   border-radius: var(--radius-pill);
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
-  z-index: 100;
+  z-index: var(--z-toast);
 }
 
 .toast button.link {
