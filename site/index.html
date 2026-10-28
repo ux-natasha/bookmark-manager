@@ -3,468 +3,1237 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Folia: keep what's worth coming back to</title>
-<meta name="description" content="Folia is a visual bookmark manager for Chrome and Edge. Save pages, pictures, quotes and notes, find them by colour, and keep everything in your own browser.">
+<title>Folia: the tabs you meant to come back to</title>
+<meta name="description" content="Folia is a free browser extension for Chrome and Edge. Close your tabs: it keeps every page, picture, quote and note, saved the way it looked, and shows you which ones you've forgotten. No account, no server, no tracking.">
+<meta name="theme-color" content="#2b2722">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  /* The same faces the extension ships. Cormorant and Bodoni only appear where their rooms do. */
+  @font-face { font-family: "Newsreader"; font-style: normal; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Newsreader"; font-style: italic; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-italic.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-mono-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 300 700; font-display: swap; src: url("fonts/cormorant-garamond-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Cormorant Garamond"; font-style: italic; font-weight: 300 700; font-display: swap; src: url("fonts/cormorant-garamond-latin-wght-italic.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Bodoni Moda"; font-style: normal; font-weight: 400 900; font-display: swap; src: url("fonts/bodoni-moda-latin-opsz-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Bodoni Moda"; font-style: italic; font-weight: 400 900; font-display: swap; src: url("fonts/bodoni-moda-latin-opsz-italic.woff2") format("woff2-variations"); }
+
   :root {
-    --olive: oklch(0.5 0.08 125);
-    --olive-ink: oklch(0.38 0.07 125);
-    --forest: oklch(0.27 0.045 128);
-    --forest-2: oklch(0.32 0.05 128);
-    --leaf: oklch(0.93 0.025 85);
-    --leaf-dim: oklch(0.82 0.03 110);
-    --bg: oklch(0.975 0.005 125);
-    --bg-2: oklch(0.945 0.012 125);
-    --ink: oklch(0.23 0.02 125);
-    --ink-2: oklch(0.42 0.02 125);
-    --line: oklch(0.88 0.012 125);
-    --rose: oklch(0.74 0.075 35);
-    --star: oklch(0.86 0.12 90);
+    /* Paper */
+    --paper: #f5efe3; --stock: #ece3d1; --card: #fbf8f1; --aged: #e2cf9c;
+    /* Ink */
+    --ink: #2b2722; --ink-2: #5d5548; --line: rgba(43, 39, 34, 0.16); --line-strong: rgba(43, 39, 34, 0.34);
+    /* Brand */
+    --olive: #5d6b3a; --olive-deep: #3e4826; --olive-pale: #e2e2c9; --leaf: #d5d6b4;
+    --rose: #e4bfb5; --rose-pale: #f1dcd5; --rose-ink: #96493f;
+    --plum: #34202e; --cream: #f3ebdd; --cream-2: #cdbfc3;
+    /* The browser frame */
+    --chrome: #2b2722; --chrome-2: #3a352f; --chrome-ink: #d9d2c4;
+    /* The rooms, from the extension's own theme files */
+    --dark-room: #191714; --proof: #f2f4f3; --proof-ink: #1e2a2e; --pencil: #e2574a;
+    --covers: #a3302a; --covers-ink: #f6ecd8;
+    --night: #120f16; --night-2: #1c1822; --night-ink: #eef0f4; --night-2-ink: #b3b9c5; --night-blue: #8ab8f7;
 
-    --display: "Gloock", "Iowan Old Style", Georgia, serif;
-    --body: "Figtree", system-ui, sans-serif;
-    --ease: cubic-bezier(.16, 1, .3, 1);
-    --gutter: clamp(16px, 4vw, 40px);
-    --z-sticky: 10;
+    --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+    --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "Geist Mono", ui-monospace, Consolas, monospace;
+    --garamond: "Cormorant Garamond", var(--serif);
+    --didone: "Bodoni Moda", "Didot", var(--serif);
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --gutter: clamp(16px, 4vw, 48px);
+    --measure: 1280px;
+    --z-raised: 2; --z-over: 4; --z-head: 10;
+
+    --specks: radial-gradient(circle at 18% 22%, rgba(110, 84, 46, 0.5) 0 1.2px, transparent 1.8px),
+              radial-gradient(circle at 72% 14%, rgba(110, 84, 46, 0.45) 0 1px, transparent 1.6px),
+              radial-gradient(circle at 40% 68%, rgba(110, 84, 46, 0.4) 0 1.4px, transparent 2px),
+              radial-gradient(circle at 86% 78%, rgba(110, 84, 46, 0.5) 0 1px, transparent 1.6px),
+              radial-gradient(circle at 10% 88%, rgba(110, 84, 46, 0.4) 0 1.1px, transparent 1.7px);
+    color-scheme: light;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 clamp(16px, 1.1vw, 18px)/1.6 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-  img { max-width: 100%; display: block; }
-  a { color: inherit; }
-  h1, h2, h3 { font-family: var(--display); font-weight: 400; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
-  p { text-wrap: pretty; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter); }
-  :focus-visible { outline: 2px solid var(--star); outline-offset: 3px; border-radius: 4px; }
-  kbd { font: 600 .82em/1 var(--body); padding: .25em .5em; border-radius: 6px; border: 1px solid currentColor; opacity: .9; white-space: nowrap; }
 
-  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 26px; border-radius: 999px; font: 600 15px/1 var(--body); text-decoration: none; transition: transform .4s var(--ease), background .25s; }
-  .btn:hover { transform: translateY(-2px); }
-  .btn-leaf { background: var(--leaf); color: var(--forest); }
-  .btn-leaf:hover { background: #fff; }
-  .btn-line { color: var(--leaf); box-shadow: inset 0 0 0 1px oklch(0.93 0.025 85 / .35); }
-  .btn-line:hover { box-shadow: inset 0 0 0 1px var(--leaf); }
-  .btn-olive { background: var(--olive-ink); color: var(--leaf); }
-  .btn-olive:hover { background: var(--forest); }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 16px; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+  img { max-width: 100%; height: auto; display: block; }
+  a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 300; margin: 0; text-wrap: balance; font-optical-sizing: auto; }
+  p { margin: 0; text-wrap: pretty; }
+  em { font-family: var(--serif); font-style: italic; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--olive); outline-offset: 3px; }
+  kbd { font: 500 0.82em/1 var(--mono); padding: 0.28em 0.5em 0.22em; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; white-space: nowrap; background: var(--card); color: var(--ink); }
+  code { font: 500 0.86em/1 var(--mono); background: var(--stock); padding: 0.2em 0.4em; border-radius: 3px; }
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 var(--gutter); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .mono { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 0; border-radius: 3px; background: var(--olive-deep); color: var(--cream); font: 500 16px/1 var(--sans); text-decoration: none; cursor: pointer; box-shadow: 0 2px 0 rgba(43, 39, 34, 0.2); transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px -8px rgba(43, 39, 34, 0.5); }
+  .btn:active { transform: translateY(1px); }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .textlink { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; text-decoration: underline; text-decoration-color: var(--line-strong); transition: text-decoration-color 0.25s; }
+  .textlink:hover { text-decoration-color: currentColor; }
+
+  /* Section heads: a big line on the left, the plain explanation on the right */
+  section { position: relative; }
+  .pad { padding: clamp(88px, 11vw, 152px) 0; }
+  .h2 { font-size: clamp(2.3rem, 4.8vw, 4.2rem); line-height: 1.02; letter-spacing: -0.022em; }
+  .h2 em { color: var(--olive); }
+  .lede { color: var(--ink-2); font-size: clamp(17px, 1.3vw, 19px); max-width: 44ch; }
+  .lede + .lede { margin-top: 12px; }
+  .head { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 20px 72px; align-items: end; margin-bottom: clamp(44px, 6vw, 80px); }
+
+  /* ---------- The browser the page opens in ---------- */
+  .chrome { background: var(--chrome); color: var(--chrome-ink); }
+  .tabs { display: flex; align-items: flex-end; gap: 1px; padding: 8px 8px 0; height: 44px; overflow: hidden; }
+  .tab { flex: 1 1 180px; min-width: 0; max-width: 200px; height: 34px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--chrome-2); border-radius: 7px 7px 0 0; font: 400 12.5px/1 var(--sans); white-space: nowrap; overflow: hidden; }
+  .tab i { width: 14px; height: 14px; border-radius: 3px; background: var(--c); flex: none; }
+  .tab span { overflow: hidden; text-overflow: ellipsis; }
+  .tab.on { background: var(--paper); color: var(--ink); flex-basis: 200px; }
+  .tab.on img { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .tab.add { flex: 0 0 34px; background: transparent; justify-content: center; font-size: 18px; }
+  .addr { display: flex; align-items: center; gap: 14px; padding: 7px 12px 6px; background: var(--paper); color: var(--ink-2); }
+  .addr .arrows { letter-spacing: 6px; font-size: 14px; }
+  .addr .url { flex: 1; min-width: 0; height: 32px; display: flex; align-items: center; padding: 0 14px; border-radius: 16px; background: var(--stock); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .addr .ext { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; transition: box-shadow 0.5s var(--ease); }
+  .addr .ext img { width: 22px; height: 22px; border-radius: 5px; }
+  .filing .addr .ext { box-shadow: 0 0 0 2px var(--olive), 0 0 18px 2px rgba(93, 107, 58, 0.5); }
+  /* The site's own navigation, as a bookmarks bar */
+  .bar { display: flex; align-items: center; gap: 4px 20px; padding: 2px 16px 6px; background: var(--paper); border-bottom: 1px solid var(--line); font-size: 14px; }
+  .bar a { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; color: var(--ink-2); text-decoration: none; transition: color 0.2s; }
+  .bar a:hover { color: var(--ink); }
+  .bar a i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+  .bar .install { margin-left: auto; color: var(--olive-deep); font-weight: 500; }
 
   /* ---------- Hero ---------- */
-  .hero { background: var(--forest); color: var(--leaf); position: relative; overflow: hidden; }
-  .bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; position: relative; z-index: 2; }
-  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font: 400 28px/1 var(--display); }
-  .brand img { width: 36px; height: 36px; border-radius: 9px; box-shadow: 0 0 0 1px oklch(0.93 0.025 85 / .2); }
-  .bar nav { display: flex; gap: 28px; align-items: center; font-size: 15px; }
-  .bar nav a:not(.btn) { text-decoration: none; color: var(--leaf-dim); transition: color .2s; }
-  .bar nav a:not(.btn):hover { color: var(--leaf); }
-  .bar .btn { padding: 11px 20px; }
+  .hero { padding: clamp(48px, 7.5vw, 104px) 0 clamp(36px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 28px 64px; align-items: end; }
+  .hero h1 { font-size: clamp(2.7rem, 6.2vw, 5.8rem); line-height: 0.97; letter-spacing: -0.03em; }
+  .hero h1 em { color: var(--olive); }
+  .hero h1 .n { font-variant-numeric: lining-nums; }
+  .hero .lede { max-width: 38ch; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 28px; }
+  .facts { margin-top: 22px; color: var(--ink-2); }
+  .done-msg { font: italic 400 clamp(19px, 1.7vw, 23px)/1.35 var(--serif); color: var(--olive-deep); margin-top: 14px; min-height: 1.35em; }
 
-  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding: clamp(40px, 7vw, 96px) 0 clamp(72px, 9vw, 128px); }
-  .hero h1 { font-size: clamp(2.75rem, 6.4vw, 5.6rem); line-height: .98; }
-  .hero h1 .star { display: inline-block; width: .42em; height: .42em; vertical-align: .55em; margin-left: .06em; color: var(--star); animation: twinkle 5s var(--ease) infinite; }
-  .lede { font-size: clamp(17px, 1.35vw, 20px); color: var(--leaf-dim); max-width: 34ch; margin: 28px 0 36px; }
-  .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-  .meta { margin-top: 28px; font-size: 14px; color: var(--leaf-dim); }
+  /* The shelf the tabs land on */
+  .shelf { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 22px); padding: 0 0 18px; position: relative; }
+  .shelf::after { content: ""; position: absolute; left: calc(-1 * var(--gutter) / 2); right: calc(-1 * var(--gutter) / 2); bottom: 0; height: 10px; background: linear-gradient(#b9a47c, #9c875f); box-shadow: 0 12px 16px -10px rgba(43, 39, 34, 0.6); }
+  .slot { aspect-ratio: 3 / 4; border: 1px dashed var(--line-strong); position: relative; }
+  .slot:first-child::before { content: "Your library"; position: absolute; left: 10px; top: 10px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .k { position: absolute; inset: -1px; display: flex; flex-direction: column; overflow: hidden; background: var(--card); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 16px 24px -16px rgba(43, 39, 34, 0.65); opacity: 0; transform: translateY(-36px) rotate(var(--r, 0deg)) scale(0.96); }
+  .filed .k { opacity: 1; transform: rotate(var(--r, 0deg)); transition: opacity 0.6s var(--ease), transform 0.9s var(--ease); transition-delay: calc(0.35s + var(--i) * 60ms); }
+  .k .pic { flex: 1; background: var(--c); background-size: cover; background-position: 50% 30%; }
+  .k .lbl { padding: 8px 9px 10px; font: 400 clamp(12px, 1.05vw, 15px)/1.15 var(--serif); }
+  .k .lbl small { display: block; font: 500 9px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; }
+  .k.cover .pic { padding: 10%; display: flex; align-items: flex-end; color: #f6ecd8; font: italic 400 clamp(13px, 1.25vw, 18px)/1.05 var(--serif); }
+  .k.quote { background: var(--rose-pale); padding: 12%; justify-content: center; font: italic 400 clamp(13px, 1.2vw, 17px)/1.25 var(--serif); }
+  .k.quote::before { content: "\201C"; font-size: 2.2em; line-height: 0.5; color: var(--rose-ink); }
+  .k.more { background: var(--olive-deep); color: var(--cream); padding: 12%; justify-content: flex-end; font: 300 clamp(26px, 3vw, 44px)/1 var(--serif); }
+  .k.more small { font: 400 clamp(12px, 1vw, 14px)/1.3 var(--sans); color: var(--leaf); margin-top: 8px; }
 
-  /* The pile of keepings */
-  .pile { position: relative; aspect-ratio: 1 / .92; }
-  .keep { position: absolute; border-radius: 14px; overflow: hidden; background: var(--bg); color: var(--ink); box-shadow: 0 1px 0 oklch(1 0 0 / .4) inset, 0 30px 60px -24px oklch(0.1 0.03 128 / .7);
-          transform: translate(var(--x, 0), var(--y, 0)) rotate(var(--r, 0deg));
-          animation: settle 1.3s var(--ease) both; animation-delay: var(--d, 0s); transition: transform .6s var(--ease); }
-  .pile:hover .keep { transform: translate(var(--x, 0), var(--y, 0)) rotate(calc(var(--r, 0deg) * .4)); }
-  .keep.shot { left: 0; top: 4%; width: 78%; --r: -3deg; --d: .1s; }
-  .keep.shot img { aspect-ratio: 16 / 10.5; object-fit: cover; object-position: top left; width: 100%; }
-  .keep.quote { right: 0; top: 0; width: 44%; padding: 22px 22px 18px; background: var(--leaf); --r: 4deg; --d: .35s; }
-  .keep.quote blockquote { margin: 0; font: 400 clamp(17px, 1.6vw, 22px)/1.2 var(--display); }
-  .keep.quote cite { display: block; margin-top: 14px; font: 500 12px/1.3 var(--body); font-style: normal; color: var(--ink-2); }
-  .keep.note { left: 10%; bottom: 0; width: 40%; padding: 18px 20px; background: var(--star); --r: -5deg; --d: .55s; }
-  .keep.note strong { display: block; font: 400 19px/1.15 var(--display); margin-bottom: 6px; }
-  .keep.note span { font-size: 13px; line-height: 1.45; display: block; }
-  .keep.swatch { right: 4%; bottom: 6%; width: 38%; aspect-ratio: 1.25; background: var(--rose); --r: 3deg; --d: .75s; display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; }
-  .keep.swatch b { font: 400 22px/1 var(--display); }
-  .keep.swatch small { font-size: 12px; margin-top: 6px; opacity: .8; }
-  .tag { position: absolute; top: 10px; left: 10px; font: 600 11px/1 var(--body); padding: 6px 9px; border-radius: 99px; background: oklch(0.23 0.02 125 / .78); color: var(--leaf); }
+  /* ---------- Ageing: four screens of scroll, one pinned table ---------- */
+  .ageing { --t: 0; background: color-mix(in oklab, var(--paper), var(--aged) calc(var(--t) * 60%)); border-top: 1px solid var(--line); }
+  .dusting .ageing, .dusting .ageing .obj, .dusting .ageing .obj::before, .dusting .ageing .obj::after, .dusting .ageing .pic img, .dusting .ageing .dust {
+    transition: background-color 0.9s var(--ease), transform 0.9s var(--ease), opacity 0.9s var(--ease), filter 0.9s var(--ease);
+  }
+  .scene { height: 340vh; }
+  .stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 80px); align-items: center; padding: 40px var(--gutter); max-width: var(--measure); margin: 0 auto; }
+  .stage .h2 { font-size: clamp(2.1rem, 4vw, 3.6rem); }
+  .clock { margin-top: clamp(22px, 4vh, 44px); }
+  .clock .mono { color: var(--rose-ink); }
+  .clock output { display: block; font: 200 clamp(3.2rem, 7.4vw, 5.8rem)/0.95 var(--serif); letter-spacing: -0.03em; font-variant-numeric: lining-nums; margin-top: 6px; }
+  .clock p { font: italic 400 clamp(18px, 1.6vw, 22px)/1.4 var(--serif); color: var(--ink-2); max-width: 30ch; margin-top: 12px; min-height: 2.8em; }
+  .rail { position: relative; margin-top: clamp(16px, 3vh, 32px); height: 30px; max-width: 420px; }
+  .rail::before { content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 1px; background: var(--ink); opacity: 0.25; }
+  .rail i { position: absolute; left: 0; top: 4px; height: 5px; width: calc(var(--p, 0) * 100%); background: var(--ink); }
+  .rail span { position: absolute; top: 16px; transform: translateX(-50%); white-space: nowrap; font: 500 10.5px/1 var(--mono); color: var(--ink-2); }
+  .rail span:first-of-type { transform: none; }
+  .rail span:last-of-type { transform: translateX(-100%); }
 
-  @keyframes settle { from { opacity: 0; transform: translate(var(--x, 0), calc(var(--y, 0px) + 60px)) rotate(calc(var(--r, 0deg) * 4)); } }
-  @keyframes twinkle { 0%, 80%, 100% { transform: scale(1) rotate(0); } 88% { transform: scale(1.35) rotate(45deg); } }
-  @keyframes rise { from { opacity: 0; transform: translateY(24px); } }
-  .hero-copy > * { animation: rise 1s var(--ease) both; }
-  .hero-copy > *:nth-child(2) { animation-delay: .1s; }
-  .hero-copy > *:nth-child(3) { animation-delay: .2s; }
-  .hero-copy > *:nth-child(4) { animation-delay: .3s; }
+  .table { position: relative; width: 100%; max-width: 600px; aspect-ratio: 1 / 1.02; justify-self: end; }
+  .table > * { position: absolute; }
+  .obj { isolation: isolate; box-shadow: 0 1px 1px rgba(43, 39, 34, 0.08), 0 18px 34px -20px rgba(43, 39, 34, 0.5); }
+  .obj::before, .obj::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: var(--z-raised); }
+  .obj::before { background: linear-gradient(160deg, #e9d29a, #c9a35c); mix-blend-mode: multiply; opacity: calc(var(--t) * 0.6); }
+  .obj::after { background: var(--specks); background-size: 84px 84px; opacity: var(--t); }
+  .obj .mono { font-size: 10.5px; }
+  .table .pic { left: 0; top: 4%; width: 46%; padding: 10px 10px 0; background: var(--card); transform: rotate(calc(-3deg - var(--t) * 4deg)); }
+  .table .pic .frame { aspect-ratio: 4 / 5; overflow: hidden; background: var(--olive-deep); }
+  .table .pic img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.7); transform-origin: 50% 57%; filter: saturate(calc(1 - var(--t) * 0.75)) sepia(calc(var(--t) * 0.45)) brightness(calc(1 + var(--t) * 0.08)); }
+  .table .pic figcaption { display: flex; justify-content: space-between; padding: 9px 2px 10px; color: var(--ink-2); }
+  .table .card { right: 0; top: 0; width: 54%; z-index: var(--z-raised); padding: 14px 18px 20px; background: var(--card); transform: rotate(calc(2deg + var(--t) * 6deg)) translateY(calc(var(--t) * 10px)); }
+  .table .card .row { display: flex; justify-content: space-between; gap: 8px; color: var(--ink-2); padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--rose-ink); }
+  .table .card .cover { height: 70px; background: #c99a3c; margin-bottom: 12px; position: relative; overflow: hidden; filter: saturate(calc(1 - var(--t) * 0.5)); }
+  .table .card .cover::after { content: ""; position: absolute; right: -14px; top: -22px; width: 90px; height: 90px; border-radius: 50%; background: rgba(255, 255, 255, 0.26); }
+  .table .card h3 { font-size: clamp(18px, 1.8vw, 24px); line-height: 1.12; }
+  .table .card .site { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .shine { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: var(--z-over); }
+  .shine::after { content: ""; position: absolute; top: 0; bottom: 0; width: 60%; left: -70%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.8), transparent); }
+  .shone .shine::after { animation: shine 1.1s var(--ease) 0.2s; }
+  @keyframes shine { to { transform: translateX(300%); } }
+  .table .quote { right: 3%; top: 54%; width: 46%; padding: 20px 22px 16px; background: var(--rose-pale); transform: rotate(calc(-1.5deg - var(--t) * 3deg)) translateX(calc(var(--t) * 18px)); }
+  .table .quote blockquote { margin: 0; font: italic 400 clamp(16px, 1.55vw, 21px)/1.3 var(--serif); }
+  .table .quote .mono { display: block; margin-top: 12px; color: var(--rose-ink); }
+  .table .note { left: 6%; bottom: 0; width: 40%; padding: 18px; background: var(--olive-pale); transform: rotate(calc(2deg + var(--t) * 5deg)); }
+  .table .note .mono { color: var(--olive-deep); }
+  .table .note p { font: 400 17px/1.35 var(--serif); margin-top: 8px; }
+  .tape { position: absolute; top: -10px; left: 50%; width: 70px; height: 20px; margin-left: -35px; z-index: var(--z-over); background: rgba(241, 220, 213, 0.8); transform: rotate(calc(-4deg + var(--t) * 28deg)) translate(calc(var(--t) * 16px), calc(var(--t) * -6px)); box-shadow: 0 1px 2px rgba(43, 39, 34, 0.12); }
+  .dust { inset: -6%; pointer-events: none; z-index: var(--z-over); background: var(--specks), var(--specks); background-size: 120px 120px, 57px 57px; background-position: 0 0, 23px 31px; opacity: calc(var(--t) * 0.8); }
+  .dust-btn { right: 4%; top: calc(46% + 12px); z-index: var(--z-over); min-height: 44px; padding: 0 18px; border: 0; border-radius: 3px; background: var(--ink); color: var(--card); font: 500 15px/1 var(--sans); cursor: pointer; box-shadow: 0 10px 22px -10px rgba(43, 39, 34, 0.8); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.4s var(--ease), transform 0.4s var(--ease); }
+  .can-dust .dust-btn { opacity: 1; transform: none; pointer-events: auto; }
 
-  /* ---------- Shared section bits ---------- */
-  section { padding: clamp(80px, 11vw, 150px) 0; }
-  .h2 { font-size: clamp(2.2rem, 4.4vw, 3.8rem); line-height: 1.02; }
-  .intro { color: var(--ink-2); max-width: 52ch; margin: 22px 0 0; font-size: clamp(17px, 1.25vw, 19px); }
+  .tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(32px, 5vw, 72px); padding-bottom: clamp(80px, 10vw, 136px); }
+  .tools div { border-top: 1px solid var(--ink); padding-top: 18px; }
+  .tools b { display: block; font: italic 400 clamp(24px, 2.4vw, 32px)/1.1 var(--serif); }
+  .tools p { color: var(--ink-2); margin-top: 8px; max-width: 46ch; }
 
-  /* ---------- Kinds ---------- */
-  .kinds-head { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: clamp(44px, 6vw, 72px); }
-  .kinds-head .intro { margin: 0; justify-self: end; }
-  .kinds { display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: auto auto; gap: 18px; }
-  .kind { border-radius: 18px; overflow: hidden; position: relative; min-height: 220px; display: flex; flex-direction: column; justify-content: flex-end; }
-  .kind h3 { font-size: clamp(24px, 2.2vw, 30px); line-height: 1.05; }
-  .kind p { margin: 8px 0 0; font-size: 15px; max-width: 38ch; }
-  .kind-link { grid-row: span 2; background: var(--bg-2); }
-  .kind-link img { flex: 1; object-fit: cover; object-position: top left; width: 100%; min-height: 260px; border-bottom: 1px solid var(--line); }
-  .kind-link .txt { padding: 26px 28px 28px; }
-  .kind-link p { color: var(--ink-2); }
-  .kind-quote { background: var(--forest); color: var(--leaf); padding: 28px; }
-  .kind-quote .big { font: 400 clamp(22px, 2vw, 28px)/1.15 var(--display); margin-bottom: auto; padding-bottom: 28px; }
-  .kind-quote .big::before { content: "\201C"; display: block; font-size: 2.4em; line-height: .6; color: var(--star); margin-bottom: 8px; }
-  .kind-quote p { color: var(--leaf-dim); }
-  .kind-pic { background: var(--rose); padding: 28px; }
-  .kind-pic .frames { display: flex; gap: 8px; margin-bottom: auto; padding-bottom: 28px; }
-  .kind-pic .frames i { flex: 1; aspect-ratio: .8; border-radius: 8px; background: var(--c); box-shadow: inset 0 0 0 1px oklch(0 0 0 / .08); }
-  .kind-note { background: var(--star); padding: 28px; grid-column: span 2; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
-  .kind-note .paper { font: 400 clamp(19px, 1.6vw, 22px)/1.3 var(--display); max-width: 26ch; }
-  .kind-note .paper small { display: block; font: 400 14px/1.5 var(--body); margin-top: 8px; }
-  .kind-note .txt { max-width: 36ch; }
-  .kind-note kbd { border-color: oklch(0.23 0.02 125 / .5); }
+  /* ---------- The rooms: four doors, the one you lean on opens ---------- */
+  .rooms { background: var(--stock); }
+  .doors { --pad: clamp(18px, 2vw, 30px); --open: 3.4; container-type: inline-size; display: flex; gap: 8px; height: clamp(600px, 84vh, 800px); }
+  .door { --grow: 1; flex: var(--grow) 1 0; min-width: 0; position: relative; overflow: hidden; display: flex; flex-direction: column; padding: var(--pad); transition: flex-grow 0.8s var(--ease); }
+  .door.open { --grow: var(--open); }
+  .door-key { position: absolute; inset: 0; z-index: var(--z-over); width: 100%; border: 0; background: transparent; cursor: pointer; }
+  .door.open .door-key { display: none; }
+  .door-key:focus-visible { outline-offset: -6px; }
+  .door header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid currentColor; border-bottom-color: color-mix(in oklab, currentColor 30%, transparent); }
+  .door .num { font: 400 22px/1 var(--serif); }
+  .door .modes { opacity: 0.75; white-space: nowrap; }
+  .door h3 { margin-top: 18px; line-height: 0.95; white-space: nowrap; transition: opacity 0.3s; }
+  .door:not(.open) h3, .door:not(.open) .modes { opacity: 0; }
+  /* A closed door stands its name up, like a spine */
+  .door .spine { position: absolute; left: 50%; bottom: calc(var(--pad) + 26px); writing-mode: vertical-rl; transform: translateX(-50%) rotate(180deg); white-space: nowrap; transition: opacity 0.3s; }
+  .door.open .spine { opacity: 0; }
+  .door .chips { position: absolute; left: var(--pad); right: var(--pad); bottom: var(--pad); display: flex; gap: 3px; transition: opacity 0.3s; }
+  .door .chips i { flex: 1; height: 8px; background: var(--c); }
+  .door.open .chips { opacity: 0; }
 
-  /* ---------- Colour search ---------- */
-  .colour { background: var(--bg-2); }
-  .colour-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 88px); align-items: center; }
-  .picker { display: flex; gap: 10px; flex-wrap: wrap; margin: 34px 0 14px; }
-  .picker button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--c); cursor: pointer; box-shadow: inset 0 0 0 1px oklch(0 0 0 / .1); transition: transform .35s var(--ease), box-shadow .25s; }
-  .picker button:hover { transform: scale(1.1); }
-  .picker button[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--bg-2), 0 0 0 5px var(--ink); }
-  .picked { font-size: 14px; color: var(--ink-2); min-height: 1.6em; }
-  .wall { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 14px; border-radius: 18px; background: var(--bg); border: 1px solid var(--line); }
-  .wall i { aspect-ratio: .78; border-radius: 7px; background: var(--c); transition: opacity .5s var(--ease), transform .5s var(--ease), filter .5s var(--ease); }
-  .wall i.off { opacity: .14; transform: scale(.88); filter: grayscale(1); }
-  .wall-cap { margin-top: 14px; font-size: 14px; color: var(--ink-2); }
+  .door .body { margin-top: auto; width: calc((100cqw - 24px - 8 * var(--pad)) * var(--open) / (var(--open) + 3)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; opacity: 0; transform: translateY(14px); transition: opacity 0.3s var(--ease), transform 0.6s var(--ease); visibility: hidden; }
+  .door.open .body { opacity: 1; transform: none; visibility: visible; transition-delay: 0.28s; }
+  .shot { margin: 0 0 4px; height: clamp(150px, 34vh, 330px); overflow: hidden; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 30px 50px -30px rgba(0, 0, 0, 0.7); background: #fff; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+  .door .body > div { display: grid; gap: 18px; }
+  .door .say { font-size: 15.5px; line-height: 1.5; max-width: 52ch; }
+  .spec { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .spec div { padding-top: 10px; border-top: 1px solid color-mix(in oklab, currentColor 30%, transparent); font-size: 14.5px; line-height: 1.4; }
+  .spec dt { font: 500 10.5px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; margin-bottom: 4px; }
+  .spec dd { margin: 0; }
+  .spec strong { font-weight: 600; }
 
-  /* ---------- Fading ---------- */
-  .fade-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 88px); align-items: center; }
-  .shelf { display: flex; gap: 12px; align-items: flex-end; }
-  .shelf figure { margin: 0; flex: 1; transition: opacity .9s var(--ease), filter .9s var(--ease), transform .9s var(--ease); }
-  .shelf .tile { aspect-ratio: .75; border-radius: 12px; background: var(--c); }
-  .shelf figcaption { font-size: 12px; color: var(--ink-2); margin-top: 8px; }
-  .shelf figure:nth-child(1) { opacity: 1; }
-  .shelf figure:nth-child(2) { opacity: .78; filter: saturate(.7); }
-  .shelf figure:nth-child(3) { opacity: .55; filter: saturate(.4); }
-  .shelf figure:nth-child(4) { opacity: .36; filter: saturate(.15); }
-  .shelf figure:nth-child(5) { opacity: .2; filter: saturate(0); }
-  .shelf figure.back { opacity: 1; filter: none; transform: translateY(-14px); }
-  .shelf figure.back .tile { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--olive); }
-  .fade-sec .btn { margin-top: 30px; border: 0; cursor: pointer; }
+  .d-lib { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+  .d-lib .num { color: var(--olive); }
+  .d-lib h3, .d-lib .spine { font: italic 300 clamp(2.6rem, 4.6vw, 4.4rem)/0.95 var(--serif); }
+  .d-lib .spine { font-size: 32px; }
+  .d-lib .spec strong { color: var(--olive-deep); }
+  .d-con { background: var(--dark-room); color: #ece6da; background-image: radial-gradient(ellipse 80% 50% at 50% 0, rgba(161, 58, 34, 0.32), transparent 70%); }
+  .d-con .num { color: var(--pencil); font-family: var(--garamond); }
+  .d-con h3, .d-con .spine { font: 400 clamp(2.6rem, 4.6vw, 4.4rem)/0.95 var(--garamond); }
+  .d-con .spine { font-size: 34px; }
+  .d-con .spec strong { color: #f0a08f; }
+  .d-cov { background: var(--covers); color: var(--covers-ink); }
+  .d-cov .num { font-family: var(--didone); }
+  .d-cov h3, .d-cov .spine { font: 400 clamp(2.3rem, 4.2vw, 4rem)/0.95 var(--didone); text-transform: uppercase; letter-spacing: 0.02em; }
+  .d-cov .spine { font-size: 27px; letter-spacing: 0.08em; }
+  .d-cov :focus-visible, .d-con :focus-visible { outline-color: currentColor; }
+  .d-fld { background: var(--night); color: var(--night-ink); }
+  .d-fld::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 60% 75%, #6f8a3e, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 20%, #3f6fb5, transparent 70%); opacity: 0.35; pointer-events: none; }
+  .d-fld > :not(.spine):not(.chips):not(.door-key) { position: relative; }
+  .d-fld .num { color: var(--night-blue); font-family: var(--sans); font-weight: 600; }
+  .d-fld h3, .d-fld .spine { font: 600 clamp(2.2rem, 4vw, 3.8rem)/0.95 var(--sans); letter-spacing: -0.04em; }
+  .d-fld .spine { font-size: 26px; }
+  .d-fld .spec strong { color: var(--night-blue); }
+  .d-fld :focus-visible { outline-color: var(--night-blue); }
+  .rooms-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 32px; margin-top: 18px; color: var(--ink-2); font-size: 15px; }
 
-  /* ---------- From a post ---------- */
-  .post-sec { background: var(--olive-ink); color: var(--leaf); }
-  .post-sec .intro { color: var(--leaf-dim); }
-  .post-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 4vw, 56px); margin-top: clamp(44px, 6vw, 72px); align-items: start; }
-  .post { background: var(--bg); color: var(--ink); border-radius: 18px; padding: 24px 26px; font-size: 16px; }
+  /* ---------- The tag index, as each room prints it ---------- */
+  .tagix { background: var(--paper); }
+  .setin { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 22px; }
+  .setin .mono { color: var(--ink-2); }
+  .setin [role="radiogroup"] { display: inline-flex; flex-wrap: wrap; box-shadow: inset 0 0 0 1px var(--ink); }
+  .setin button { min-height: 44px; padding: 0 16px; border: 0; background: transparent; cursor: pointer; font: 500 14px/1 var(--sans); }
+  .setin button + button { box-shadow: inset 1px 0 0 var(--line-strong); }
+  .setin button[aria-checked="true"] { background: var(--ink); color: var(--card); }
+
+  .ix { --text: var(--ink); --muted: var(--ink-2); --aged-text: #6b5c42; position: relative; padding: clamp(20px, 3vw, 36px) clamp(18px, 3.4vw, 44px) clamp(22px, 3vw, 32px); color: var(--text); transition: background-color 0.5s var(--ease), color 0.5s var(--ease); }
+  .ix-head { display: none; }
+  .ix-tidy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 12px 16px; margin-bottom: 22px; }
+  .ix-tidy .count { font: 400 19px/1.3 var(--serif); }
+  .ix-tidy .why { font-size: 13.5px; color: var(--muted); flex: 1 1 260px; }
+  .ix-tidy button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 3px; background: var(--text); color: var(--card); font: 500 14px/1 var(--sans); cursor: pointer; }
+  .ix-tidy .lbl { display: none; }
+  .ix-out { margin: 0 0 22px; font-size: 14.5px; color: var(--muted); }
+  .ix-out[hidden], .ix-tidy[hidden] { display: none; }
+  .ix-out button { background: none; border: 0; padding: 0; min-height: 40px; color: var(--text); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; font: inherit; }
+  .ix-cols { columns: 3 230px; column-gap: 44px; }
+  .ix-g { break-inside: avoid; margin-bottom: 22px; position: relative; }
+  .ix-l { font: italic 300 64px/0.9 var(--serif); margin: 0 0 6px; display: flex; align-items: baseline; justify-content: space-between; }
+  .ix-l small { display: none; }
+  .ix-e { --fade: 0; display: flex; align-items: baseline; gap: 8px; width: 100%; min-height: 32px; padding: 3px 4px; margin: 0 -4px; border: 0; border-radius: 4px; background: transparent; text-align: left; cursor: default; color: color-mix(in oklab, var(--text), var(--aged-text) calc(var(--fade) * 100%)); font: 400 18px/1.3 var(--serif); transition: opacity 0.3s, color 0.5s; }
+  .ix-e.sub { padding-left: 30px; font-size: 16px; }
+  .ix-e.sub .nm::before { content: "— "; opacity: 0.55; }
+  .ix-e.stale { background: rgba(201, 160, 80, 0.18); }
+  .ix-e .sq { width: 7px; height: 7px; flex: none; background: var(--c); align-self: center; }
+  .ix-e.hollow .sq { background: transparent; box-shadow: inset 0 0 0 1.5px var(--c); }
+  .ix-e .cm { display: none; }
+  .ix-e .ld { flex: 1; border-bottom: 1.5px dotted currentColor; opacity: 0.4; transform: translateY(-4px); }
+  .ix-e .ct { font: 500 11.5px/1 var(--mono); }
+  .ix-e .dg { display: none; color: var(--covers); }
+  .ix-once { font: 400 15.5px/1.75 var(--serif); color: var(--muted); margin: 4px 0 0; }
+  .ix-once b { font: 500 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .ix-foot { display: none; }
+  .archived .ix-e.stale { display: none; }
+
+  /* Library: paper columns */
+  .ix[data-room="lib"] { background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 30px 50px -36px rgba(43, 39, 34, 0.5); }
+  .ix[data-room="lib"] .ix-tidy { background: rgba(201, 160, 80, 0.14); border-radius: 6px; }
+
+  /* Contact sheet: every letter a cell on a hairline grid */
+  .ix[data-room="con"] { --text: var(--proof-ink); --muted: #566468; --aged-text: #7d8a8e; background: var(--proof); }
+  .ix[data-room="con"] .ix-tidy { border: 1px solid rgba(30, 42, 46, 0.3); background: rgba(226, 87, 74, 0.06); }
+  .ix[data-room="con"] .ix-tidy .count { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .ix[data-room="con"] .ix-tidy .why { font: italic 400 17px/1.3 var(--garamond); }
+  .ix[data-room="con"] .ix-tidy button, .ix[data-room="con"] .ix-out button { border-radius: 0; font: 500 11px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+  .ix[data-room="con"] .ix-cols { columns: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: rgba(30, 42, 46, 0.22); border: 1px solid rgba(30, 42, 46, 0.22); }
+  .ix[data-room="con"] .ix-g { margin: 0; padding: 14px 18px 16px; background: color-mix(in oklab, var(--proof), var(--pencil) calc(var(--share, 0) * 22%)); }
+  .ix[data-room="con"] .ix-g::before { content: "+"; position: absolute; left: -7px; top: -11px; font: 300 17px/1 var(--mono); color: var(--muted); }
+  .ix[data-room="con"] .ix-l { font: italic 400 72px/0.8 var(--garamond); }
+  .ix[data-room="con"] .ix-l small { display: inline; font: 500 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; font-style: normal; color: var(--muted); }
+  .ix[data-room="con"] .ix-e { font: 500 20px/1.25 var(--garamond); border-radius: 0; }
+  .ix[data-room="con"] .ix-e.stale { background: transparent; }
+  .ix[data-room="con"] .ix-e .sq { display: none; }
+  .ix[data-room="con"] .ix-once { font-family: var(--garamond); font-size: 17px; }
+
+  /* Covers: the index at the back of a book */
+  .ix[data-room="cov"] { --text: #1f1d1a; --muted: #58534a; background: #fbf8f1; box-shadow: 0 0 0 1px var(--line), 0 30px 50px -36px rgba(43, 39, 34, 0.5); border-radius: 3px; padding-top: clamp(26px, 3.4vw, 40px); }
+  .ix[data-room="cov"] .ix-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; margin-bottom: 18px; border-bottom: 1px solid var(--text); }
+  .ix[data-room="cov"] .ix-head b { font: italic 400 30px/1 var(--didone); }
+  .ix[data-room="cov"] .ix-head .mono { color: var(--muted); }
+  .ix[data-room="cov"] .ix-tidy { background: #f6ecc9; transform: rotate(-0.8deg); box-shadow: 0 12px 20px -16px rgba(43, 39, 34, 0.6); max-width: 620px; }
+  .ix[data-room="cov"] .ix-tidy .lbl { display: block; width: 100%; font: 500 10.5px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--covers); }
+  .ix[data-room="cov"] .ix-tidy .count { font-size: 17px; }
+  .ix[data-room="cov"] .ix-tidy button { background: var(--covers); color: var(--covers-ink); }
+  .ix[data-room="cov"] .ix-cols { column-gap: 48px; column-rule: 1px solid var(--line); }
+  .ix[data-room="cov"] .ix-l { font: italic 400 58px/0.9 var(--didone); }
+  .ix[data-room="cov"] .ix-e { font: 400 17px/1.3 var(--serif); font-variant-numeric: oldstyle-nums; min-height: 30px; }
+  .ix[data-room="cov"] .ix-e.stale { background: transparent; }
+  .ix[data-room="cov"] .ix-e .sq, .ix[data-room="cov"] .ix-e .ld { display: none; }
+  .ix[data-room="cov"] .ix-e .cm { display: inline; margin-left: -8px; }
+  .ix[data-room="cov"] .ix-e .ct { font: 400 17px/1.3 var(--serif); }
+  .ix[data-room="cov"] .ix-e .dg { display: inline; margin-left: -4px; }
+  .ix[data-room="cov"] .ix-e.sub { padding-left: 22px; font-size: 15.5px; }
+  .ix[data-room="cov"] .ix-e.sub .ct { font-size: 15.5px; }
+  .ix[data-room="cov"] .ix-once b { font: 400 15px/1 var(--serif); font-variant: small-caps; letter-spacing: 0.04em; text-transform: lowercase; }
+  .ix[data-room="cov"] .ix-foot { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); font: italic 400 14px/1 var(--didone); color: var(--muted); }
+
+  /* Colour field: columns on a dark glass panel; tag dots glow when used, grey when not */
+  .ix[data-room="fld"] { --text: var(--night-ink); --muted: var(--night-2-ink); --aged-text: #8e939c; background: radial-gradient(ellipse 60% 70% at 80% 30%, rgba(111, 138, 62, 0.28), transparent 70%), radial-gradient(ellipse 50% 60% at 10% 90%, rgba(63, 111, 181, 0.25), transparent 70%), var(--night); border-radius: 22px; box-shadow: inset 0 0 0 1px rgba(238, 240, 244, 0.12); }
+  .ix[data-room="fld"] .ix-tidy { border: 1px dashed rgba(238, 240, 244, 0.35); background: rgba(238, 240, 244, 0.05); border-radius: 12px; }
+  .ix[data-room="fld"] .ix-tidy button { background: var(--night-ink); color: var(--night); border-radius: 20px; }
+  .ix[data-room="fld"] .ix-e { border-radius: 10px; }
+  .ix[data-room="fld"] .ix-e.stale { background: rgba(238, 240, 244, 0.06); }
+  .ix[data-room="fld"] .ix-e .sq { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in oklab, var(--c), #5a5f68 calc(var(--fade) * 100%)); box-shadow: 0 0 10px var(--c); }
+  .ix[data-room="fld"] .ix-e.hollow .sq { box-shadow: none; }
+  .ix[data-room="fld"] :focus-visible { outline-color: var(--night-blue); }
+  .tagix-note { margin-top: 18px; color: var(--ink-2); font-size: 15px; max-width: 70ch; }
+
+  /* ---------- Finding it again: covers, by colour ---------- */
+  .finding { background: var(--night); color: var(--night-ink); overflow: hidden; --room: #6f8a3e; }
+  .finding::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 70% 70%, var(--room), transparent 70%); opacity: 0.3; transition: opacity 0.5s var(--ease); pointer-events: none; }
+  .finding.dim::before { opacity: 0; }
+  .finding .wrap { position: relative; }
+  .finding .h2 em { color: #cfe0b0; }
+  .finding .lede { color: var(--night-2-ink); }
+  .finding .lede strong { color: var(--night-ink); font-weight: 500; }
+  .finding :focus-visible { outline-color: var(--night-blue); }
+  .picker { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .picker .mono { color: var(--night-2-ink); margin-right: 8px; }
+  .picker button { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px 0 12px; border: 0; border-radius: 22px; cursor: pointer; background: var(--night-2); color: var(--night-ink); box-shadow: inset 0 0 0 1px rgba(238, 240, 244, 0.14); font: 500 14.5px/1 var(--sans); transition: box-shadow 0.35s var(--ease), transform 0.35s var(--ease); }
+  .picker button:hover { transform: translateY(-1px); }
+  .picker button i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px 1px var(--c); }
+  .picker button small { font: 500 11px/1 var(--mono); color: var(--night-2-ink); }
+  .picker button[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--night-ink), 0 0 24px -4px var(--c); }
+  .found-n { margin-left: auto; color: var(--night-2-ink); }
+
+  .rack { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 18px); margin-top: clamp(32px, 4vw, 48px); }
+  .slot-c { display: flex; flex-direction: column; transition: opacity 0.5s var(--ease), transform 0.5s var(--ease), filter 0.5s var(--ease); }
+  .slot-c.off { opacity: 0.16; transform: scale(0.94); filter: saturate(0.2); }
+  .slot-c b { font: 400 14px/1.25 var(--serif); margin-top: 12px; }
+  .slot-c small { font: 400 12.5px/1.4 var(--sans); color: var(--night-2-ink); margin-top: 2px; }
+  .cv { position: relative; aspect-ratio: 3 / 4; overflow: hidden; box-shadow: 0 16px 34px -12px var(--g, rgba(0, 0, 0, 0.6)); transition: transform 0.5s var(--ease); }
+  .slot-c:hover .cv { transform: translateY(-4px); }
+  .cv-article { background: var(--bg); color: var(--ink-c, #f1ede3); padding: 10% 9%; display: flex; flex-direction: column; }
+  .cv-article .mast { font: 700 clamp(12px, 1.25vw, 18px)/0.95 var(--didone); text-transform: uppercase; text-align: center; }
+  .cv-article .kick { font: 500 7.5px/1 var(--mono); letter-spacing: 0.14em; text-align: center; padding: 5px 0; margin-top: 7px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: 0.85; }
+  .cv-article .ttl { margin-top: auto; font: italic 400 clamp(12px, 1.1vw, 16px)/1.08 var(--didone); }
+  .cv-video { background: var(--bg); color: #f1ede3; padding: 18% 9%; display: flex; flex-direction: column; }
+  .cv-video::before, .cv-video::after { content: ""; position: absolute; left: 0; right: 0; height: 7%; background: #0d0f13 repeating-linear-gradient(to right, transparent 0 7px, rgba(241, 237, 227, 0.75) 7px 13px, transparent 13px 20px) center / 100% 40% no-repeat; }
+  .cv-video::before { top: 0; } .cv-video::after { bottom: 0; }
+  .cv-video .kick { font: 500 7.5px/1.3 var(--mono); letter-spacing: 0.12em; opacity: 0.8; }
+  .cv-video .ttl { font: 600 clamp(12px, 1.1vw, 16px)/1.1 var(--sans); margin-top: 8px; }
+  .cv-video .dur { margin-top: auto; align-self: flex-start; font: 500 9px/1 var(--mono); padding: 4px 6px; background: rgba(241, 237, 227, 0.16); }
+  .cv-repo { background: var(--bg); color: #e8e6e0; padding: 10% 9%; display: flex; flex-direction: column; font-family: var(--mono); }
+  .cv-repo .kick { font-size: 8.5px; opacity: 0.6; }
+  .cv-repo .ttl { font: 500 clamp(12px, 1.15vw, 17px)/1.1 var(--mono); margin-top: 8px; overflow-wrap: anywhere; }
+  .cv-repo .lang { margin-top: auto; height: 5px; background: linear-gradient(to right, #3572a5 0 58%, #e3b341 58% 84%, #6f8a3e 84%); }
+  .cv-recipe { background: #f8f1e2; color: #2b2722; padding: 9%; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: inset 0 0 0 5px #f8f1e2, inset 0 0 0 6px #a3302a, inset 0 0 0 8px #f8f1e2, inset 0 0 0 9px #a3302a; }
+  .cv-recipe .kick { font: 500 7px/1 var(--mono); letter-spacing: 0.14em; margin-top: 14%; opacity: 0.7; }
+  .cv-recipe .ttl { font: italic 500 clamp(13px, 1.25vw, 18px)/1.02 var(--garamond); margin-top: auto; }
+  .cv-recipe .dot { width: 5px; height: 5px; border-radius: 50%; background: #a3302a; margin: 8px 0 16%; }
+  .cv-pic { background: var(--bg); background-size: cover; }
+  .cv-pic span { position: absolute; left: 8%; right: 8%; bottom: 7%; font: italic 400 clamp(12px, 1.1vw, 16px)/1.1 var(--serif); color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6); }
+  .cv-post { background: var(--bg); color: #1e2a2e; padding: 10% 9%; display: flex; flex-direction: column; }
+  .cv-post .kick { display: flex; justify-content: space-between; font: 500 8px/1 var(--mono); letter-spacing: 0.06em; opacity: 0.75; }
+  .cv-post .ttl { font: 400 clamp(12px, 1.1vw, 16px)/1.15 var(--serif); margin-top: 10px; }
+  .cv-post .foot { margin-top: auto; font: 500 7px/1 var(--mono); letter-spacing: 0.12em; opacity: 0.7; border-top: 1px solid rgba(30, 42, 46, 0.3); padding-top: 6px; }
+  .rack-note { margin-top: 28px; color: var(--night-2-ink); font-size: 15px; max-width: 70ch; }
+
+  /* ---------- Links from posts: the post on the left, what Folia found on the right ---------- */
+  .posts { background: var(--olive-deep); color: var(--cream); overflow: hidden; }
+  .posts::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 60% at 18% 70%, rgba(228, 191, 181, 0.22), transparent 70%), radial-gradient(ellipse 40% 50% at 85% 20%, rgba(213, 214, 180, 0.12), transparent 70%); pointer-events: none; }
+  .posts .wrap { position: relative; }
+  .posts .h2 em { color: var(--rose); }
+  .posts .lede { color: var(--leaf); }
+  .posts :focus-visible { outline-color: var(--cream); }
+  .post-grid { position: relative; display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(72px, 12vw, 180px); align-items: center; }
+  .threads { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .threads path { fill: none; stroke: var(--rose); stroke-width: 1.6; stroke-linecap: round; }
+  .threads circle { fill: var(--rose); }
+  .js-threads .threads path { stroke-dasharray: var(--len) var(--len); stroke-dashoffset: var(--len); transition: stroke-dashoffset 1.2s var(--ease); transition-delay: calc(var(--i) * 140ms); }
+  .js-threads.drawn .threads path { stroke-dashoffset: 0; }
+  .js-threads.drawn.settled .threads path { stroke-dasharray: none; transition: none; }
+
+  .post { position: relative; z-index: var(--z-raised); background: var(--card); color: var(--ink); padding: 22px 24px 18px; border-radius: 4px; transform: rotate(-1.2deg); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1), 0 40px 60px -34px rgba(0, 0, 0, 0.75); }
   .post .who { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; font-size: 14px; color: var(--ink-2); }
-  .post .who i { width: 36px; height: 36px; border-radius: 50%; background: var(--rose); }
-  .post .who b { color: var(--ink); font-weight: 600; display: block; }
-  .post p { margin: 0 0 10px; }
-  .post mark { background: oklch(0.86 0.12 90 / .55); color: inherit; padding: 0 3px; border-radius: 4px; }
-  .found { list-style: none; margin: 0; padding: 0; }
-  .found li { display: flex; gap: 14px; align-items: center; padding: 16px 0; border-bottom: 1px solid oklch(0.93 0.025 85 / .18); }
-  .found li:first-child { border-top: 1px solid oklch(0.93 0.025 85 / .18); }
-  .found .tick { flex: none; width: 22px; height: 22px; border-radius: 6px; background: var(--leaf); color: var(--forest); display: grid; place-items: center; font-size: 14px; font-weight: 700; }
-  .found .tick.no { background: transparent; box-shadow: inset 0 0 0 1.5px var(--leaf-dim); }
-  .found b { font-weight: 600; display: block; }
-  .found small { color: var(--leaf-dim); font-size: 13px; }
-  .platforms { margin-top: 26px; font-size: 14px; color: var(--leaf-dim); }
+  .post .who i { width: 42px; height: 42px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f1dcd5, #c98c7f 60%, #96493f); flex: none; }
+  .post .who b { color: var(--ink); font-weight: 600; display: block; font-size: 15px; }
+  .post p { font-size: clamp(16px, 1.25vw, 18px); line-height: 1.55; }
+  .post p + p { margin-top: 12px; }
+  .post mark { background: rgba(228, 191, 181, 0.45); color: inherit; padding: 0 3px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; overflow-wrap: anywhere; }
+  .post mark sup, .catch .no { font: 600 10px/1 var(--mono); display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: var(--rose-ink); color: var(--card); vertical-align: 2px; margin-left: 3px; }
+  .post .meta { display: flex; gap: 18px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 13px; }
 
-  /* ---------- Themes ---------- */
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 36px 0 26px; }
-  .tabs button { font: 500 15px/1 var(--body); padding: 12px 18px; border-radius: 99px; border: 1px solid var(--line); background: transparent; color: var(--ink-2); cursor: pointer; transition: background .25s, color .25s, border-color .25s; }
-  .tabs button:hover { color: var(--ink); border-color: var(--ink-2); }
-  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  .stage { position: relative; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: var(--bg-2); aspect-ratio: 16 / 9.5; box-shadow: 0 40px 80px -40px oklch(0.27 0.045 128 / .45); }
-  .stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; opacity: 0; transform: scale(1.02); transition: opacity .6s var(--ease), transform 1s var(--ease); }
-  .stage img.on { opacity: 1; transform: none; }
-  .stage-cap { margin-top: 16px; color: var(--ink-2); font-size: 15px; min-height: 1.6em; }
+  .catch { position: relative; z-index: var(--z-raised); background: var(--paper); color: var(--ink); border-radius: 4px; box-shadow: 0 40px 60px -34px rgba(0, 0, 0, 0.75); }
+  .catch header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px 14px; border-bottom: 1px solid var(--line); }
+  .catch header b { font: italic 400 22px/1.15 var(--serif); }
+  .catch header .mono { color: var(--ink-2); white-space: nowrap; }
+  .catch ul { list-style: none; margin: 0; padding: 0; }
+  .catch li { border-bottom: 1px solid var(--line); }
+  .catch label { display: grid; grid-template-columns: 22px 34px minmax(0, 1fr); gap: 4px 14px; align-items: start; padding: 14px 20px; cursor: pointer; transition: background 0.25s; }
+  .catch label:hover { background: rgba(93, 107, 58, 0.06); }
+  .catch input { appearance: none; width: 20px; height: 20px; margin: 7px 0 0; border-radius: 3px; box-shadow: inset 0 0 0 1.5px var(--ink-2); background: var(--card); display: grid; place-items: center; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; }
+  .catch input::after { content: ""; width: 10px; height: 6px; border: solid var(--cream); border-width: 0 0 2px 2px; transform: rotate(-45deg) translate(1px, -1px) scale(0); transition: transform 0.25s var(--ease); }
+  .catch input:checked { background: var(--olive-deep); box-shadow: none; }
+  .catch input:checked::after { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
+  .catch input:focus-visible { outline: 2px solid var(--olive); outline-offset: 2px; }
+  .fav { width: 34px; height: 34px; border-radius: 6px; background: var(--c); color: #fff; display: grid; place-items: center; font: 600 15px/1 var(--sans); position: relative; }
+  .fav .no { position: absolute; right: -7px; top: -7px; margin: 0; }
+  .catch .dom { font: 500 15px/1.35 var(--mono); overflow-wrap: anywhere; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .catch .dom s { color: var(--ink-2); text-decoration-color: var(--rose-ink); text-decoration-thickness: 1.5px; font-weight: 400; }
+  .catch .what { grid-column: 3; font-size: 14px; color: var(--ink-2); line-height: 1.4; }
+  .chip { font: 500 9.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 6px; border-radius: 2px; background: var(--olive-pale); color: var(--olive-deep); white-space: nowrap; }
+  .chip.was { background: var(--rose-pale); color: var(--rose-ink); }
+  .chip.have { background: var(--stock); color: var(--ink-2); }
+  .catch li.saved .what::after { content: " Saved."; color: var(--olive-deep); font-weight: 500; }
+  .catch footer { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 16px 20px 18px; }
+  .catch .tagged { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); margin-right: auto; }
+  .catch .tagged span { font: italic 400 16px/1 var(--serif); color: var(--ink); padding: 5px 9px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-strong); border-radius: 2px; }
+  .catch .btn { min-height: 44px; padding: 0 20px; font-size: 15px; }
+  .catch .btn:disabled { background: var(--stock); color: var(--ink-2); box-shadow: none; transform: none; cursor: default; }
+  .catch .again { background: none; border: 0; padding: 0; min-height: 44px; font-size: 14px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+  .catch-note { padding: 0 20px 16px; margin-top: -6px; font-size: 13.5px; color: var(--ink-2); }
+  .platforms { margin-top: clamp(40px, 5vw, 64px); font-size: 15px; color: var(--leaf); max-width: 72ch; }
 
-  /* ---------- Privacy ---------- */
-  .privacy { background: var(--forest); color: var(--leaf); text-align: left; }
-  .privacy .h2 { font-size: clamp(2.6rem, 7vw, 6rem); line-height: .95; }
-  .privacy .h2 span { display: block; }
-  .privacy .h2 span:nth-child(2) { color: var(--leaf-dim); padding-left: clamp(0px, 8vw, 120px); }
-  .privacy .h2 span:nth-child(3) { color: var(--star); padding-left: clamp(0px, 16vw, 240px); }
-  .privacy-foot { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: clamp(56px, 7vw, 96px); padding-top: 32px; border-top: 1px solid oklch(0.93 0.025 85 / .2); color: var(--leaf-dim); font-size: 15px; }
-  .privacy-foot b { color: var(--leaf); font-weight: 600; display: block; margin-bottom: 6px; }
+  /* ---------- Where it lives ---------- */
+  .privacy { background: var(--plum); color: var(--cream); overflow: hidden; }
+  .privacy :focus-visible { outline-color: var(--cream); }
+  .stagger { font-size: clamp(2.5rem, 5.2vw, 4.8rem); line-height: 0.98; letter-spacing: -0.025em; }
+  .stagger span { display: block; }
+  .stagger span:nth-child(2) { padding-left: clamp(0px, 3.5vw, 52px); color: var(--cream-2); }
+  .stagger span:nth-child(3) { padding-left: clamp(0px, 7vw, 104px); }
+  .stagger em { color: var(--rose); }
+  .privacy-grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+  .privacy .fine { margin-top: 28px; color: var(--cream-2); max-width: 46ch; }
+  .privacy .fine strong { color: var(--cream); font-weight: 500; }
+  .lives, .lives tbody { display: block; width: 100%; }
+  .lives { margin: 0; }
+  .lives tbody { border-top: 1px solid rgba(243, 235, 221, 0.5); }
+  .lives caption { display: block; text-align: left; padding-bottom: 12px; color: var(--cream-2); }
+  .lives-row { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr); gap: 20px; padding: 20px 0; border-bottom: 1px solid rgba(243, 235, 221, 0.16); }
+  .lives-row b { font: 400 clamp(20px, 1.8vw, 24px)/1.15 var(--serif); }
+  .lives-row span { color: var(--cream-2); font-size: 15px; padding-top: 3px; }
+  .lives-row.us b { font-style: italic; color: var(--rose); }
+  .lives-row.us span { color: var(--cream); }
+  .included { margin-top: clamp(64px, 8vw, 104px); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px clamp(20px, 3vw, 40px); }
+  .included div { border-top: 1px solid rgba(243, 235, 221, 0.35); padding-top: 16px; }
+  .included b { display: block; font: 400 20px/1.2 var(--serif); }
+  .included p { color: var(--cream-2); font-size: 15px; margin-top: 6px; }
+  .privacy .h3 { font: italic 300 clamp(26px, 2.6vw, 34px)/1.1 var(--serif); margin-top: clamp(64px, 8vw, 104px); }
+
+  /* ---------- Questions ---------- */
+  .qa-grid { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+  .qa-grid .lede { margin-top: 20px; }
+  .qa { border-top: 1px solid var(--ink); }
+  .qa details { border-bottom: 1px solid var(--line); }
+  .qa summary { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) 24px; gap: 12px; align-items: baseline; padding: 18px 0; min-height: 44px; cursor: pointer; font: 400 clamp(19px, 1.7vw, 23px)/1.25 var(--serif); }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary::after { content: "+"; font: 300 24px/1 var(--sans); color: var(--ink-2); justify-self: end; transition: transform 0.3s var(--ease); }
+  .qa details[open] summary::after { transform: rotate(45deg); }
+  .qa summary:focus-visible { outline-offset: -2px; }
+  .qa details p { padding: 0 36px 22px 0; color: var(--ink-2); max-width: 64ch; }
 
   /* ---------- Install ---------- */
-  .install-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 88px); }
+  .install { background: var(--stock); }
+  .install-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+  .install .lede { margin-top: 22px; }
+  .borrow { background: var(--card); box-shadow: 0 0 0 1px var(--line), 0 30px 50px -36px rgba(43, 39, 34, 0.5); padding: 22px clamp(18px, 3vw, 32px) 26px; }
+  .borrow header { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); color: var(--ink-2); }
+  .borrow header b { font: italic 400 22px/1 var(--serif); color: var(--ink); text-transform: none; letter-spacing: 0; }
   .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
-  .steps li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; gap: 6px 16px; padding: 22px 0; border-bottom: 1px solid var(--line); }
-  .steps li:first-child { border-top: 1px solid var(--line); }
-  .steps li::before { content: counter(s); grid-row: span 2; font: 400 34px/1 var(--display); color: var(--olive); }
-  .steps b { font-weight: 600; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 2px 12px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .steps li::before { content: counter(s, upper-roman) "."; grid-row: span 2; font: italic 400 22px/1.2 var(--serif); color: var(--olive); }
+  .steps b { font-weight: 500; }
   .steps span { color: var(--ink-2); font-size: 15px; }
-  code { font: 500 .9em/1 ui-monospace, Consolas, monospace; background: var(--bg-2); padding: .2em .45em; border-radius: 5px; }
 
-  footer { border-top: 1px solid var(--line); padding: 36px 0 48px; }
-  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); }
-  footer .brand { font-size: 24px; color: var(--ink); }
-  footer .brand img { width: 28px; height: 28px; box-shadow: none; border-radius: 7px; }
+  .colophon { border-top: 1px solid var(--line); padding: 44px 0 52px; font-size: 14px; color: var(--ink-2); }
+  .colophon .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto; gap: 24px 48px; align-items: start; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; min-height: 44px; font: italic 400 26px/1 var(--serif); color: var(--ink); }
+  .brand img { width: 28px; height: 28px; border-radius: 7px; }
+  .colophon nav { display: flex; flex-direction: column; align-items: flex-start; }
+  .colophon nav a { min-height: 44px; display: inline-flex; align-items: center; }
 
-  @media (max-width: 900px) {
-    .bar nav a:not(.btn) { display: none; }
-    .hero-grid, .colour-grid, .fade-sec, .post-grid, .install-grid, .kinds-head { grid-template-columns: 1fr; }
-    .kinds-head .intro { justify-self: start; }
-    .kinds { grid-template-columns: 1fr 1fr; }
-    .kind-link { grid-column: span 2; grid-row: auto; }
-    .pile { max-width: 560px; width: 100%; margin: 0 auto; }
+  /* Breakpoints match the extension's scale: 479, 719, 859, 1099 */
+  @media (max-width: 1099px) {
+    .rack { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 28px; }
+    .included { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  @media (max-width: 560px) {
-    .kinds { grid-template-columns: 1fr; }
-    .kind-link, .kind-note { grid-column: auto; }
-    .wall { grid-template-columns: repeat(4, 1fr); }
-    .shelf figcaption { display: none; }
-    .keep.quote { width: 52%; }
-    .keep.note { width: 50%; left: 2%; }
+  @media (max-width: 859px) {
+    .head, .hero, .privacy-grid, .post-grid, .qa-grid, .install-grid { grid-template-columns: minmax(0, 1fr); }
+    .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 16px; }
+    .shelf .slot:nth-child(n + 4):not(:last-child) { display: none; }
+    .shelf .slot:nth-child(3) { display: none; }
+    .addr .arrows { display: none; }
+    /* The ageing table stacks under its copy */
+    .scene { height: 320vh; }
+    .stage { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); align-items: start; gap: 18px; padding-top: 24px; padding-bottom: 20px; }
+    .stage .h2 { font-size: clamp(1.7rem, 6vw, 2.4rem); }
+    .clock { margin-top: 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 18px; align-items: end; }
+    .clock .mono { grid-column: 1 / -1; }
+    .clock output { font-size: clamp(2.4rem, 10vw, 3.4rem); }
+    .clock p { margin-top: 0; font-size: 16px; min-height: 0; }
+    .rail { margin-top: 10px; }
+    .table { justify-self: center; width: min(100%, calc(100svh - 330px)); }
+    .tools { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    /* Doors become a stack that opens downward */
+    .doors { flex-direction: column; height: auto; }
+    .door { flex: none; transition: none; }
+    .door .spine, .door .chips { display: none; }
+    .door:not(.open) h3 { opacity: 1; font-size: 36px; }
+    .door:not(.open) .modes { opacity: 0.75; }
+    .door h3 { margin-top: 14px; }
+    .door .body { width: 100%; margin-top: 22px; display: none; }
+    .door.open .body { display: grid; }
+    .colophon .wrap { grid-template-columns: minmax(0, 1fr); }
+    .threads { display: none; }
+    .post { transform: none; }
+  }
+  @media (max-width: 719px) {
+    body { font-size: 16px; }
+    .tab span { display: none; }
+    .tab { padding: 0 4px; justify-content: center; }
+    .tab.on span { display: inline; }
+    .bar a:not(.install):nth-child(n + 3) { display: none; }
+    .rack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .found-n { margin-left: 0; width: 100%; }
+    .lives-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .included { grid-template-columns: minmax(0, 1fr); }
+    .qa details p { padding-right: 0; }
+    .catch label { padding: 14px 16px; gap: 4px 12px; }
+    .catch header { flex-direction: column; gap: 4px; }
+    .setin [role="radiogroup"] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .setin button { padding: 0 12px; }
+    .setin button:nth-child(n + 3) { box-shadow: inset 0 1px 0 var(--line-strong), inset 1px 0 0 var(--line-strong); }
+    .setin button:nth-child(3) { box-shadow: inset 0 1px 0 var(--line-strong); }
+  }
+  @media (max-width: 479px) {
+    .table .card { padding: 10px 12px 14px; }
+    .table .card .cover { height: 38px; }
+    .table .card h3 { font-size: 15px; }
+    .table .card .row span:first-child { display: none; }
+    .table .quote { padding: 12px 14px 10px; }
+    .table .quote blockquote { font-size: 14px; }
+    .table .note { padding: 12px; }
+    .table .note p { font-size: 14px; }
+    .table .pic figcaption { display: none; }
+    .spec { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
   }
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="wrap">
-    <div class="bar">
-      <a class="brand" href="#"><img src="logo.svg" alt="">folia</a>
-      <nav aria-label="Main">
-        <a href="#kinds">What it keeps</a>
-        <a href="#colour">Colour search</a>
-        <a href="#themes">Themes</a>
-        <a href="#privacy">Privacy</a>
-        <a class="btn btn-leaf" href="#install">Install</a>
-      </nav>
-    </div>
-
-    <div class="hero-grid">
-      <div class="hero-copy">
-        <h1>Keep the parts of the internet you'd like to see again<svg class="star" viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" d="M6 0l1.6 4.4L12 6 7.6 7.6 6 12 4.4 7.6 0 6l4.4-1.6z"/></svg></h1>
-        <p class="lede">Folia is a bookmark manager you'll actually look at. Every page, picture, quote and note is saved as you saw it, so you find things by how they looked.</p>
-        <div class="actions">
-          <a class="btn btn-leaf" href="#install">Add to Chrome or Edge</a>
-          <a class="btn btn-line" href="#kinds">See what it keeps</a>
-        </div>
-        <p class="meta">Free and open source. Lives entirely in your browser.</p>
-      </div>
-
-      <div class="pile" aria-hidden="true">
-        <div class="keep shot"><img src="img/library-light.png" alt=""><span class="tag">Link</span></div>
-        <div class="keep quote"><blockquote>Collect things that make you want to make things.</blockquote><cite>Saved from a newsletter, March</cite></div>
-        <div class="keep note"><strong>Kitchen shelf ideas</strong><span>Oak, not pine. Check the one with brass brackets.</span></div>
-        <div class="keep swatch"><b>Terracotta</b><small>14 bookmarks this colour</small></div>
-      </div>
-    </div>
+<header id="top">
+  <div class="chrome" aria-hidden="true">
+    <div class="tabs" id="tabs"></div>
   </div>
+  <div class="addr" aria-hidden="true">
+    <span class="arrows">← → ↻</span>
+    <span class="url">folia — the tabs you meant to come back to</span>
+    <span class="ext"><img src="logo.svg" alt="" width="22" height="22"></span>
+  </div>
+  <nav class="bar" aria-label="Main">
+    <a href="#ageing"><i style="--c:#c99a3c"></i>Ageing</a>
+    <a href="#posts"><i style="--c:#e4bfb5"></i>Links from posts</a>
+    <a href="#rooms"><i style="--c:#a3302a"></i>The rooms</a>
+    <a href="#index"><i style="--c:#5d6b3a"></i>The index</a>
+    <a href="#finding"><i style="--c:#3f6fb5"></i>Colour search</a>
+    <a href="#privacy"><i style="--c:#34202e"></i>Privacy</a>
+    <a class="install" href="#install">Install Folia →</a>
+  </nav>
 </header>
 
 <main>
-<section id="kinds">
+  <!-- Hero: start from the tabs you can't close -->
   <div class="wrap">
-    <div class="kinds-head">
-      <h2 class="h2">Not just links. Whatever caught your eye.</h2>
-      <p class="intro">Press <kbd>Alt+Shift+S</kbd> to save the page you're on, or right-click a link, a picture or some selected text. It all lands in one library you can filter and search.</p>
-    </div>
-
-    <div class="kinds">
-      <article class="kind kind-link">
-        <img src="img/library-dark.png" alt="The Folia library in dark mode, a grid of page previews" loading="lazy">
-        <div class="txt">
-          <h3>Pages, with a picture</h3>
-          <p>Each one gets a screenshot or the site's own preview image. Pages with neither get a card in the site's brand colour.</p>
+    <div class="hero">
+      <h1><span class="n" id="n">42</span> <span id="tw">tabs</span> open, <em id="why">because closing one feels like losing it.</em></h1>
+      <div>
+        <p class="lede">Folia keeps every one, saved the way it looked, in a library inside your browser. Then it does what bookmarks never do: it shows you which ones you’ve forgotten.</p>
+        <div class="actions">
+          <button class="btn" type="button" id="keep">Keep them and close</button>
+          <a class="textlink" href="#install">How to install</a>
         </div>
-      </article>
-      <article class="kind kind-quote">
-        <div class="big">The good part of an article, without the rest of it.</div>
-        <h3>Quotes</h3>
-        <p>Select text and keep it, linked back to where you found it.</p>
-      </article>
-      <article class="kind kind-pic">
-        <div class="frames" aria-hidden="true"><i style="--c:oklch(0.55 0.09 150)"></i><i style="--c:oklch(0.9 0.05 80)"></i><i style="--c:oklch(0.42 0.06 30)"></i></div>
-        <h3>Pictures</h3>
-        <p>Right-click an image to keep a copy, tied to the page it was on.</p>
-      </article>
-      <article class="kind kind-note">
-        <div class="paper">Gift for Sam: the ceramic lamp, not the glass one.<small>Your own notes, with tags.</small></div>
-        <div class="txt"><h3>Notes</h3><p>Write one from the library or the side panel. The first line becomes its title; <kbd>Ctrl+Enter</kbd> saves.</p></div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section id="colour" class="colour">
-  <div class="wrap colour-grid">
-    <div>
-      <h2 class="h2">Can't remember the name? Remember it was green.</h2>
-      <p class="intro">Memory is visual. Pick a colour and Folia shows everything that looked like it. Try it:</p>
-      <div class="picker" role="group" aria-label="Pick a colour">
-        <button style="--c:oklch(0.58 0.11 145)" data-h="green" aria-label="Green" aria-pressed="true"></button>
-        <button style="--c:oklch(0.66 0.13 40)" data-h="orange" aria-label="Terracotta" aria-pressed="false"></button>
-        <button style="--c:oklch(0.55 0.12 255)" data-h="blue" aria-label="Blue" aria-pressed="false"></button>
-        <button style="--c:oklch(0.86 0.13 92)" data-h="yellow" aria-label="Yellow" aria-pressed="false"></button>
-        <button style="--c:oklch(0.25 0.01 125)" data-h="dark" aria-label="Near black" aria-pressed="false"></button>
+        <p class="done-msg" id="msg" aria-live="polite"></p>
+        <p class="facts mono">Free · Open source · No account · Chrome &amp; Edge</p>
       </div>
-      <p class="picked" aria-live="polite"></p>
     </div>
-    <div>
-      <div class="wall" id="wall" aria-hidden="true"></div>
-      <p class="wall-cap">A library of 24 bookmarks, filtered by colour.</p>
-    </div>
+    <div class="shelf" id="shelf" role="group" aria-label="Your library"></div>
   </div>
-</section>
 
-<section>
-  <div class="wrap fade-sec">
-    <div class="shelf" id="shelf" aria-hidden="true">
-      <figure><div class="tile" style="--c:oklch(0.62 0.12 40)"></div><figcaption>Last week</figcaption></figure>
-      <figure><div class="tile" style="--c:oklch(0.55 0.1 150)"></div><figcaption>2 months</figcaption></figure>
-      <figure><div class="tile" style="--c:oklch(0.55 0.12 255)"></div><figcaption>6 months</figcaption></figure>
-      <figure><div class="tile" style="--c:oklch(0.8 0.13 85)"></div><figcaption>A year</figcaption></figure>
-      <figure><div class="tile" style="--c:oklch(0.5 0.13 340)"></div><figcaption>Forgotten</figcaption></figure>
-    </div>
-    <div>
-      <h2 class="h2">Old bookmarks fade. Good ones come back.</h2>
-      <p class="intro">Things you haven't opened in a while slowly lose their colour, so the library shows what you actually use. When you're curious, <em>Refresh my memory</em> pulls a few forgotten ones back into the light.</p>
-      <button class="btn btn-olive" id="refresh" type="button">Refresh my memory</button>
-    </div>
-  </div>
-</section>
-
-<section class="post-sec">
-  <div class="wrap">
-    <h2 class="h2">Someone posted ten great links. Keep all ten.</h2>
-    <p class="intro">Paste a post's address or its text. Folia finds the links, follows shortened ones to the real page, strips the tracking tags, and lets you pick which to save.</p>
-    <div class="post-grid">
-      <div class="post">
-        <div class="who"><i></i><span><b>A designer you follow</b>Bluesky · 2h</span></div>
-        <p>Tools I keep coming back to this year: <mark>figma.com/community</mark> for kits, <mark>bit.ly/3type-scale</mark> (a great type scale calculator), and <mark>coolors.co</mark> when I'm stuck on a palette.</p>
-        <p>Also this long read on craft: <mark>essays.example.com/the-slow-w…</mark></p>
+  <!-- Ageing, told by scrolling -->
+  <section id="ageing" class="ageing" aria-labelledby="ageing-h">
+    <div class="scene" id="scene">
+      <div class="stage">
+        <div>
+          <h2 class="h2" id="ageing-h">Most saved links are never opened again. <em>Folia lets you see which.</em></h2>
+          <div class="clock">
+            <span class="mono" id="since">Saved</span>
+            <output id="when">Today</output>
+            <p id="what">Straight, clean, on top of the pile.</p>
+          </div>
+          <div class="rail" aria-hidden="true"><i></i><span style="left:0">Today</span><span style="left:33.3%">6 mo.</span><span style="left:66.6%">A year</span><span style="left:100%">18 mo.</span></div>
+        </div>
+        <div class="table" id="table">
+          <figure class="obj pic" aria-hidden="true">
+            <div class="frame"><img src="img/art/swing.jpg" alt="" width="1280" height="1607"></div>
+            <figcaption class="mono"><span>Pic·003</span><span>The Swing</span></figcaption>
+          </figure>
+          <div class="obj card" id="card" role="group" aria-label="A saved article, Why we still use pencils">
+            <i class="shine" aria-hidden="true"></i>
+            <div class="row mono"><span>Lnk·014</span><span id="opened">opened today</span></div>
+            <div class="cover" aria-hidden="true"></div>
+            <h3>Why we still use pencils</h3>
+            <p class="site">offline.example</p>
+          </div>
+          <div class="obj quote" aria-hidden="true">
+            <blockquote>“The best things I read this year were the ones I almost scrolled past.”</blockquote>
+            <span class="mono">Qte·007 · from an essay</span>
+          </div>
+          <div class="obj note" aria-hidden="true">
+            <i class="tape"></i>
+            <span class="mono">Nte·002 · your note</span>
+            <p>Kitchen shelf: oak, not pine. Ask about the brass brackets.</p>
+          </div>
+          <i class="dust" aria-hidden="true"></i>
+          <button class="dust-btn" type="button" id="dust">Dust them off</button>
+        </div>
       </div>
-      <ul class="found">
-        <li><span class="tick">✓</span><span><b>figma.com/community</b><small>Figma Community</small></span></li>
-        <li><span class="tick">✓</span><span><b>typescale.example.com</b><small>Followed from bit.ly to the real page</small></span></li>
-        <li><span class="tick">✓</span><span><b>coolors.co</b><small>Coolors, palette generator</small></span></li>
-        <li><span class="tick no"></span><span><b>essays.example.com</b><small>Address was cut short, so it's the home page. Left unticked.</small></span></li>
-      </ul>
     </div>
-    <p class="platforms">Works with X, Bluesky, Mastodon, Reddit, Hacker News and LinkedIn. For posts behind a login, open the post and use <em>Find links in this post</em>.</p>
-  </div>
-</section>
+    <p class="sr" id="age-status" aria-live="polite"></p>
+    <div class="wrap tools">
+      <div><b>Look ahead</b><p>Step the library up to 24 months forward and see what will have faded by then, while there’s still time to read it.</p></div>
+      <div><b>Refresh my memory</b><p>One press brings three things you’ve neglected to the front. Nothing is ever deleted for being old.</p></div>
+    </div>
+  </section>
 
-<section id="themes">
-  <div class="wrap">
-    <h2 class="h2">Four ways to browse. Each in light and dark.</h2>
-    <div class="tabs" role="tablist" aria-label="Themes">
-      <button role="tab" aria-selected="true" data-i="0">Library</button>
-      <button role="tab" aria-selected="false" data-i="1">Contact sheet</button>
-      <button role="tab" aria-selected="false" data-i="2">Covers</button>
-      <button role="tab" aria-selected="false" data-i="3">Colour field</button>
+  <!-- Links from posts -->
+  <section id="posts" class="posts pad" aria-labelledby="posts-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="posts-h">Someone shared ten good links. <em>Keep all ten.</em></h2>
+        <div>
+          <p class="lede">Other tools save the post. Folia reads it, follows the shortened links to the real pages, strips the tracking tags, and lets you tick which to keep.</p>
+          <p class="lede">It works on posts behind a login too, because it reads them in your own browser.</p>
+        </div>
+      </div>
+      <div class="post-grid" id="post-grid">
+        <svg class="threads" id="threads" aria-hidden="true"></svg>
+        <article class="post" aria-label="An example post with four links">
+          <div class="who"><i aria-hidden="true"></i><span><b>Ines, a designer you follow</b>@ines.example · Bluesky · 2h</span></div>
+          <p>Tools I keep coming back to this year: <mark data-n="1">figma.com/community<sup>1</sup></mark> for kits, <mark data-n="2">bit.ly/3type-scale<sup>2</sup></mark> (a great type scale calculator), and <mark data-n="3">coolors.co/?utm_source=bsky<sup>3</sup></mark> when I’m stuck on a palette.</p>
+          <p>Also this long read on craft: <mark data-n="4">essays.example.com/the-slow-w…<sup>4</sup></mark></p>
+          <div class="meta" aria-hidden="true"><span>↩ 12</span><span>⟳ 48</span><span>♡ 311</span></div>
+        </article>
+        <form class="catch" id="catch" aria-labelledby="catch-h">
+          <header><b id="catch-h">Found 4 links in this post</b><span class="mono" id="catch-n">3 ticked</span></header>
+          <ul>
+            <li data-n="1"><label><input type="checkbox" checked><span class="fav" style="--c:#1e1e1e">F<span class="no">1</span></span><span class="dom">figma.com/community <span class="chip">New</span></span><span class="what">Figma Community</span></label></li>
+            <li data-n="2"><label><input type="checkbox" checked><span class="fav" style="--c:#3f6fb5">T<span class="no">2</span></span><span class="dom"><s>bit.ly/3type-scale</s> typescale.example.com <span class="chip">Followed</span></span><span class="what">The short link, followed to the real page.</span></label></li>
+            <li data-n="3" data-have><label><input type="checkbox" checked><span class="fav" style="--c:#c4688a">C<span class="no">3</span></span><span class="dom">coolors.co<s>/?utm_source=bsky</s> <span class="chip have">Already saved · 3 Oct</span></span><span class="what">Tracking tag removed, so Folia knows you have it.</span></label></li>
+            <li data-n="4"><label><input type="checkbox"><span class="fav" style="--c:#8d8676">E<span class="no">4</span></span><span class="dom">essays.example.com <span class="chip was">Cut short</span></span><span class="what">The post cut this address short, so this is the site’s home page.</span></label></li>
+          </ul>
+          <footer>
+            <span class="tagged">Tags <span>design</span></span>
+            <button class="again" type="button" id="catch-again" hidden>Try it again</button>
+            <button class="btn" type="submit" id="catch-save">Save 2 links</button>
+          </footer>
+          <p class="catch-note" id="catch-note" aria-live="polite">Links you already have are only changed if you add tags.</p>
+        </form>
+      </div>
+      <p class="platforms">Works with X, Bluesky, Mastodon, Reddit, Hacker News and LinkedIn. Paste a post’s address or its text, or open the post and use <em>Find links in this post</em> in the side panel.</p>
     </div>
-    <div class="stage">
-      <img class="on" src="img/library-light.png" alt="Library theme: a calm grid of previews with titles and tags">
-      <img src="img/theme-contact-sheet.png" alt="Contact sheet theme: a dense masonry of previews, like a photographer's proof sheet" loading="lazy">
-      <img src="img/theme-covers.png" alt="Covers theme: large previews set like book and magazine covers" loading="lazy">
-      <img src="img/theme-colour-field.png" alt="Colour field theme: bookmarks arranged as blocks of their main colour" loading="lazy">
-    </div>
-    <p class="stage-cap" aria-live="polite">The everyday view: previews, titles and tags, at a comfortable size.</p>
-  </div>
-</section>
+  </section>
 
-<section id="privacy" class="privacy">
-  <div class="wrap">
-    <h2 class="h2"><span>No account.</span><span>No server.</span><span>No tracking.</span></h2>
-    <div class="privacy-foot">
-      <p><b>Everything stays in your browser.</b>Your library is stored locally. Nothing is sent anywhere, because there's nowhere to send it.</p>
-      <p><b>Back up whenever you like.</b>Export a JSON file and restore it on any machine. Uninstalling deletes the library, so keep a copy.</p>
-      <p><b>Bring your old bookmarks.</b>Import Edge favorites in one go, duplicates skipped. Dead links get checked quietly in the background.</p>
-    </div>
-  </div>
-</section>
+  <!-- The rooms -->
+  <section id="rooms" class="rooms pad" aria-labelledby="rooms-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="rooms-h">A library that feels like a place, <em>not a list.</em></h2>
+        <div>
+          <p class="lede">Choose one of four rooms. Each lays your things out its own way, ages them its own way, and has its own word for bringing them back.</p>
+          <p class="lede">Switch any time. Everything you’ve kept comes with you.</p>
+        </div>
+      </div>
 
-<section id="install">
-  <div class="wrap install-grid">
-    <div>
-      <h2 class="h2">Start your library in two minutes.</h2>
-      <p class="intro">Folia isn't in the web stores yet, so you load it yourself. It works in Chrome, Edge and other Chromium browsers.</p>
-      <p style="margin-top:32px"><a class="btn btn-olive" href="https://github.com/ux-natasha/bookmark-manager">Get the code on GitHub</a></p>
+      <div class="doors" id="doors">
+        <article class="door d-lib open" aria-labelledby="r1">
+          <button class="door-key" type="button" aria-controls="b1" aria-expanded="true"><span class="sr">Open the Library room</span></button>
+          <header><span class="num">I.</span><span class="modes mono">Light &amp; dark</span></header>
+          <h3 id="r1">Library</h3>
+          <span class="spine" aria-hidden="true">Library</span>
+          <span class="chips" aria-hidden="true"><i style="--c:#fbf8f1;box-shadow:inset 0 0 0 1px var(--line)"></i><i style="--c:#5d6b3a"></i><i style="--c:#e4bfb5"></i></span>
+          <div class="body" id="b1">
+            <figure class="shot"><img src="img/library-light.png" alt="The Library room: cards on cream paper with titles in a serif and tags filed underneath" width="1280" height="1200" loading="lazy"></figure>
+            <div>
+              <p class="say">The everyday room. Previews on cream paper, titles in a reading serif, tags filed underneath.</p>
+              <dl class="spec">
+                <div><dt>Leave it</dt><dd>Yellows, gathers dust, tilts off square</dd></div>
+                <div><dt>Bring it back</dt><dd><strong>Dust off</strong></dd></div>
+                <div><dt>Set in</dt><dd>Newsreader and Geist</dd></div>
+              </dl>
+            </div>
+          </div>
+        </article>
+        <article class="door d-con" aria-labelledby="r2">
+          <button class="door-key" type="button" aria-controls="b2" aria-expanded="false"><span class="sr">Open the Contact sheet room</span></button>
+          <header><span class="num">II.</span><span class="modes mono">Light &amp; dark</span></header>
+          <h3 id="r2">Contact sheet</h3>
+          <span class="spine" aria-hidden="true">Contact sheet</span>
+          <span class="chips" aria-hidden="true"><i style="--c:#f2f4f3"></i><i style="--c:#1e2a2e"></i><i style="--c:#e2574a"></i></span>
+          <div class="body" id="b2">
+            <figure class="shot"><img src="img/theme-contact-sheet.png" alt="The Contact sheet room: frames on a hairline grid, each with a catalogue code" width="1280" height="1200" loading="lazy"></figure>
+            <div>
+              <p class="say">A photographer’s proof. Every page is a frame with its own catalogue code, like LNK·014, and a picture of how it looked.</p>
+              <dl class="spec">
+                <div><dt>Leave it</dt><dd>Bleaches, like a print left in the sun</dd></div>
+                <div><dt>Bring it back</dt><dd><strong>Reprint</strong>, circled in pencil</dd></div>
+                <div><dt>Set in</dt><dd>Cormorant Garamond and Geist Mono</dd></div>
+              </dl>
+            </div>
+          </div>
+        </article>
+        <article class="door d-cov" aria-labelledby="r3">
+          <button class="door-key" type="button" aria-controls="b3" aria-expanded="false"><span class="sr">Open the Covers room</span></button>
+          <header><span class="num">III.</span><span class="modes mono">Light &amp; dark</span></header>
+          <h3 id="r3">Covers</h3>
+          <span class="spine" aria-hidden="true">Covers</span>
+          <span class="chips" aria-hidden="true"><i style="--c:#f6ecd8"></i><i style="--c:#d9a441"></i><i style="--c:#6e1d18"></i></span>
+          <div class="body" id="b3">
+            <figure class="shot"><img src="img/theme-covers.png" alt="The Covers room: every link typeset as a magazine cover on a shelf, under a Bookmarks masthead" width="1280" height="1200" loading="lazy"></figure>
+            <div>
+              <p class="say">A magazine rack. Every link is typeset as a cover from its own title, site and colour, with an A to Z index at the back.</p>
+              <dl class="spec">
+                <div><dt>Leave it</dt><dd>Sun-fades from the top, spots, leans on its neighbour</dd></div>
+                <div><dt>Bring it back</dt><dd><strong>Take down</strong>, back in print</dd></div>
+                <div><dt>Set in</dt><dd>Bodoni Moda</dd></div>
+              </dl>
+            </div>
+          </div>
+        </article>
+        <article class="door d-fld" aria-labelledby="r4">
+          <button class="door-key" type="button" aria-controls="b4" aria-expanded="false"><span class="sr">Open the Colour field room</span></button>
+          <header><span class="num">IV.</span><span class="modes mono">Dark &amp; light</span></header>
+          <h3 id="r4">Colour field</h3>
+          <span class="spine" aria-hidden="true">Colour field</span>
+          <span class="chips" aria-hidden="true"><i style="--c:#6f8a3e"></i><i style="--c:#3f6fb5"></i><i style="--c:#c4688a"></i></span>
+          <div class="body" id="b4">
+            <figure class="shot"><img src="img/theme-colour-field.png" alt="The Colour field room: glowing cards in a dark room, with a row of colours to search by" width="1280" height="1200" loading="lazy"></figure>
+            <div>
+              <p class="say">A dark room lit by what you kept. Each thing glows in its own colour, and the room takes on the light of what you’re looking at.</p>
+              <dl class="spec">
+                <div><dt>Leave it</dt><dd>Loses its colour, then its glow</dd></div>
+                <div><dt>Bring it back</dt><dd><strong>Bring back</strong>, and it blooms</dd></div>
+                <div><dt>Set in</dt><dd>Newsreader and Geist</dd></div>
+              </dl>
+            </div>
+          </div>
+        </article>
+      </div>
+      <p class="rooms-foot"><span>Real screenshots from the extension, version 0.2.</span><span>Other tools stop at a dark mode.</span></p>
     </div>
-    <ol class="steps">
-      <li><b>Build it</b><span>Run <code>npm install</code>, then <code>npm run build</code>. This makes a <code>dist</code> folder.</span></li>
-      <li><b>Open extensions</b><span>Go to <code>chrome://extensions</code> or <code>edge://extensions</code> and turn on Developer mode.</span></li>
-      <li><b>Load it</b><span>Click <em>Load unpacked</em> and choose the <code>dist</code> folder.</span></li>
-      <li><b>Pin it</b><span>Pin Folia to the toolbar, then press <kbd>Alt+Shift+S</kbd> on any page worth keeping.</span></li>
-    </ol>
-  </div>
-</section>
+  </section>
+
+  <!-- The tag index -->
+  <section id="index" class="tagix pad" aria-labelledby="index-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="index-h">Tags get old too. <em>The index shows which.</em></h2>
+        <div>
+          <p class="lede">Every tag from A to Z, with how many things carry it. Pick one and the library shows only what’s filed under it.</p>
+          <p class="lede">Tags you stop using fade. After a year, Folia asks whether to leave them out. They stay on the things they’re on.</p>
+        </div>
+      </div>
+      <div class="setin">
+        <span class="mono" id="setin-l">Printed in</span>
+        <div role="radiogroup" aria-labelledby="setin-l" id="setin">
+          <button type="button" role="radio" aria-checked="true" data-room="lib" tabindex="0">Library</button>
+          <button type="button" role="radio" aria-checked="false" data-room="con" tabindex="-1">Contact sheet</button>
+          <button type="button" role="radio" aria-checked="false" data-room="cov" tabindex="-1">Covers</button>
+          <button type="button" role="radio" aria-checked="false" data-room="fld" tabindex="-1">Colour field</button>
+        </div>
+      </div>
+      <div class="ix" id="ix" data-room="lib" role="group" aria-label="An example tag index">
+        <div class="ix-head"><b>Index</b><span class="mono">Numbers are how many things carry each tag</span></div>
+        <div class="ix-tidy" id="ix-tidy"><span class="lbl">Erratum</span><span class="count" id="ix-count"></span><span class="why" id="ix-why"></span><button type="button" id="ix-archive"></button></div>
+        <p class="ix-out" id="ix-out" aria-live="polite" hidden><span id="ix-out-t"></span> <button type="button" id="ix-back"></button></p>
+        <div class="ix-cols" id="ix-cols"></div>
+        <div class="ix-foot" aria-hidden="true"><span>Bookmarks · Index</span><span>— 308 —</span></div>
+      </div>
+      <p class="tagix-note">A sample index. Shaded, greyed, tinted or daggered: the same three tags, unused for over a year, as each room marks them.</p>
+    </div>
+  </section>
+
+  <!-- Finding it again -->
+  <section id="finding" class="finding pad" aria-labelledby="finding-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="finding-h">Can’t remember the name? <em>Remember it was green.</em></h2>
+        <div>
+          <p class="lede">Every link gets a cover of its own: a newsletter gets a masthead, a video a film strip, a repository a terminal, a recipe a menu card. You know it on sight.</p>
+          <p class="lede">And when you only remember the colour, pick it. <strong>Colour search runs on your computer, with no AI and no subscription.</strong></p>
+        </div>
+      </div>
+
+      <div class="picker" id="picker" role="group" aria-label="Search by colour"><span class="mono">Search by colour</span><span class="found-n mono" id="found-n" aria-live="polite">8 of 8 shown</span></div>
+      <div class="rack" id="rack">
+        <div class="slot-c" data-h="blue"><div class="cv cv-article" style="--bg:#2f3b8f;--g:rgba(63,111,181,.55)" aria-hidden="true"><span class="mast">The Slow Read</span><span class="kick">A NEWSLETTER</span><span class="ttl">Why we still write letters by hand</span></div><b>Why we still write letters by hand</b><small>a newsletter</small></div>
+        <div class="slot-c" data-h="red"><div class="cv cv-video" style="--bg:#7e2520;--g:rgba(192,57,43,.55)" aria-hidden="true"><span class="kick">YOUTUBE · PART 2 OF 3</span><span class="ttl">Setting type by hand</span><span class="dur">14:08</span></div><b>Setting type by hand</b><small>a video</small></div>
+        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/swing.jpg) 50% 40% / 240% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Swing</span></div><b>The Swing</b><small>a picture</small></div>
+        <div class="slot-c" data-h="purple"><div class="cv cv-repo" style="--bg:#3a2238;--g:rgba(138,79,158,.55)" aria-hidden="true"><span class="kick">$ git clone</span><span class="ttl">tidy-feeds</span><span class="lang"></span></div><b>tidy-feeds</b><small>a repository</small></div>
+        <div class="slot-c" data-h="red"><div class="cv cv-recipe" style="--g:rgba(192,57,43,.45)" aria-hidden="true"><span class="kick">KITCHEN.EXAMPLE</span><span class="ttl">Pickled red onions</span><i class="dot"></i></div><b>Pickled red onions</b><small>a recipe</small></div>
+        <div class="slot-c" data-h="yellow"><div class="cv cv-post" style="--bg:#e3c56c;--g:rgba(217,177,59,.55)" aria-hidden="true"><span class="kick"><span>@slowread</span><span>1 / 6</span></span><span class="ttl">Twelve posters from the Basel archive, one a day.</span><span class="foot">POST ON BLUESKY</span></div><b>Twelve posters from Basel</b><small>a post</small></div>
+        <div class="slot-c" data-h="orange"><div class="cv cv-article" style="--bg:#c8692c;--g:rgba(217,130,43,.55)" aria-hidden="true"><span class="mast">Orchard</span><span class="kick">SEASONAL</span><span class="ttl">Persimmon season</span></div><b>Persimmon season</b><small>an article</small></div>
+        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/oxbow.jpg) 70% 60% / 300% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Oxbow</span></div><b>The Oxbow</b><small>a picture</small></div>
+      </div>
+      <p class="rack-note">Prefer the site’s own image, or a screenshot? One switch in the library changes what links show. Search also reads titles, tags, your notes and the words inside quotes, and an A to Z index lists every tag.</p>
+    </div>
+  </section>
+
+  <!-- Where it lives -->
+  <section id="privacy" class="privacy pad" aria-labelledby="privacy-h">
+    <div class="wrap">
+      <div class="privacy-grid">
+        <div>
+          <h2 class="stagger" id="privacy-h"><span>No account.</span><span>No server.</span><span><em>No tracking.</em></span></h2>
+          <p class="fine">Your library is kept in your browser’s own storage, on your computer. Folia only goes online to do what you ask: fetching a link’s title and preview, checking links still work, and reading a public post you paste in.</p>
+          <p class="fine"><strong>Free and open source</strong> under the MIT licence.</p>
+        </div>
+        <table class="lives">
+          <caption class="mono">Where your library lives</caption>
+          <tbody>
+            <tr class="lives-row"><th scope="row" style="text-align:left;font-weight:400"><b>Most visual bookmark tools</b></th><td><span>In their cloud. When Pocket closed in October 2025, whatever people hadn’t exported was deleted.</span></td></tr>
+            <tr class="lives-row"><th scope="row" style="text-align:left;font-weight:400"><b>Self-hosted ones</b></th><td><span>On your own server, which you have to set up and keep running.</span></td></tr>
+            <tr class="lives-row us"><th scope="row" style="text-align:left;font-weight:400"><b>Folia</b></th><td><span>In your browser. Nothing to sign up for, nothing to host.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="h3">Included, not saved for a paid plan.</h3>
+      <div class="included">
+        <div><b>What you actually saw</b><p>The screenshot is taken in your own browser, so logged-in pages and private posts look right.</p></div>
+        <div><b>Dead links found</b><p><em>Check links</em> re-checks everything and stamps the ones that stopped answering.</p></div>
+        <div><b>Duplicates caught</b><p>Save the same page twice and Folia notices, even with tracking tags on the end.</p></div>
+        <div><b>Back up anytime</b><p>Export one file and restore it on any computer. Import your Edge favorites in one go.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions: the honest ones -->
+  <section id="questions" class="pad" aria-labelledby="questions-h">
+    <div class="wrap qa-grid">
+      <div>
+        <h2 class="h2" id="questions-h">Before you <em>move in.</em></h2>
+        <p class="lede">What Folia doesn’t do yet, too.</p>
+      </div>
+      <div class="qa">
+        <details><summary>Does it cost anything?</summary><p>No. Folia is free and open source under the MIT licence, and nothing is held back for a paid plan.</p></details>
+        <details><summary>Will it sync between my computers?</summary><p>Not yet, and there’s no phone app. To move your library, back it up on one computer and restore it on the other.</p></details>
+        <details><summary>Which browsers does it work in?</summary><p>Chrome, Edge and other browsers built on Chromium. Not Firefox or Safari for now.</p></details>
+        <details><summary>Is it in the Chrome Web Store?</summary><p>Not yet. For now you build it and load it yourself, which takes a few minutes. The steps are just below.</p></details>
+        <details><summary>Does it keep a copy of the page?</summary><p>It keeps a screenshot of how the page looked and the site’s preview image, not the full text of the page.</p></details>
+        <details><summary>What if I uninstall it?</summary><p>Uninstalling deletes the library along with the extension, because it only lives in your browser. Back it up first and you can restore it later.</p></details>
+        <details><summary>Can I switch rooms later?</summary><p>Any time, from the library’s menu. Each room comes in light and dark, and everything you’ve kept stays as it is.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section id="install" class="install pad" aria-labelledby="install-h">
+    <div class="wrap install-grid">
+      <div>
+        <h2 class="h2" id="install-h">Close a tab. <em>Keep it anyway.</em></h2>
+        <p class="lede">Folia isn’t in the web stores yet, so for now you load it yourself. It takes a few minutes and works in Chrome, Edge and other Chromium browsers.</p>
+        <div class="actions">
+          <a class="btn" href="https://github.com/ux-natasha/bookmark-manager">Get the code on GitHub
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="borrow">
+        <header class="mono"><b>Instructions</b><span>Four steps</span></header>
+        <ol class="steps">
+          <li><b>Build it</b><span>Run <code>npm install</code>, then <code>npm run build</code>. This makes a <code>dist</code> folder.</span></li>
+          <li><b>Open your extensions</b><span>Go to <code>chrome://extensions</code> or <code>edge://extensions</code> and turn on Developer mode.</span></li>
+          <li><b>Load it</b><span>Choose <em>Load unpacked</em> and pick the <code>dist</code> folder.</span></li>
+          <li><b>Pin it and keep something</b><span>Pin Folia to the toolbar, then press <kbd>Alt+Shift+S</kbd> on any page worth coming back to.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer>
+<footer class="colophon">
   <div class="wrap">
-    <a class="brand" href="#"><img src="logo.svg" alt="">folia</a>
-    <span>A little library of the internet. MIT licensed.</span>
+    <div>
+      <a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28">Folia</a>
+      <p style="margin-top:8px">A library that shows you what you’ve forgotten. MIT licence.</p>
+    </div>
+    <p>Set in Newsreader, Geist and Geist Mono, with Cormorant Garamond and Bodoni Moda in the rooms that use them. Sample things are invented. Paintings, all public domain: Jean-Honoré Fragonard, <em>The Swing</em> (1767); Thomas Cole, <em>The Oxbow</em> (1836).</p>
+    <nav aria-label="Footer">
+      <a href="https://github.com/ux-natasha/bookmark-manager">Source on GitHub</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+    </nav>
   </div>
 </footer>
 
 <script>
-  // Colour search demo
-  const hues = {
-    green: ['oklch(0.58 0.11 145)','oklch(0.68 0.09 135)','oklch(0.45 0.08 150)','oklch(0.75 0.1 130)','oklch(0.52 0.1 160)'],
-    orange: ['oklch(0.66 0.13 40)','oklch(0.58 0.12 35)','oklch(0.74 0.1 50)','oklch(0.5 0.1 30)'],
-    blue: ['oklch(0.55 0.12 255)','oklch(0.68 0.09 240)','oklch(0.42 0.1 265)','oklch(0.78 0.07 230)'],
-    yellow: ['oklch(0.86 0.13 92)','oklch(0.8 0.14 85)','oklch(0.9 0.09 100)'],
-    dark: ['oklch(0.25 0.01 125)','oklch(0.3 0.02 260)','oklch(0.22 0.02 40)'],
-  };
-  const order = ['green','orange','blue','yellow','dark','green','blue','orange','green','dark','yellow','blue','orange','green','blue','green','orange','dark','yellow','green','blue','orange','dark','green'];
-  const wall = document.getElementById('wall');
-  const count = {};
-  order.forEach((h, i) => {
-    const t = document.createElement('i');
-    const list = hues[h];
-    t.style.setProperty('--c', list[(count[h] = (count[h] ?? -1) + 1) % list.length]);
-    t.dataset.h = h;
-    wall.append(t);
-  });
-  const picked = document.querySelector('.picked');
-  const pick = btn => {
-    document.querySelectorAll('.picker button').forEach(b => b.setAttribute('aria-pressed', b === btn));
-    const h = btn.dataset.h;
-    let n = 0;
-    wall.querySelectorAll('i').forEach(t => { const on = t.dataset.h === h; t.classList.toggle('off', !on); n += on; });
-    picked.textContent = `${n} bookmarks look ${btn.getAttribute('aria-label').toLowerCase()}.`;
-  };
-  document.querySelectorAll('.picker button').forEach(b => b.addEventListener('click', () => pick(b)));
-  pick(document.querySelector('.picker button'));
+  const root = document.documentElement;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Refresh my memory
-  const figs = [...document.querySelectorAll('#shelf figure')];
-  let last = -1;
-  document.getElementById('refresh').addEventListener('click', () => {
-    let i;
-    do { i = 2 + Math.floor(Math.random() * 3); } while (i === last);
-    last = i;
-    figs.forEach((f, j) => f.classList.toggle('back', j === i));
-  });
-
-  // Theme tabs
-  const caps = [
-    'The everyday view: previews, titles and tags, at a comfortable size.',
-    'Contact sheet: everything at once, packed like a photographer’s proofs.',
-    'Covers: big previews, for browsing slowly.',
-    'Colour field: your library as a wall of colour.',
+  /* ---------- Hero: forty-two tabs, filed in one press ---------- */
+  const names = [
+    ['Why we still use pencils', '#c99a3c'], ['Night trains of Europe', '#2f3b8f'], ['tidy-feeds', '#15171a'], ['Pickled red onions', '#c4688a'],
+    ['Setting type by hand', '#c0392b'], ['Sea glass palettes', '#7d9aa8'], ['A field guide to mosses', '#6f7d45'], ['Letterpress specimens', '#b8682e'],
+    ['Cyanotype at home', '#3f6fb5'], ['The Swing, Fragonard', '#4d6b3a'], ['Rhubarb galette', '#b9483c'], ['Honey, a field guide', '#b4893f'],
+    ['Poster archive: Swiss modernism', '#a3302a'], ['The quiet joy of small software', '#6e3f63'], ['Persimmon season', '#d9875a'], ['Twelve posters from Basel', '#a3302a'],
+    ['On a slower web', '#8d8676'], ['Oak shelving, brass brackets', '#8a6a2a'], ['How to read a contact sheet', '#1e2a2e'], ['Kitchen lighting ideas', '#e3c56c'],
+    ['A type scale calculator', '#3b3f4a'], ['Pressed flower frames', '#c4688a'], ['Primavera, Botticelli', '#4d6b3a'], ['Gift ideas for Sam', '#d9b13b'],
   ];
-  const tabs = [...document.querySelectorAll('.tabs button')];
-  const imgs = [...document.querySelectorAll('.stage img')];
-  const cap = document.querySelector('.stage-cap');
-  tabs.forEach(t => t.addEventListener('click', () => {
-    const i = +t.dataset.i;
-    tabs.forEach(b => b.setAttribute('aria-selected', b === t));
-    imgs.forEach((im, j) => im.classList.toggle('on', j === i));
-    cap.textContent = caps[i];
-  }));
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.insertAdjacentHTML('beforeend', '<div class="tab on"><img src="logo.svg" alt="" width="14" height="14"><span>Folia</span></div>');
+  for (let i = 1; i < 42; i++) {
+    const [t, c] = names[i % names.length];
+    tabsEl.insertAdjacentHTML('beforeend', `<div class="tab"><i style="--c:${c}"></i><span>${t}</span></div>`);
+  }
+  tabsEl.insertAdjacentHTML('beforeend', '<div class="tab add">+</div>');
+
+  // Five of the forty-one on the shelf, then the rest.
+  const kept = [
+    ['cover', 'Lnk·014', 'Why we still use pencils', '#c99a3c', -1.5],
+    ['pic', 'Pic·003', 'The Swing', 'url(img/art/swing.jpg)', 1],
+    ['cover', 'Lnk·021', 'Night trains of Europe', '#2f3b8f', 0.5],
+    ['quote', '', 'Make the thing you wish you’d found.', '', -1],
+    ['pic', 'Pic·012', 'The Oxbow', 'url(img/art/oxbow.jpg)', 0.5],
+  ];
+  const shelf = document.getElementById('shelf');
+  const slot = (html, cls, i, r) => `<div class="slot"><div class="k ${cls}" style="--i:${i};--r:${r}deg">${html}</div></div>`;
+  shelf.innerHTML = kept.map(([kind, code, title, c, r], i) => {
+    if (kind === 'quote') return slot(title, 'quote', i, r);
+    if (kind === 'pic') return slot(`<div class="pic" style="--c:${c}"></div><div class="lbl"><small>${code}</small>${title}</div>`, '', i, r);
+    return slot(`<div class="pic" style="--c:${c}">${title}</div><div class="lbl"><small>${code}</small>kept today</div>`, 'cover', i, r);
+  }).join('') + slot('+36<small>more, each saved the way it looked</small>', 'more', 5, 0);
+
+  const keep = document.getElementById('keep');
+  const msg = document.getElementById('msg');
+  const n = document.getElementById('n');
+  const tw = document.getElementById('tw');
+  const why = document.getElementById('why');
+  let filed = false;
+  let tick;
+  keep.addEventListener('click', () => {
+    const tabs = [...tabsEl.querySelectorAll('.tab:not(.on):not(.add)')];
+    clearInterval(tick);
+    if (!filed) {
+      root.classList.add('filing');
+      // Tabs drop off the strip from the end, as if pulled down onto the shelf.
+      tabs.reverse().forEach((t, i) => {
+        if (reduced) { t.hidden = true; return; }
+        t.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(90px) scale(0.7)', opacity: 0 }],
+          { duration: 420, delay: i * 14, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' }).finished.then(() => { t.hidden = true; });
+      });
+      let k = 42;
+      const land = () => { n.textContent = '1'; tw.textContent = 'tab'; why.textContent = 'and the other 41 are kept.'; };
+      if (reduced) land();
+      else tick = setInterval(() => { k -= 3; if (k <= 1) { clearInterval(tick); land(); } else n.textContent = k; }, 30);
+      setTimeout(() => root.classList.add('filed'), reduced ? 0 : 250);
+      msg.textContent = 'Closed, and kept. Every one saved the way it looked.';
+      keep.textContent = 'Open them all again';
+    } else {
+      tabs.forEach((t) => { t.getAnimations().forEach((a) => a.cancel()); t.hidden = false; });
+      root.classList.remove('filing', 'filed');
+      n.textContent = '42'; tw.textContent = 'tabs'; why.textContent = 'because closing one feels like losing it.';
+      msg.textContent = '';
+      keep.textContent = 'Keep them and close';
+    }
+    filed = !filed;
+  });
+
+  /* ---------- Ageing: scrolling through the section is time passing ---------- */
+  const ageing = document.getElementById('ageing');
+  const scene = document.getElementById('scene');
+  const rail = ageing.querySelector('.rail');
+  const when = document.getElementById('when');
+  const what = document.getElementById('what');
+  const since = document.getElementById('since');
+  const opened = document.getElementById('opened');
+  const card = document.getElementById('card');
+  const table = document.getElementById('table');
+  const MAX = 18;
+  // The extension's own curve: fresh for three months, fully aged fourteen months after that.
+  const ageT = (m) => Math.min(1, Math.max(0, (m - 3) / 14));
+  const say = (m) => (m <= 0 ? 'Today' : m === 1 ? 'A month' : m === 12 ? 'A year' : `${m} months`);
+  const lines = [
+    [3, 'Straight, clean, on top of the pile.'],
+    [6, 'Still fresh. Everything gets three months.'],
+    [10, 'The paper turns. The tape lets go.'],
+    [14, 'Dust settles. The picture loses its colour.'],
+    [99, 'Tilted, foxed, impossible to miss.'],
+  ];
+  let dustedAt = 0; // the month they were last dusted off
+  let lastM = -1;
+  const age = () => {
+    const r = scene.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight))) || 0;
+    const m = Math.round(p * MAX);
+    rail.style.setProperty('--p', p.toFixed(3));
+    if (m < dustedAt) dustedAt = m; // scrolling back before the dusting undoes it
+    const s = m - dustedAt;
+    const t = ageT(s);
+    ageing.style.setProperty('--t', t.toFixed(3));
+    table.classList.toggle('can-dust', t >= 0.45);
+    if (m === lastM) return;
+    lastM = m;
+    when.textContent = say(s);
+    since.textContent = dustedAt ? 'Since you dusted them off' : 'Saved';
+    what.textContent = lines.find(([lim]) => s < lim)[1];
+    opened.textContent = s === 0 ? 'opened today' : `opened ${s} mo. ago`;
+  };
+  let queued = false;
+  addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; age(); }); } }, { passive: true });
+  addEventListener('resize', age);
+  age();
+  document.getElementById('dust').addEventListener('click', () => {
+    root.classList.add('dusting');
+    dustedAt = lastM;
+    lastM = -1;
+    card.classList.remove('shone'); void card.offsetWidth; card.classList.add('shone');
+    age();
+    document.getElementById('age-status').textContent = 'Dusted off. They start ageing again from now.';
+    card.tabIndex = -1;
+    card.focus({ preventScroll: true });
+    setTimeout(() => root.classList.remove('dusting'), 1000);
+  });
+
+  /* ---------- Rooms: the door you hover, tab to or tap opens ---------- */
+  const doors = [...document.querySelectorAll('.door')];
+  const wide = matchMedia('(min-width: 860px)');
+  const open = (d) => doors.forEach((x) => {
+    x.classList.toggle('open', x === d);
+    x.querySelector('.door-key').setAttribute('aria-expanded', String(x === d));
+  });
+  doors.forEach((d) => {
+    const key = d.querySelector('.door-key');
+    d.addEventListener('mouseenter', () => wide.matches && open(d));
+    key.addEventListener('click', () => open(d));
+    key.addEventListener('focus', () => wide.matches && open(d));
+  });
+
+  /* ---------- Finding: covers, filtered by the colour you remember ---------- */
+  const hues = [['red', 'Red', '#c0392b'], ['orange', 'Orange', '#d9822b'], ['yellow', 'Yellow', '#d9b13b'], ['green', 'Green', '#6f8a3e'], ['blue', 'Blue', '#3f6fb5'], ['purple', 'Purple', '#8a4f9e']];
+  const slots = [...document.querySelectorAll('#rack .slot-c')];
+  const picker = document.getElementById('picker');
+  const foundN = document.getElementById('found-n');
+  const finding = document.getElementById('finding');
+  hues.forEach(([h, label, c]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.style.setProperty('--c', c);
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = `<i aria-hidden="true"></i>${label}<small>${slots.filter((s) => s.dataset.h === h).length}</small>`;
+    b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-pressed') !== 'true';
+      picker.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b && on)));
+      let shown = 0;
+      slots.forEach((s) => { const show = !on || s.dataset.h === h; s.classList.toggle('off', !show); shown += show; });
+      foundN.textContent = on ? `${shown} of ${slots.length} looked ${label.toLowerCase()}` : `${slots.length} of ${slots.length} shown`;
+      // The room's light changes colour: dim, swap, come back up.
+      finding.classList.add('dim');
+      setTimeout(() => { finding.style.setProperty('--room', on ? c : '#6f8a3e'); finding.classList.remove('dim'); }, reduced ? 0 : 300);
+    });
+    picker.insertBefore(b, foundN);
+  });
+  /* ---------- Links from posts: threads from each link to what was found ---------- */
+  const grid = document.getElementById('post-grid');
+  const threads = document.getElementById('threads');
+  const drawThreads = () => {
+    if (getComputedStyle(threads).display === 'none') return;
+    const box = grid.getBoundingClientRect();
+    threads.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    const postEdge = grid.querySelector('.post').getBoundingClientRect().right;
+    const panelEdge = grid.querySelector('.catch').getBoundingClientRect().left;
+    threads.innerHTML = [...grid.querySelectorAll('.post mark')].map((m, i) => {
+      const a = [...m.getClientRects()].pop();
+      const b = grid.querySelector(`.catch li[data-n="${m.dataset.n}"] input`).getBoundingClientRect();
+      const x1 = postEdge - box.left + 3, y1 = a.top + a.height / 2 - box.top;
+      const x2 = panelEdge - box.left - 3, y2 = b.top + b.height / 2 - box.top;
+      const mid = (x1 + x2) / 2;
+      const d = `M${x1} ${y1}C${mid} ${y1} ${mid} ${y2} ${x2} ${y2}`;
+      return `<path d="${d}" style="--i:${i}"/><circle cx="${x1}" cy="${y1}" r="3.5"/><circle cx="${x2}" cy="${y2}" r="3.5"/>`;
+    }).join('');
+    threads.querySelectorAll('path').forEach((p) => p.style.setProperty('--len', Math.ceil(p.getTotalLength())));
+  };
+  drawThreads();
+  addEventListener('resize', drawThreads);
+  document.fonts?.ready.then(drawThreads);
+  if (!reduced && 'IntersectionObserver' in window) {
+    grid.classList.add('js-threads');
+    const seen = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      grid.classList.add('drawn');
+      setTimeout(() => grid.classList.add('settled'), 1800);
+      seen.disconnect();
+    }, { threshold: 0.4 });
+    seen.observe(grid);
+  }
+
+  const catchForm = document.getElementById('catch');
+  const rows = [...catchForm.querySelectorAll('li')];
+  const save = document.getElementById('catch-save');
+  const again = document.getElementById('catch-again');
+  const note = document.getElementById('catch-note');
+  const links = (n) => `${n} ${n === 1 ? 'link' : 'links'}`;
+  const recount = () => {
+    const ticked = rows.filter((r) => r.querySelector('input').checked);
+    const fresh = ticked.filter((r) => !('have' in r.dataset)).length;
+    document.getElementById('catch-n').textContent = `${ticked.length} ticked`;
+    save.textContent = fresh ? `Save ${links(fresh)}` : 'Save';
+    save.disabled = !fresh;
+  };
+  rows.forEach((r) => r.querySelector('input').addEventListener('change', recount));
+  catchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fresh = rows.filter((r) => r.querySelector('input').checked && !('have' in r.dataset));
+    fresh.forEach((r) => r.classList.add('saved'));
+    rows.forEach((r) => (r.querySelector('input').disabled = true));
+    save.disabled = true;
+    save.textContent = `Saved ${links(fresh.length)}`;
+    note.textContent = `Saved ${links(fresh.length)}, filed under design, each with a picture of how it looked.`;
+    again.hidden = false;
+  });
+  again.addEventListener('click', () => {
+    rows.forEach((r) => { r.classList.remove('saved'); const i = r.querySelector('input'); i.disabled = false; i.checked = r.dataset.n !== '4'; });
+    note.textContent = 'Links you already have are only changed if you add tags.';
+    again.hidden = true;
+    recount();
+    save.focus();
+  });
+
+  /* ---------- The tag index, printed four ways ---------- */
+  // [tag, count, months since last used, colour, children]
+  const tags = [
+    ['design', 8, 0, '#c0392b', [['posters', 3, 1]]],
+    ['film', 2, 14, '#3f6fb5'], ['food', 4, 1, '#d9822b'],
+    ['inspiration', 4, 2, '#8a4f9e'],
+    ['knitting', 2, 16, '#5f98a8'],
+    ['reading', 5, 0, '#6f8a3e'], ['recipes', 5, 1, '#c4688a'],
+    ['software', 5, 0, '#2f3b8f'],
+    ['travel', 2, 13, '#b8682e'], ['type', 3, 4, '#d9b13b'],
+    ['weeknight', 3, 2, '#8a6a2a'], ['writing', 2, 7, '#566468'],
+  ];
+  const once = { F: 'fonts, framing', S: 'sourdough', W: 'woodwork' };
+  const STALE = 12;
+  const ix = document.getElementById('ix');
+  const cols = document.getElementById('ix-cols');
+  const entry = ([name, count, months, c], sub) => {
+    const fade = Math.min(1, months / 18);
+    const cls = ['ix-e', sub ? 'sub' : '', months >= STALE ? 'stale' : '', fade > 0.4 ? 'hollow' : ''].join(' ');
+    return `<span class="${cls}" style="--fade:${fade.toFixed(2)};--c:${c || 'transparent'}">${sub ? '' : '<i class="sq"></i>'}<span class="nm">${name}</span><span class="cm">,</span><span class="ld"></span><span class="ct">${count}</span>${months >= STALE ? '<span class="dg">†</span>' : ''}</span>`;
+  };
+  const letters = [...new Set(tags.map((t) => t[0][0].toUpperCase()))];
+  cols.innerHTML = letters.map((L) => {
+    const mine = tags.filter((t) => t[0][0].toUpperCase() === L);
+    const stale = mine.filter((t) => t[2] >= STALE).length;
+    const body = mine.map((t) => entry(t) + (t[4] || []).map((ch) => entry([...ch, t[3]], true)).join('')).join('');
+    const n = mine.length + (once[L] ? once[L].split(',').length : 0);
+    return `<section class="ix-g" style="--share:${(stale / mine.length).toFixed(2)}"><h3 class="ix-l">${L}<small>${n} tags</small></h3>${body}${once[L] ? `<p class="ix-once"><b>Once · </b>${once[L]}</p>` : ''}</section>`;
+  }).join('');
+  const staleN = tags.filter((t) => t[2] >= STALE).length;
+  // Each room's own words, from the extension's copy.
+  const words = {
+    lib: { count: `${staleN} tags haven’t been used in a year`, why: 'They’re shaded below. Archived tags leave the index but stay on the things they’re on.', act: `Archive ${staleN}`, out: `Archived ${staleN} tags.`, back: 'Bring them back', once: 'Once · ' },
+    con: { count: `${staleN} tags unused for a year`, why: 'Their letters are tinted below. Archived tags leave the index but stay on the things they’re on.', act: `Archive ${staleN}`, out: `Archived ${staleN} tags.`, back: 'Bring them back', once: 'Once · ' },
+    cov: { count: `${staleN} tags marked † haven’t been used in a year. Leave them out of the next edition?`, why: 'They stay on the things they’re on.', act: `Leave out ${staleN}`, out: `${staleN} tags out of print.`, back: 'Bring them all back', once: 'once: ' },
+    fld: { count: `${staleN} tags haven’t been used in a year`, why: 'They’ve gone grey below. Archived tags leave the index but stay on the things they’re on.', act: `Archive ${staleN}`, out: `Archived ${staleN} tags.`, back: 'Bring them back', once: 'Once · ' },
+  };
+  const tidy = document.getElementById('ix-tidy');
+  const out = document.getElementById('ix-out');
+  const setWords = () => {
+    const w = words[ix.dataset.room];
+    document.getElementById('ix-count').textContent = w.count;
+    document.getElementById('ix-why').textContent = w.why;
+    document.getElementById('ix-archive').textContent = w.act;
+    document.getElementById('ix-out-t').textContent = w.out;
+    document.getElementById('ix-back').textContent = w.back;
+    cols.querySelectorAll('.ix-once b').forEach((b) => (b.textContent = w.once));
+  };
+  const archive = (on) => {
+    ix.classList.toggle('archived', on);
+    tidy.hidden = on;
+    out.hidden = !on;
+    document.getElementById(on ? 'ix-back' : 'ix-archive').focus();
+  };
+  document.getElementById('ix-archive').addEventListener('click', () => archive(true));
+  document.getElementById('ix-back').addEventListener('click', () => archive(false));
+  const rooms = [...document.querySelectorAll('#setin [role="radio"]')];
+  const pickRoom = (i, focus) => {
+    rooms.forEach((r, j) => { r.setAttribute('aria-checked', String(j === i)); r.tabIndex = j === i ? 0 : -1; });
+    ix.dataset.room = rooms[i].dataset.room;
+    setWords();
+    if (focus) rooms[i].focus();
+  };
+  rooms.forEach((r, i) => {
+    r.addEventListener('click', () => pickRoom(i));
+    r.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (step) { e.preventDefault(); pickRoom((i + step + rooms.length) % rooms.length, true); }
+    });
+  });
+  setWords();
 </script>
 </body>
 </html>

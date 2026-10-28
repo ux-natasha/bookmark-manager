@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folia: rough E, four doors</title>
+<meta name="theme-color" content="#f5efe3">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  /* Rough E: the rooms are the pitch. Four doors side by side; the one you lean on opens. */
+  @font-face { font-family: "Newsreader"; font-style: normal; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Newsreader"; font-style: italic; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-italic.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-mono-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Cormorant Garamond"; font-style: normal; font-weight: 300 700; font-display: swap; src: url("fonts/cormorant-garamond-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Cormorant Garamond"; font-style: italic; font-weight: 300 700; font-display: swap; src: url("fonts/cormorant-garamond-latin-wght-italic.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Bodoni Moda"; font-style: normal; font-weight: 400 900; font-display: swap; src: url("fonts/bodoni-moda-latin-opsz-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Bodoni Moda"; font-style: italic; font-weight: 400 900; font-display: swap; src: url("fonts/bodoni-moda-latin-opsz-italic.woff2") format("woff2-variations"); }
+
+  :root {
+    --paper: #f5efe3; --card: #fbf8f1; --stock: #ece3d1;
+    --ink: #2b2722; --ink-2: #5d5548; --line: rgba(43, 39, 34, 0.16);
+    --olive: #5d6b3a; --olive-deep: #3e4826; --cream: #f3ebdd;
+    --rose-pale: #f1dcd5; --rose-ink: #96493f;
+    --dark-room: #191714; --proof: #f2f4f3; --proof-ink: #1e2a2e; --proof-2: #566468; --pencil: #e2574a;
+    --covers: #a3302a; --covers-ink: #f6ecd8;
+    --night: #120f16; --night-ink: #eef0f4; --night-2-ink: #b3b9c5;
+    --serif: "Newsreader", Georgia, serif; --sans: "Geist", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, monospace;
+    --garamond: "Cormorant Garamond", var(--serif); --didone: "Bodoni Moda", var(--serif);
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --gutter: clamp(16px, 4vw, 48px);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  h1, h2, h3 { margin: 0; font-weight: 300; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  em { font-family: var(--serif); font-style: italic; }
+  :focus-visible { outline: 2px solid var(--olive); outline-offset: 3px; }
+  .mono { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 3px; background: var(--olive-deep); color: var(--cream); font: 500 15px/1 var(--sans); text-decoration: none; transition: transform 0.4s var(--ease); }
+  .btn:hover { transform: translateY(-1px); }
+
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px var(--gutter); }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; min-height: 44px; font: italic 400 28px/1 var(--serif); }
+  .brand img { width: 32px; height: 32px; border-radius: 7px; }
+  .top .btn { min-height: 44px; padding: 0 18px; }
+
+  .head { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 20px 64px; align-items: end; padding: clamp(28px, 5vw, 64px) var(--gutter) clamp(28px, 4vw, 44px); }
+  .head h1 { font: 300 clamp(2.6rem, 6vw, 5.4rem)/0.98 var(--serif); letter-spacing: -0.025em; }
+  .head h1 em { color: var(--olive); }
+  .head p { color: var(--ink-2); max-width: 40ch; font-size: clamp(16px, 1.3vw, 19px); }
+
+  /* ---------- The doors ---------- */
+  .doors { --pad: clamp(16px, 2vw, 28px); container-type: inline-size; display: flex; height: clamp(520px, 74vh, 760px); margin: 0 var(--gutter); gap: 6px; }
+  .door {
+    --grow: 1; flex: var(--grow) 1 0; min-width: 0; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; padding: var(--pad); text-decoration: none;
+    transition: flex-grow 0.8s var(--ease);
+  }
+  .door[data-open] { --grow: 3.2; }
+  .door .num { opacity: 0.75; }
+  .door h2 { margin-top: 10px; line-height: 0.95; white-space: nowrap; }
+  .door .body { margin-top: auto; display: grid; gap: 18px; width: calc((100cqw - 18px - 8 * var(--pad)) * 3.2 / 6.2); opacity: 0; transform: translateY(12px); transition: opacity 0.35s var(--ease), transform 0.6s var(--ease); pointer-events: none; }
+  .door[data-open] .body { opacity: 1; transform: none; transition-delay: 0.25s; }
+  .door .say { font-size: 15px; max-width: 46ch; }
+  .door .say strong { font-weight: 600; }
+  .door .go { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 15px; }
+  .door .go::after { content: "→"; transition: transform 0.3s var(--ease); }
+  .door:hover .go::after { transform: translateX(4px); }
+  /* A closed door shows its name standing up, like a spine */
+  .door .spine { position: absolute; left: 50%; bottom: clamp(16px, 2vw, 28px); writing-mode: vertical-rl; transform: translateX(-50%) rotate(180deg); white-space: nowrap; transition: opacity 0.3s; }
+  .door[data-open] .spine { opacity: 0; }
+  .door:not([data-open]) h2 { opacity: 0; }
+  .door h2 { transition: opacity 0.3s; }
+
+  /* I. Library: cream paper, reading serif */
+  .d-lib { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); }
+  .d-lib .num { color: var(--olive); }
+  .d-lib h2, .d-lib .spine { font: italic 300 clamp(2.4rem, 4.6vw, 4.4rem)/0.95 var(--serif); }
+  .d-lib .spine { font-size: 30px; }
+  .d-lib .say strong { color: var(--olive-deep); }
+  .lib-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; }
+  .lc { background: #fff; padding: 6px 6px 9px; box-shadow: 0 0 0 1px var(--line), 0 12px 20px -14px rgba(43, 39, 34, 0.6); position: relative; isolation: isolate; }
+  .lc i { display: block; aspect-ratio: 4 / 3; background: var(--c); background-size: cover; background-position: 50% 30%; }
+  .lc b { display: block; font: 400 14px/1.2 var(--serif); margin-top: 7px; }
+  .lc.old { transform: rotate(4deg); }
+  .lc.old::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, #e9d29a, #c9a35c); mix-blend-mode: multiply; opacity: 0.6; }
+
+  /* II. Contact sheet: a proof on the darkroom bench */
+  .d-con { background: var(--dark-room); color: #ece6da; background-image: radial-gradient(ellipse 80% 50% at 50% 0, rgba(161, 58, 34, 0.3), transparent 70%); }
+  .d-con .num { color: var(--pencil); }
+  .d-con h2, .d-con .spine { font: 400 clamp(2.4rem, 4.6vw, 4.4rem)/0.95 var(--garamond); }
+  .d-con .spine { font-size: 32px; }
+  .d-con .say strong { color: #f0a08f; }
+  .proof { background: var(--proof); color: var(--proof-ink); padding: 10px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; }
+  .pf { background: var(--proof); padding: 5px 5px 7px; position: relative; box-shadow: 0 0 0 1px rgba(30, 42, 46, 0.15); }
+  .pf small { display: block; font: 500 8.5px/1 var(--mono); letter-spacing: 0.06em; color: var(--proof-2); margin-bottom: 4px; }
+  .pf i { display: block; aspect-ratio: 4 / 3; background: var(--c); background-size: cover; }
+  .pf.faded i { filter: saturate(0.1) brightness(1.5) contrast(0.6); }
+  .pf.ring::after { content: ""; position: absolute; inset: -4px; border: 2px solid var(--pencil); border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; transform: rotate(-4deg); opacity: 0.9; }
+
+  /* III. Covers: a red magazine rack */
+  .d-cov { background: var(--covers); color: var(--covers-ink); }
+  .d-cov .num { color: rgba(246, 236, 216, 0.8); }
+  .d-cov h2, .d-cov .spine { font: 400 clamp(2.2rem, 4.2vw, 4rem)/0.95 var(--didone); text-transform: uppercase; letter-spacing: 0.02em; }
+  .d-cov .spine { font-size: 26px; letter-spacing: 0.08em; }
+  .rack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding-bottom: 8px; border-bottom: 8px solid #6e1d18; }
+  .cv { aspect-ratio: 3 / 4; padding: 10% 9%; display: flex; flex-direction: column; background: var(--bg); color: var(--fg, #f1ede3); box-shadow: 0 14px 20px -14px rgba(0, 0, 0, 0.7); position: relative; }
+  .cv .m { font: 700 clamp(11px, 1vw, 15px)/0.95 var(--didone); text-transform: uppercase; text-align: center; border-bottom: 1px solid currentColor; padding-bottom: 5px; }
+  .cv .t { margin-top: auto; font: italic 400 clamp(11px, 0.95vw, 14px)/1.08 var(--didone); }
+  .cv.vid { font-family: var(--sans); }
+  .cv.vid .t { font: 600 clamp(11px, 0.95vw, 14px)/1.1 var(--sans); font-style: normal; }
+  .cv.dead { filter: saturate(0.3); }
+  .cv.dead::after { content: "OUT OF PRINT"; position: absolute; left: 8%; top: 42%; padding: 3px 5px; border: 1.5px solid #a3302a; color: #a3302a; background: rgba(217, 211, 198, 0.85); font: 600 7.5px/1 var(--mono); letter-spacing: 0.1em; transform: rotate(-12deg); }
+
+  /* IV. Colour field: a dark room lit by what you kept */
+  .d-fld { background: var(--night); color: var(--night-ink); }
+  .d-fld::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 60% 70%, #6f8a3e, transparent 70%); opacity: 0.35; pointer-events: none; }
+  .d-fld > * { position: relative; }
+  .d-fld .spine { position: absolute; }
+  .d-fld .num { color: #8ab8f7; }
+  .d-fld h2, .d-fld .spine { font: 600 clamp(2.2rem, 4.2vw, 4rem)/0.95 var(--sans); letter-spacing: -0.04em; }
+  .d-fld .spine { font-size: 26px; }
+  .d-fld .say strong { color: #8ab8f7; }
+  .wall { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+  .wall i { aspect-ratio: 3 / 4; border-radius: 4px; background: var(--c); box-shadow: 0 8px 26px -6px var(--c); }
+  .wall i.grey { background: #4a4d55; box-shadow: none; outline: 1px dashed rgba(238, 240, 244, 0.4); outline-offset: -1px; }
+
+  .strip { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; padding: 18px var(--gutter) 0; color: var(--ink-2); }
+  .strip span { font-size: 15px; }
+
+  /* ---------- Under the doors ---------- */
+  .more { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px); padding: clamp(80px, 11vw, 150px) var(--gutter); max-width: 1320px; margin: 0 auto; align-items: start; }
+  .more h2 { font: 300 clamp(2.2rem, 4.4vw, 3.8rem)/1.02 var(--serif); letter-spacing: -0.02em; }
+  .more h2 em { color: var(--olive); }
+  .kinds { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+  .kinds li { display: grid; grid-template-columns: 9ch minmax(0, 1fr); gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .kinds b { font: italic 400 24px/1.1 var(--serif); }
+  .kinds span { color: var(--ink-2); }
+  .end { background: var(--olive-deep); color: var(--cream); padding: clamp(56px, 8vw, 104px) var(--gutter); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 28px; }
+  .end h2 { font: 300 clamp(2rem, 4vw, 3.4rem)/1.04 var(--serif); letter-spacing: -0.02em; max-width: 18ch; }
+  .end p { color: #d5d6b4; margin-top: 14px; max-width: 46ch; }
+  .end .btn { background: var(--cream); color: var(--olive-deep); }
+  .end :focus-visible { outline-color: var(--cream); }
+
+  @media (max-width: 1099px) {
+    .lib-row .lc:nth-child(3), .rack .cv:nth-child(4), .wall i:nth-child(n + 5) { display: none; }
+    .lib-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .rack { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wall { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  /* Narrow screens: the doors stack, and open downward */
+  @media (max-width: 859px) {
+    .head, .more { grid-template-columns: minmax(0, 1fr); }
+    .doors { flex-direction: column; height: auto; gap: 6px; }
+    .door { flex: none; min-height: 84px; transition: none; }
+    .door .spine { display: none; }
+    .door:not([data-open]) h2 { opacity: 1; font-size: 34px; }
+    .door:not([data-open]) .body { display: none; }
+    .door .body { width: 100%; margin-top: 22px; }
+    .door { flex-direction: column; }
+    .door .num { order: -1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="index.html"><img src="logo.svg" alt="" width="32" height="32">Folia</a>
+  <a class="btn" href="index.html#install">Install</a>
+</header>
+
+<main>
+  <div class="head">
+    <h1>One library. <em>Four rooms</em> to keep it in.</h1>
+    <p>Folia saves the pages, pictures, quotes and notes you come across, in your browser. Choose the room that matches how you remember things. Each one shows forgotten things in its own way.</p>
+  </div>
+
+  <nav class="doors" id="doors" aria-label="The four rooms">
+    <a class="door d-lib" href="index.html#library" data-open>
+      <span class="num mono">Room I · Light &amp; dark</span>
+      <h2>Library</h2>
+      <span class="spine" aria-hidden="true">Library</span>
+      <div class="body">
+        <div class="lib-row" aria-hidden="true">
+          <div class="lc"><i style="--c:#c99a3c"></i><b>Why we still use pencils</b></div>
+          <div class="lc"><i style="--c:url(img/art/venus.jpg)"></i><b>The Birth of Venus</b></div>
+          <div class="lc old"><i style="--c:#5a7e94"></i><b>Sea glass palettes</b></div>
+        </div>
+        <p class="say">The everyday room. Previews on cream paper, titles in a reading serif, tags filed underneath. What you leave alone yellows and tilts; <strong>Dust off</strong> puts it straight.</p>
+        <span class="go">See the Library</span>
+      </div>
+    </a>
+    <a class="door d-con" href="index.html#contact">
+      <span class="num mono">Room II · Light &amp; dark</span>
+      <h2>Contact sheet</h2>
+      <span class="spine" aria-hidden="true">Contact sheet</span>
+      <div class="body">
+        <div class="proof" aria-hidden="true">
+          <div class="pf"><small>LNK·014</small><i style="--c:#c99a3c"></i></div>
+          <div class="pf faded"><small>VID·006</small><i style="--c:#1e2129"></i></div>
+          <div class="pf ring"><small>PIC·003</small><i style="--c:url(img/art/swing.jpg) 50% 45% / 240%"></i></div>
+          <div class="pf"><small>LNK·021</small><i style="--c:#2f3b8f"></i></div>
+          <div class="pf faded"><small>REP·002</small><i style="--c:#24453b"></i></div>
+          <div class="pf"><small>PIC·012</small><i style="--c:url(img/art/oxbow.jpg) 40% 50% / 300%"></i></div>
+          <div class="pf"><small>LNK·030</small><i style="--c:#7d9aa8"></i></div>
+          <div class="pf faded"><small>PST·011</small><i style="--c:#a3302a"></i></div>
+        </div>
+        <p class="say">Every page is a frame with its own catalogue code and a picture of how it looked. Frames you don’t open bleach; <strong>Reprint</strong> develops one back in, circled in pencil.</p>
+        <span class="go">See the Contact sheet</span>
+      </div>
+    </a>
+    <a class="door d-cov" href="index.html#covers">
+      <span class="num mono">Room III · Light &amp; dark</span>
+      <h2>Covers</h2>
+      <span class="spine" aria-hidden="true">Covers</span>
+      <div class="body">
+        <div class="rack" aria-hidden="true">
+          <div class="cv" style="--bg:#2f3b8f"><span class="m">The Slow Read</span><span class="t">Why we still write letters by hand</span></div>
+          <div class="cv vid" style="--bg:#1e2129"><span class="m" style="font-family:var(--mono);font-size:9px;letter-spacing:.1em">YouTube</span><span class="t">Setting type by hand</span></div>
+          <div class="cv" style="--bg:#f8f1e2;--fg:#2b2722"><span class="m">Kitchen</span><span class="t">Pickled red onions</span></div>
+          <div class="cv dead" style="--bg:#d9d3c6;--fg:#6e675c"><span class="m">Notes</span><span class="t">On a slower web</span></div>
+        </div>
+        <p class="say">Every link gets a cover set from its own title, site and colour: a masthead for a newsletter, a film strip for a video, a menu card for a recipe. Forgotten covers sun-fade; dead links go <strong>out of print</strong>.</p>
+        <span class="go">See the Covers</span>
+      </div>
+    </a>
+    <a class="door d-fld" href="index.html#field">
+      <span class="num mono">Room IV · Dark &amp; light</span>
+      <h2>Colour field</h2>
+      <span class="spine" aria-hidden="true">Colour field</span>
+      <div class="body">
+        <div class="wall" aria-hidden="true">
+          <i style="--c:#6f8a3e"></i><i style="--c:#c99a3c"></i><i style="--c:#3f6fb5"></i><i class="grey"></i>
+          <i style="--c:#c0392b"></i><i style="--c:#8a4f9e"></i><i style="--c:#d9822b"></i><i style="--c:#7d9aa8"></i>
+          <i class="grey"></i><i style="--c:#4d6b3a"></i><i style="--c:#c4688a"></i><i style="--c:#d9b13b"></i>
+        </div>
+        <p class="say">Can’t remember the name? Remember it was green. Pick a colour and everything like it comes forward, worked out on your computer. Forgotten things lose their colour, then their glow; <strong>Bring back</strong> lets them bloom.</p>
+        <span class="go">See the Colour field</span>
+      </div>
+    </a>
+  </nav>
+  <div class="strip"><span>The same library in every room. Switch any time from the menu.</span><span class="mono">Free · Open source · No account</span></div>
+
+  <section class="more" aria-labelledby="more-h">
+    <h2 id="more-h">Not only links. <em>Whatever made you stop.</em></h2>
+    <ul class="kinds">
+      <li><b>Pages</b><span>Toolbar icon or <b style="font:500 14px var(--mono)">Alt+Shift+S</b>. Saved with a screenshot of how it looked, logged-in pages included.</span></li>
+      <li><b>Pictures</b><span>Right-click an image. A copy is kept, tied to the page it came from.</span></li>
+      <li><b>Quotes</b><span>Select text and right-click. The one paragraph worth keeping, linked back to where you read it.</span></li>
+      <li><b>Notes</b><span>A thought of your own, with tags. The first line becomes its title.</span></li>
+    </ul>
+  </section>
+
+  <section class="end" aria-labelledby="end-h">
+    <div>
+      <h2 id="end-h">Pick a room. <em>Start with one page.</em></h2>
+      <p>For Chrome and Edge. Your library stays in your browser: no account, no server, no tracking.</p>
+    </div>
+    <a class="btn" href="index.html#install">How to install</a>
+  </section>
+</main>
+
+<script>
+  // Whichever door you hover or tab to opens; the rest close to spines.
+  const doors = [...document.querySelectorAll('.door')];
+  const open = (d) => doors.forEach((x) => x.toggleAttribute('data-open', x === d));
+  const wide = matchMedia('(min-width: 860px)');
+  doors.forEach((d) => {
+    d.addEventListener('mouseenter', () => wide.matches && open(d));
+    d.addEventListener('focus', () => open(d));
+    // On a phone the first tap opens the door; the second goes through it.
+    d.addEventListener('click', (e) => { if (!d.hasAttribute('data-open')) { e.preventDefault(); open(d); } });
+  });
+</script>
+</body>
+</html>

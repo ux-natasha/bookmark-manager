@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folia: rough F, too many tabs</title>
+<meta name="theme-color" content="#2b2722">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  /* Rough F: start from the problem. The page is a browser with forty-two tabs; one button files them all. */
+  @font-face { font-family: "Newsreader"; font-style: normal; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Newsreader"; font-style: italic; font-weight: 200 800; font-display: swap; src: url("fonts/newsreader-latin-opsz-italic.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-latin-wght-normal.woff2") format("woff2-variations"); }
+  @font-face { font-family: "Geist Mono"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("fonts/geist-mono-latin-wght-normal.woff2") format("woff2-variations"); }
+
+  :root {
+    --paper: #f5efe3; --card: #fbf8f1; --stock: #ece3d1;
+    --ink: #2b2722; --ink-2: #5d5548; --line: rgba(43, 39, 34, 0.16); --line-strong: rgba(43, 39, 34, 0.34);
+    --olive: #5d6b3a; --olive-deep: #3e4826; --olive-pale: #e2e2c9; --cream: #f3ebdd; --leaf: #d5d6b4;
+    --rose: #e4bfb5; --rose-pale: #f1dcd5; --rose-ink: #96493f;
+    --chrome: #2b2722; --chrome-2: #3a352f; --chrome-ink: #d9d2c4;
+    --serif: "Newsreader", Georgia, serif; --sans: "Geist", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --gutter: clamp(16px, 4vw, 48px);
+    --z-head: 10;
+    --specks: radial-gradient(circle at 18% 22%, rgba(110, 84, 46, 0.5) 0 1.2px, transparent 1.8px),
+              radial-gradient(circle at 72% 14%, rgba(110, 84, 46, 0.45) 0 1px, transparent 1.6px),
+              radial-gradient(circle at 40% 68%, rgba(110, 84, 46, 0.4) 0 1.4px, transparent 2px),
+              radial-gradient(circle at 86% 78%, rgba(110, 84, 46, 0.5) 0 1px, transparent 1.6px);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 300; margin: 0; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  em { font-family: var(--serif); font-style: italic; }
+  :focus-visible { outline: 2px solid var(--olive); outline-offset: 3px; }
+  .mono { font: 500 11px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 0; border-radius: 3px; background: var(--olive-deep); color: var(--cream); font: 500 16px/1 var(--sans); text-decoration: none; cursor: pointer; box-shadow: 0 2px 0 rgba(43, 39, 34, 0.2); transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease); }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px -8px rgba(43, 39, 34, 0.5); }
+  .btn:active { transform: translateY(1px); }
+  .textlink { background: none; border: 0; padding: 0; min-height: 44px; font: 500 15px/1 var(--sans); color: var(--ink); text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 0.2em; cursor: pointer; }
+
+  /* ---------- The browser the page sits in ---------- */
+  .chrome { position: sticky; top: 0; z-index: var(--z-head); background: var(--chrome); color: var(--chrome-ink); }
+  .tabs { display: flex; align-items: flex-end; gap: 1px; padding: 8px 8px 0; height: 44px; overflow: hidden; }
+  .tab { flex: 1 1 180px; min-width: 0; max-width: 200px; height: 34px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--chrome-2); border-radius: 7px 7px 0 0; font: 400 12.5px/1 var(--sans); white-space: nowrap; overflow: hidden; }
+  .tab i { width: 14px; height: 14px; border-radius: 3px; background: var(--c); flex: none; }
+  .tab span { overflow: hidden; text-overflow: ellipsis; }
+  .tab.here { background: var(--paper); color: var(--ink); flex-basis: 220px; }
+  .tab.new { flex: 0 0 34px; background: transparent; justify-content: center; font-size: 18px; color: var(--chrome-ink); }
+  .addr { display: flex; align-items: center; gap: 14px; padding: 7px 12px 8px; background: var(--paper); color: var(--ink-2); border-bottom: 1px solid var(--line); }
+  .addr .url { flex: 1; min-width: 0; height: 32px; display: flex; align-items: center; padding: 0 14px; border-radius: 16px; background: var(--stock); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .addr .nav { letter-spacing: 6px; font-size: 14px; }
+  .addr .ext { width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; transition: box-shadow 0.4s var(--ease); }
+  .addr .ext img { width: 22px; height: 22px; border-radius: 5px; }
+  .filing .addr .ext, .filed .addr .ext { box-shadow: 0 0 0 2px var(--olive), 0 0 18px 2px rgba(93, 107, 58, 0.5); }
+  .count { font: 500 12px/1 var(--mono); color: var(--chrome-ink); padding: 0 6px 0 4px; flex: none; align-self: center; margin-bottom: 4px; }
+
+  /* ---------- Hero ---------- */
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
+  .hero { padding: clamp(48px, 8vw, 112px) 0 clamp(40px, 6vw, 72px); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 24px 64px; align-items: end; }
+  .hero h1 { font-size: clamp(2.6rem, 6vw, 5.6rem); line-height: 0.98; letter-spacing: -0.03em; }
+  .hero h1 em { color: var(--olive); }
+  .hero h1 .n { font-variant-numeric: lining-nums; }
+  .hero .lede { color: var(--ink-2); font-size: clamp(17px, 1.35vw, 19px); max-width: 38ch; }
+  .hero .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 28px; }
+  .after-msg { font: italic 400 clamp(19px, 1.8vw, 24px)/1.35 var(--serif); color: var(--olive-deep); margin-top: 16px; min-height: 1.4em; }
+
+  /* The shelf the tabs land on */
+  .shelf { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 22px); padding-bottom: clamp(64px, 9vw, 120px); }
+  .slot { aspect-ratio: 3 / 4; border: 1px dashed var(--line-strong); border-radius: 2px; position: relative; }
+  .slot:first-child::before { content: "Your library"; position: absolute; left: 10px; top: 8px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .k { position: absolute; inset: -1px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 16px 24px -16px rgba(43, 39, 34, 0.65); background: var(--card); opacity: 0; transform: translateY(-30px) rotate(var(--r, 0deg)) scale(0.96); }
+  .filed .k { opacity: 1; transform: rotate(var(--r, 0deg)); transition: opacity 0.6s var(--ease), transform 0.9s var(--ease); transition-delay: calc(0.35s + var(--i) * 45ms); }
+  .k .pic { flex: 1; background: var(--c); background-size: cover; background-position: 50% 30%; }
+  .k .lbl { padding: 8px 9px 10px; font: 400 clamp(12px, 1.05vw, 15px)/1.15 var(--serif); }
+  .k .lbl small { display: block; font: 500 9px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; }
+  .k.cover .pic { padding: 10%; display: flex; align-items: flex-end; color: #f6ecd8; font: italic 400 clamp(13px, 1.25vw, 18px)/1.05 var(--serif); }
+  .k.quote { background: var(--rose-pale); padding: 12%; font: italic 400 clamp(13px, 1.2vw, 17px)/1.25 var(--serif); justify-content: center; }
+  .k.quote::before { content: "\201C"; font-size: 2.2em; line-height: 0.5; color: var(--rose-ink); }
+  .k.note { background: var(--olive-pale); padding: 12%; font: 400 clamp(13px, 1.2vw, 17px)/1.3 var(--serif); }
+  .k.more { background: var(--olive-deep); color: var(--cream); padding: 12%; justify-content: flex-end; font: 300 clamp(26px, 3vw, 44px)/1 var(--serif); }
+  .k.more small { font: 400 14px/1.3 var(--sans); color: var(--leaf); margin-top: 8px; }
+
+  /* ---------- Then it waits ---------- */
+  .wait { background: var(--olive-deep); color: var(--cream); padding: clamp(80px, 11vw, 150px) 0; }
+  .wait h2 { font-size: clamp(2.2rem, 4.6vw, 4rem); line-height: 1.02; letter-spacing: -0.02em; max-width: 20ch; }
+  .wait h2 em { color: var(--rose); }
+  .wait .intro { color: var(--leaf); max-width: 54ch; margin-top: 20px; font-size: clamp(17px, 1.3vw, 19px); }
+  .years { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(12px, 2vw, 28px); margin-top: clamp(48px, 6vw, 80px); align-items: end; }
+  .yr figure { margin: 0; }
+  .aged { --t: 0; position: relative; isolation: isolate; background: var(--card); color: var(--ink); padding: 8px 8px 12px; transform: rotate(calc(var(--t) * 6deg)); box-shadow: 0 20px 30px -20px rgba(0, 0, 0, 0.7); }
+  .aged::before, .aged::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .aged::before { background: linear-gradient(160deg, #e9d29a, #c9a35c); mix-blend-mode: multiply; opacity: calc(var(--t) * 0.6); }
+  .aged::after { background: var(--specks); background-size: 60px 60px; opacity: var(--t); }
+  .aged .pic { aspect-ratio: 4 / 3; background: url(img/art/oxbow.jpg) 60% 50% / 260% no-repeat; filter: saturate(calc(1 - var(--t) * 0.8)) sepia(calc(var(--t) * 0.4)); }
+  .aged b { display: block; font: 400 clamp(13px, 1.2vw, 16px)/1.2 var(--serif); margin-top: 8px; }
+  .yr figcaption { margin-top: 18px; padding-top: 10px; border-top: 1px solid rgba(243, 235, 221, 0.35); }
+  .yr figcaption b { display: block; font: 300 clamp(20px, 2vw, 28px)/1.1 var(--serif); }
+  .yr figcaption span { font-size: 14px; color: var(--leaf); }
+  .wait .back { margin-top: clamp(40px, 5vw, 64px); font: italic 400 clamp(19px, 1.7vw, 23px)/1.4 var(--serif); max-width: 52ch; }
+  .wait .back strong { font-style: normal; font-family: var(--sans); font-weight: 500; font-size: 0.8em; color: var(--rose); }
+
+  .lives { padding: clamp(80px, 11vw, 150px) 0; }
+  .lives .big { font-size: clamp(2.4rem, 5.4vw, 4.8rem); line-height: 1; letter-spacing: -0.025em; }
+  .lives .big span { display: block; }
+  .lives .big span:nth-child(2) { color: var(--ink-2); padding-left: clamp(0px, 4vw, 64px); }
+  .lives .big span:nth-child(3) { padding-left: clamp(0px, 8vw, 128px); }
+  .lives .big em { color: var(--rose-ink); }
+  .lives-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: 32px 72px; align-items: end; }
+  .lives p { color: var(--ink-2); max-width: 44ch; }
+  .lives .actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; }
+
+  @media (max-width: 1099px) {
+    .shelf { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .shelf .slot:nth-child(n + 9) { display: none; }
+  }
+  @media (max-width: 859px) {
+    .hero, .lives-grid { grid-template-columns: minmax(0, 1fr); }
+    .years { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .years .yr:nth-child(2), .years .yr:nth-child(4) { display: none; }
+    .addr .nav { display: none; }
+  }
+  @media (max-width: 719px) {
+    .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .shelf .slot:nth-child(n + 7) { display: none; }
+    .tab span { display: none; }
+    .tab { padding: 0 4px; justify-content: center; }
+    .tab.here span { display: inline; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; transition-delay: 0s !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome" aria-hidden="true">
+  <div class="tabs" id="tabs"></div>
+  <div class="addr">
+    <span class="nav">← → ↻</span>
+    <span class="url">folia — keep the tabs, close the tabs</span>
+    <span class="ext"><img src="logo.svg" alt="" width="22" height="22"></span>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1><span class="n" id="n">42</span> <span id="tw">tabs</span> open, <em id="why">because closing one feels like losing it.</em></h1>
+      </div>
+      <div>
+        <p class="lede">Folia keeps them for you, saved the way they looked, in a library that lives in your browser. Then you can close them. All of them.</p>
+        <div class="actions">
+          <button class="btn" type="button" id="keep">Keep them and close</button>
+          <a class="textlink" href="index.html#library">See what else it keeps</a>
+        </div>
+        <p class="after-msg" id="msg" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="shelf" id="shelf" aria-label="Your library" role="group"></div>
+  </div>
+
+  <section class="wait" aria-labelledby="wait-h">
+    <div class="wrap">
+      <h2 id="wait-h">The ones you never open again <em>start to look it.</em></h2>
+      <p class="intro">Saving is the easy part. The hard part is remembering you saved it. So anything you haven’t opened in three months slowly ages, in plain sight, until you either come back to it or let it go.</p>
+      <div class="years">
+        <div class="yr"><figure><div class="aged" style="--t:0"><div class="pic"></div><b>The Oxbow</b></div><figcaption><b>Today</b><span>Saved.</span></figcaption></figure></div>
+        <div class="yr"><figure><div class="aged" style="--t:0"><div class="pic"></div><b>The Oxbow</b></div><figcaption><b>3 months</b><span>Still fresh.</span></figcaption></figure></div>
+        <div class="yr"><figure><div class="aged" style="--t:.36"><div class="pic"></div><b>The Oxbow</b></div><figcaption><b>8 months</b><span>Yellowing.</span></figcaption></figure></div>
+        <div class="yr"><figure><div class="aged" style="--t:.78"><div class="pic"></div><b>The Oxbow</b></div><figcaption><b>A year</b><span>Dusty, crooked.</span></figcaption></figure></div>
+        <div class="yr"><figure><div class="aged" style="--t:1"><div class="pic"></div><b>The Oxbow</b></div><figcaption><b>Two years</b><span>Hard to miss.</span></figcaption></figure></div>
+      </div>
+      <p class="back">Open it and it comes back to how it was. Or press <strong>Refresh my memory</strong> and Folia brings three forgotten things to the front.</p>
+    </div>
+  </section>
+
+  <section class="lives" aria-labelledby="here-h">
+    <div class="wrap lives-grid">
+      <h2 class="big" id="here-h"><span>No account.</span><span>No server.</span><span><em>No tracking.</em></span></h2>
+      <div>
+        <p>Your library lives in your browser’s own storage, on your computer. Folia only goes online to fetch a page’s title and preview, and to check your links still work. Free and open source, for Chrome and Edge.</p>
+        <div class="actions"><a class="btn" href="index.html#install">How to install</a></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const titles = [
+    ['Why we still use pencils', '#c99a3c'], ['Night trains of Europe', '#2f3b8f'], ['tidy-feeds', '#15171a'], ['Pickled red onions', '#c4688a'],
+    ['Setting type by hand', '#c0392b'], ['Sea glass palettes', '#7d9aa8'], ['A field guide to mosses', '#6f7d45'], ['Letterpress specimens', '#b8682e'],
+    ['Cyanotype at home', '#3f6fb5'], ['The Swing, Fragonard', '#4d6b3a'], ['Rhubarb galette', '#b9483c'], ['Honey, a field guide', '#b4893f'],
+    ['Poster archive: Swiss modernism', '#a3302a'], ['The quiet joy of small software', '#6e3f63'], ['Persimmon season', '#d9875a'], ['Twelve posters from Basel', '#a3302a'],
+    ['On a slower web', '#8d8676'], ['Oak shelving, brass brackets', '#8a6a2a'], ['How to read a contact sheet', '#1e2a2e'], ['Kitchen lighting ideas', '#e3c56c'],
+    ['A type scale calculator', '#3b3f4a'], ['Pressed flower frames', '#c4688a'], ['Primavera, Botticelli', '#4d6b3a'], ['Gift ideas for Sam', '#d9b13b'],
+  ];
+  // Forty-two tabs: the named ones, then the ones you’ve forgotten the names of.
+  const tabsEl = document.getElementById('tabs');
+  const all = Array.from({ length: 42 }, (_, i) => titles[i % titles.length]);
+  const count = document.createElement('span');
+  count.className = 'count';
+  all.forEach(([t, c], i) => {
+    const el = document.createElement('div');
+    el.className = 'tab' + (i === 0 ? ' here' : '');
+    el.innerHTML = `<i style="--c:${c}"></i><span>${i === 0 ? 'Folia' : t}</span>`;
+    tabsEl.append(el);
+  });
+  tabsEl.insertAdjacentHTML('beforeend', '<div class="tab new">+</div>');
+
+  // The shelf: the first eleven things, then everything else.
+  const kept = [
+    ['cover', 'Lnk', 'Why we still use pencils', '#c99a3c', -1.5],
+    ['pic', 'Pic', 'The Swing', 'url(img/art/swing.jpg)', 1],
+    ['cover', 'Lnk', 'Night trains of Europe', '#2f3b8f', 0.5],
+    ['quote', 'Qte', 'Make the thing you wish you’d found.', '', -1],
+    ['cover', 'Rep', 'tidy-feeds', '#15171a', 1.5],
+    ['pic', 'Pic', 'Primavera', 'url(img/art/primavera.jpg)', -0.5],
+    ['cover', 'Lnk', 'Pickled red onions', '#c4688a', 1],
+    ['note', 'Nte', 'Kitchen shelf: oak, not pine.', '', -1.5],
+    ['pic', 'Pic', 'The Oxbow', 'url(img/art/oxbow.jpg)', 0.5],
+    ['cover', 'Lnk', 'Sea glass palettes', '#7d9aa8', -1],
+    ['cover', 'Vid', 'Setting type by hand', '#1e2129', 1],
+  ];
+  const shelf = document.getElementById('shelf');
+  const make = (html, cls, i, r) => {
+    const s = document.createElement('div');
+    s.className = 'slot';
+    s.innerHTML = `<div class="k ${cls}" style="--i:${i};--r:${r}deg">${html}</div>`;
+    return s;
+  };
+  kept.forEach(([kind, code, title, c, r], i) => {
+    let html;
+    if (kind === 'quote' || kind === 'note') html = title;
+    else if (kind === 'pic') html = `<div class="pic" style="--c:${c}"></div><div class="lbl"><small>${code}·0${i + 1}</small>${title}</div>`;
+    else html = `<div class="pic" style="--c:${c}">${title}</div><div class="lbl"><small>${code}·0${i + 1}</small>kept today</div>`;
+    shelf.append(make(html, kind === 'pic' ? '' : kind, i, r));
+  });
+  shelf.append(make('+31<small>more, each with a picture of how it looked</small>', 'more', 11, 0));
+
+  const keep = document.getElementById('keep');
+  const msg = document.getElementById('msg');
+  const n = document.getElementById('n');
+  const tw = document.getElementById('tw');
+  const why = document.getElementById('why');
+  let isFiled = false;
+  keep.addEventListener('click', () => {
+    const tabs = [...tabsEl.querySelectorAll('.tab:not(.here):not(.new)')];
+    if (!isFiled) {
+      document.body.classList.add('filing');
+      // Tabs drop off the strip, nearest the end first, as if pulled down onto the shelf.
+      tabs.reverse().forEach((t, i) => {
+        const done = () => { t.style.display = 'none'; };
+        if (reduced) return done();
+        t.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(90px) scale(0.7)', opacity: 0 }],
+          { duration: 420, delay: i * 14, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' }).finished.then(done);
+      });
+      // Count down to one.
+      let k = 42;
+      const tick = setInterval(() => { k = Math.max(1, k - 3); n.textContent = k; if (k === 1) { clearInterval(tick); tw.textContent = "tab"; why.textContent = "and the other 41 are kept."; } }, reduced ? 0 : 30);
+      setTimeout(() => { document.body.classList.add('filed'); }, reduced ? 0 : 250);
+      msg.textContent = 'Closed. Kept. Every one, saved the way it looked.';
+      keep.textContent = 'Open them all again';
+      isFiled = true;
+    } else {
+      tabs.forEach((t) => { t.style.display = ''; t.getAnimations().forEach((a) => a.cancel()); });
+      document.body.classList.remove('filing', 'filed');
+      n.textContent = "42"; tw.textContent = "tabs"; why.textContent = "because closing one feels like losing it.";
+      msg.textContent = '';
+      keep.textContent = 'Keep them and close';
+      isFiled = false;
+    }
+  });
+</script>
+</body>
+</html>
