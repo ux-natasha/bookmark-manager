@@ -600,11 +600,10 @@
     <span class="ext"><img src="logo.svg" alt="" width="22" height="22"></span>
   </div>
   <nav class="bar" aria-label="Main">
+    <a href="#posts"><i style="--c:#e4bfb5"></i>Keeping</a>
     <a href="#ageing"><i style="--c:#c99a3c"></i>Ageing</a>
-    <a href="#posts"><i style="--c:#e4bfb5"></i>Links from posts</a>
+    <a href="#finding"><i style="--c:#3f6fb5"></i>Finding</a>
     <a href="#rooms"><i style="--c:#a3302a"></i>The rooms</a>
-    <a href="#index"><i style="--c:#5d6b3a"></i>The index</a>
-    <a href="#finding"><i style="--c:#3f6fb5"></i>Colour search</a>
     <a href="#privacy"><i style="--c:#34202e"></i>Privacy</a>
     <a class="install" href="#install">Install Folia →</a>
   </nav>
@@ -627,6 +626,44 @@
     </div>
     <div class="shelf" id="shelf" role="group" aria-label="Your library"></div>
   </div>
+
+  <!-- Links from posts -->
+  <section id="posts" class="posts pad" aria-labelledby="posts-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="posts-h">Someone shared ten good links. <em>Keep all ten.</em></h2>
+        <div>
+          <p class="lede">One click or <span class="mono">Alt+Shift+S</span> keeps a page with a picture of how it looked, logged-in pages too. Right-click keeps a picture, a quote or a video without leaving the page.</p>
+          <p class="lede">And when a post is full of good links, other tools save the post. Folia follows each shortened link to the real page, strips the tracking tags and lets you tick which to keep, even behind a login.</p>
+        </div>
+      </div>
+      <div class="post-grid" id="post-grid">
+        <svg class="threads" id="threads" aria-hidden="true"></svg>
+        <article class="post" aria-label="An example post with four links">
+          <div class="who"><i aria-hidden="true"></i><span><b>Ines, a designer you follow</b>@ines.example · Bluesky · 2h</span></div>
+          <p>Tools I keep coming back to this year: <mark data-n="1">figma.com/community<sup>1</sup></mark> for kits, <mark data-n="2">bit.ly/3type-scale<sup>2</sup></mark> (a great type scale calculator), and <mark data-n="3">coolors.co/?utm_source=bsky<sup>3</sup></mark> when I’m stuck on a palette.</p>
+          <p>Also this long read on craft: <mark data-n="4">essays.example.com/the-slow-w…<sup>4</sup></mark></p>
+          <div class="meta" aria-hidden="true"><span>↩ 12</span><span>⟳ 48</span><span>♡ 311</span></div>
+        </article>
+        <form class="catch" id="catch" aria-labelledby="catch-h">
+          <header><b id="catch-h">Found 4 links in this post</b><span class="mono" id="catch-n">3 ticked</span></header>
+          <ul>
+            <li data-n="1"><label><input type="checkbox" checked><span class="fav" style="--c:#1e1e1e">F<span class="no">1</span></span><span class="dom">figma.com/community <span class="chip">New</span></span><span class="what">Figma Community</span></label></li>
+            <li data-n="2"><label><input type="checkbox" checked><span class="fav" style="--c:#3f6fb5">T<span class="no">2</span></span><span class="dom"><s>bit.ly/3type-scale</s> typescale.example.com <span class="chip">Followed</span></span><span class="what">The short link, followed to the real page.</span></label></li>
+            <li data-n="3" data-have><label><input type="checkbox" checked><span class="fav" style="--c:#c4688a">C<span class="no">3</span></span><span class="dom">coolors.co<s>/?utm_source=bsky</s> <span class="chip have">Already saved · 3 Oct</span></span><span class="what">Tracking tag removed, so Folia knows you have it.</span></label></li>
+            <li data-n="4"><label><input type="checkbox"><span class="fav" style="--c:#8d8676">E<span class="no">4</span></span><span class="dom">essays.example.com <span class="chip was">Cut short</span></span><span class="what">The post cut this address short, so this is the site’s home page.</span></label></li>
+          </ul>
+          <footer>
+            <span class="tagged">Tags <span>design</span></span>
+            <button class="again" type="button" id="catch-again" hidden>Try it again</button>
+            <button class="btn" type="submit" id="catch-save">Save 2 links</button>
+          </footer>
+          <p class="catch-note" id="catch-note" aria-live="polite">Links you already have are only changed if you add tags.</p>
+        </form>
+      </div>
+      <p class="platforms">Works with X, Bluesky, Mastodon, Reddit, Hacker News and LinkedIn. Paste a post’s address or its text, or open the post and use <em>Find links in this post</em> in the side panel.</p>
+    </div>
+  </section>
 
   <!-- Ageing, told by scrolling -->
   <section id="ageing" class="ageing" aria-labelledby="ageing-h">
@@ -670,45 +707,63 @@
     <p class="sr" id="age-status" aria-live="polite"></p>
     <div class="wrap tools">
       <div><b>Look ahead</b><p>Step the library up to 24 months forward and see what will have faded by then, while there’s still time to read it.</p></div>
-      <div><b>Refresh my memory</b><p>One press brings three things you’ve neglected to the front. Nothing is ever deleted for being old.</p></div>
+      <div><b>Refresh my memory</b><p>The pile tells you what you’ve let go of. One press brings three of them back to the front, and nothing is ever deleted for being old.</p></div>
     </div>
   </section>
 
-  <!-- Links from posts -->
-  <section id="posts" class="posts pad" aria-labelledby="posts-h">
+  <!-- The tag index -->
+  <section id="index" class="tagix pad" aria-labelledby="index-h">
     <div class="wrap">
       <div class="head">
-        <h2 class="h2" id="posts-h">Someone shared ten good links. <em>Keep all ten.</em></h2>
+        <h2 class="h2" id="index-h">Tags go quiet too. <em>The index shows which.</em></h2>
         <div>
-          <p class="lede">Other tools save the post. Folia reads it, follows the shortened links to the real pages, strips the tracking tags, and lets you tick which to keep.</p>
-          <p class="lede">It works on posts behind a login too, because it reads them in your own browser.</p>
+          <p class="lede">Every tag from A to Z, with how many things carry it. Pick one and the library shows only what’s filed under it.</p>
+          <p class="lede">Tags you stop using fade. After a year, Folia asks whether to leave them out. They stay on the things they’re on.</p>
         </div>
       </div>
-      <div class="post-grid" id="post-grid">
-        <svg class="threads" id="threads" aria-hidden="true"></svg>
-        <article class="post" aria-label="An example post with four links">
-          <div class="who"><i aria-hidden="true"></i><span><b>Ines, a designer you follow</b>@ines.example · Bluesky · 2h</span></div>
-          <p>Tools I keep coming back to this year: <mark data-n="1">figma.com/community<sup>1</sup></mark> for kits, <mark data-n="2">bit.ly/3type-scale<sup>2</sup></mark> (a great type scale calculator), and <mark data-n="3">coolors.co/?utm_source=bsky<sup>3</sup></mark> when I’m stuck on a palette.</p>
-          <p>Also this long read on craft: <mark data-n="4">essays.example.com/the-slow-w…<sup>4</sup></mark></p>
-          <div class="meta" aria-hidden="true"><span>↩ 12</span><span>⟳ 48</span><span>♡ 311</span></div>
-        </article>
-        <form class="catch" id="catch" aria-labelledby="catch-h">
-          <header><b id="catch-h">Found 4 links in this post</b><span class="mono" id="catch-n">3 ticked</span></header>
-          <ul>
-            <li data-n="1"><label><input type="checkbox" checked><span class="fav" style="--c:#1e1e1e">F<span class="no">1</span></span><span class="dom">figma.com/community <span class="chip">New</span></span><span class="what">Figma Community</span></label></li>
-            <li data-n="2"><label><input type="checkbox" checked><span class="fav" style="--c:#3f6fb5">T<span class="no">2</span></span><span class="dom"><s>bit.ly/3type-scale</s> typescale.example.com <span class="chip">Followed</span></span><span class="what">The short link, followed to the real page.</span></label></li>
-            <li data-n="3" data-have><label><input type="checkbox" checked><span class="fav" style="--c:#c4688a">C<span class="no">3</span></span><span class="dom">coolors.co<s>/?utm_source=bsky</s> <span class="chip have">Already saved · 3 Oct</span></span><span class="what">Tracking tag removed, so Folia knows you have it.</span></label></li>
-            <li data-n="4"><label><input type="checkbox"><span class="fav" style="--c:#8d8676">E<span class="no">4</span></span><span class="dom">essays.example.com <span class="chip was">Cut short</span></span><span class="what">The post cut this address short, so this is the site’s home page.</span></label></li>
-          </ul>
-          <footer>
-            <span class="tagged">Tags <span>design</span></span>
-            <button class="again" type="button" id="catch-again" hidden>Try it again</button>
-            <button class="btn" type="submit" id="catch-save">Save 2 links</button>
-          </footer>
-          <p class="catch-note" id="catch-note" aria-live="polite">Links you already have are only changed if you add tags.</p>
-        </form>
+      <div class="setin">
+        <span class="mono" id="setin-l">Printed in</span>
+        <div role="radiogroup" aria-labelledby="setin-l" id="setin">
+          <button type="button" role="radio" aria-checked="true" data-room="lib" tabindex="0">Library</button>
+          <button type="button" role="radio" aria-checked="false" data-room="con" tabindex="-1">Contact sheet</button>
+          <button type="button" role="radio" aria-checked="false" data-room="cov" tabindex="-1">Covers</button>
+          <button type="button" role="radio" aria-checked="false" data-room="fld" tabindex="-1">Colour field</button>
+        </div>
       </div>
-      <p class="platforms">Works with X, Bluesky, Mastodon, Reddit, Hacker News and LinkedIn. Paste a post’s address or its text, or open the post and use <em>Find links in this post</em> in the side panel.</p>
+      <div class="ix" id="ix" data-room="lib" role="group" aria-label="An example tag index">
+        <div class="ix-head"><b>Index</b><span class="mono">Numbers are how many things carry each tag</span></div>
+        <div class="ix-tidy" id="ix-tidy"><span class="lbl">Erratum</span><span class="count" id="ix-count"></span><span class="why" id="ix-why"></span><button type="button" id="ix-archive"></button></div>
+        <p class="ix-out" id="ix-out" aria-live="polite" hidden><span id="ix-out-t"></span> <button type="button" id="ix-back"></button></p>
+        <div class="ix-cols" id="ix-cols"></div>
+        <div class="ix-foot" aria-hidden="true"><span>Bookmarks · Index</span><span>— 308 —</span></div>
+      </div>
+      <p class="tagix-note">A sample index. Shaded, greyed, tinted or daggered: the same three tags, unused for over a year, as each room marks them.</p>
+    </div>
+  </section>
+
+  <!-- Finding it again -->
+  <section id="finding" class="finding pad" aria-labelledby="finding-h">
+    <div class="wrap">
+      <div class="head">
+        <h2 class="h2" id="finding-h">Can’t remember the name? <em>Remember it was green.</em></h2>
+        <div>
+          <p class="lede">Every link gets a cover of its own: a newsletter gets a masthead, a video a film strip, a repository a terminal, a recipe a menu card. You know it on sight.</p>
+          <p class="lede">And when you only remember the colour, pick it. <strong>Colour search runs on your computer, with no AI and no subscription.</strong></p>
+        </div>
+      </div>
+
+      <div class="picker" id="picker" role="group" aria-label="Search by colour"><span class="mono">Search by colour</span><span class="found-n mono" id="found-n" aria-live="polite">8 of 8 shown</span></div>
+      <div class="rack" id="rack">
+        <div class="slot-c" data-h="blue"><div class="cv cv-article" style="--bg:#2f3b8f;--g:rgba(63,111,181,.55)" aria-hidden="true"><span class="mast">The Slow Read</span><span class="kick">A NEWSLETTER</span><span class="ttl">Why we still write letters by hand</span></div><b>Why we still write letters by hand</b><small>a newsletter</small></div>
+        <div class="slot-c" data-h="red"><div class="cv cv-video" style="--bg:#7e2520;--g:rgba(192,57,43,.55)" aria-hidden="true"><span class="kick">YOUTUBE · PART 2 OF 3</span><span class="ttl">Setting type by hand</span><span class="dur">14:08</span></div><b>Setting type by hand</b><small>a video</small></div>
+        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/swing.jpg) 50% 40% / 240% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Swing</span></div><b>The Swing</b><small>a picture</small></div>
+        <div class="slot-c" data-h="purple"><div class="cv cv-repo" style="--bg:#3a2238;--g:rgba(138,79,158,.55)" aria-hidden="true"><span class="kick">$ git clone</span><span class="ttl">tidy-feeds</span><span class="lang"></span></div><b>tidy-feeds</b><small>a repository</small></div>
+        <div class="slot-c" data-h="red"><div class="cv cv-recipe" style="--g:rgba(192,57,43,.45)" aria-hidden="true"><span class="kick">KITCHEN.EXAMPLE</span><span class="ttl">Pickled red onions</span><i class="dot"></i></div><b>Pickled red onions</b><small>a recipe</small></div>
+        <div class="slot-c" data-h="yellow"><div class="cv cv-post" style="--bg:#e3c56c;--g:rgba(217,177,59,.55)" aria-hidden="true"><span class="kick"><span>@slowread</span><span>1 / 6</span></span><span class="ttl">Twelve posters from the Basel archive, one a day.</span><span class="foot">POST ON BLUESKY</span></div><b>Twelve posters from Basel</b><small>a post</small></div>
+        <div class="slot-c" data-h="orange"><div class="cv cv-article" style="--bg:#c8692c;--g:rgba(217,130,43,.55)" aria-hidden="true"><span class="mast">Orchard</span><span class="kick">SEASONAL</span><span class="ttl">Persimmon season</span></div><b>Persimmon season</b><small>an article</small></div>
+        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/oxbow.jpg) 70% 60% / 300% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Oxbow</span></div><b>The Oxbow</b><small>a picture</small></div>
+      </div>
+      <p class="rack-note">Prefer the site’s own image, or a screenshot? One switch in the library changes what links show. Search also reads titles, tags, your notes and the words inside quotes, and an A to Z index lists every tag.</p>
     </div>
   </section>
 
@@ -719,7 +774,7 @@
         <h2 class="h2" id="rooms-h">A library that feels like a place, <em>not a list.</em></h2>
         <div>
           <p class="lede">Choose one of four rooms. Each lays your things out its own way, ages them its own way, and has its own word for bringing them back.</p>
-          <p class="lede">Switch any time. Everything you’ve kept comes with you.</p>
+          <p class="lede">The yellowing above is just the first room. Switch any time, and everything you’ve kept comes with you.</p>
         </div>
       </div>
 
@@ -798,62 +853,6 @@
         </article>
       </div>
       <p class="rooms-foot"><span>Real screenshots from the extension, version 0.2.</span><span>Other tools stop at a dark mode.</span></p>
-    </div>
-  </section>
-
-  <!-- The tag index -->
-  <section id="index" class="tagix pad" aria-labelledby="index-h">
-    <div class="wrap">
-      <div class="head">
-        <h2 class="h2" id="index-h">Tags get old too. <em>The index shows which.</em></h2>
-        <div>
-          <p class="lede">Every tag from A to Z, with how many things carry it. Pick one and the library shows only what’s filed under it.</p>
-          <p class="lede">Tags you stop using fade. After a year, Folia asks whether to leave them out. They stay on the things they’re on.</p>
-        </div>
-      </div>
-      <div class="setin">
-        <span class="mono" id="setin-l">Printed in</span>
-        <div role="radiogroup" aria-labelledby="setin-l" id="setin">
-          <button type="button" role="radio" aria-checked="true" data-room="lib" tabindex="0">Library</button>
-          <button type="button" role="radio" aria-checked="false" data-room="con" tabindex="-1">Contact sheet</button>
-          <button type="button" role="radio" aria-checked="false" data-room="cov" tabindex="-1">Covers</button>
-          <button type="button" role="radio" aria-checked="false" data-room="fld" tabindex="-1">Colour field</button>
-        </div>
-      </div>
-      <div class="ix" id="ix" data-room="lib" role="group" aria-label="An example tag index">
-        <div class="ix-head"><b>Index</b><span class="mono">Numbers are how many things carry each tag</span></div>
-        <div class="ix-tidy" id="ix-tidy"><span class="lbl">Erratum</span><span class="count" id="ix-count"></span><span class="why" id="ix-why"></span><button type="button" id="ix-archive"></button></div>
-        <p class="ix-out" id="ix-out" aria-live="polite" hidden><span id="ix-out-t"></span> <button type="button" id="ix-back"></button></p>
-        <div class="ix-cols" id="ix-cols"></div>
-        <div class="ix-foot" aria-hidden="true"><span>Bookmarks · Index</span><span>— 308 —</span></div>
-      </div>
-      <p class="tagix-note">A sample index. Shaded, greyed, tinted or daggered: the same three tags, unused for over a year, as each room marks them.</p>
-    </div>
-  </section>
-
-  <!-- Finding it again -->
-  <section id="finding" class="finding pad" aria-labelledby="finding-h">
-    <div class="wrap">
-      <div class="head">
-        <h2 class="h2" id="finding-h">Can’t remember the name? <em>Remember it was green.</em></h2>
-        <div>
-          <p class="lede">Every link gets a cover of its own: a newsletter gets a masthead, a video a film strip, a repository a terminal, a recipe a menu card. You know it on sight.</p>
-          <p class="lede">And when you only remember the colour, pick it. <strong>Colour search runs on your computer, with no AI and no subscription.</strong></p>
-        </div>
-      </div>
-
-      <div class="picker" id="picker" role="group" aria-label="Search by colour"><span class="mono">Search by colour</span><span class="found-n mono" id="found-n" aria-live="polite">8 of 8 shown</span></div>
-      <div class="rack" id="rack">
-        <div class="slot-c" data-h="blue"><div class="cv cv-article" style="--bg:#2f3b8f;--g:rgba(63,111,181,.55)" aria-hidden="true"><span class="mast">The Slow Read</span><span class="kick">A NEWSLETTER</span><span class="ttl">Why we still write letters by hand</span></div><b>Why we still write letters by hand</b><small>a newsletter</small></div>
-        <div class="slot-c" data-h="red"><div class="cv cv-video" style="--bg:#7e2520;--g:rgba(192,57,43,.55)" aria-hidden="true"><span class="kick">YOUTUBE · PART 2 OF 3</span><span class="ttl">Setting type by hand</span><span class="dur">14:08</span></div><b>Setting type by hand</b><small>a video</small></div>
-        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/swing.jpg) 50% 40% / 240% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Swing</span></div><b>The Swing</b><small>a picture</small></div>
-        <div class="slot-c" data-h="purple"><div class="cv cv-repo" style="--bg:#3a2238;--g:rgba(138,79,158,.55)" aria-hidden="true"><span class="kick">$ git clone</span><span class="ttl">tidy-feeds</span><span class="lang"></span></div><b>tidy-feeds</b><small>a repository</small></div>
-        <div class="slot-c" data-h="red"><div class="cv cv-recipe" style="--g:rgba(192,57,43,.45)" aria-hidden="true"><span class="kick">KITCHEN.EXAMPLE</span><span class="ttl">Pickled red onions</span><i class="dot"></i></div><b>Pickled red onions</b><small>a recipe</small></div>
-        <div class="slot-c" data-h="yellow"><div class="cv cv-post" style="--bg:#e3c56c;--g:rgba(217,177,59,.55)" aria-hidden="true"><span class="kick"><span>@slowread</span><span>1 / 6</span></span><span class="ttl">Twelve posters from the Basel archive, one a day.</span><span class="foot">POST ON BLUESKY</span></div><b>Twelve posters from Basel</b><small>a post</small></div>
-        <div class="slot-c" data-h="orange"><div class="cv cv-article" style="--bg:#c8692c;--g:rgba(217,130,43,.55)" aria-hidden="true"><span class="mast">Orchard</span><span class="kick">SEASONAL</span><span class="ttl">Persimmon season</span></div><b>Persimmon season</b><small>an article</small></div>
-        <div class="slot-c" data-h="green"><div class="cv cv-pic" style="--bg:url(img/art/oxbow.jpg) 70% 60% / 300% no-repeat;--g:rgba(111,138,62,.6)" aria-hidden="true"><span>The Oxbow</span></div><b>The Oxbow</b><small>a picture</small></div>
-      </div>
-      <p class="rack-note">Prefer the site’s own image, or a screenshot? One switch in the library changes what links show. Search also reads titles, tags, your notes and the words inside quotes, and an A to Z index lists every tag.</p>
     </div>
   </section>
 
