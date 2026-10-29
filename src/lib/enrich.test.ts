@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isDeadLink, type Bookmark, type Preview } from './db';
-import { classifyStatus } from './enrich';
+import { classifyStatus, posterOf } from './enrich';
 import { pickPreview } from './previews';
 import { needsEnrichment } from './queue';
 
@@ -64,5 +64,12 @@ describe('pickPreview', () => {
     expect(pickPreview(bookmark({ previewPreference: 'screenshot' }), both)?.kind).toBe('screenshot');
     expect(pickPreview(bookmark({ platform: 'x' }), [preview('image')])?.kind).toBe('image');
     expect(pickPreview(bookmark(), [])).toBeUndefined();
+  });
+});
+
+describe('posterOf', () => {
+  it('finds the still X keeps for a GIF', () => {
+    expect(posterOf('https://video.twimg.com/tweet_video/GaBc-12_x.mp4')).toBe('https://pbs.twimg.com/tweet_video_thumb/GaBc-12_x.jpg');
+    expect(posterOf('https://example.com/tweet_video/abc.mp4')).toBeUndefined();
   });
 });

@@ -108,6 +108,12 @@ async function fetchYouTubeVideo(url: string): Promise<Partial<PageMeta> | undef
   }
 }
 
+// X keeps a still for each GIF ("Copy Gif Address" gives video.twimg.com/tweet_video/ID.mp4).
+export function posterOf(url: string): string | undefined {
+  const id = url.match(/^https:\/\/video\.twimg\.com\/tweet_video\/([\w-]+)\.mp4/i)?.[1];
+  return id ? `https://pbs.twimg.com/tweet_video_thumb/${id}.jpg` : undefined;
+}
+
 // Details from the platforms whose pages don't give them to a plain fetch.
 export async function fetchKnownDetails(url: string): Promise<Partial<PageMeta> | undefined> {
   return (await fetchXPost(url)) ?? (await fetchYouTubeVideo(url));
@@ -197,7 +203,7 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
   // A link straight to a file has no page to read: use the file name as the title, and a GIF as its own preview.
   const media = mediaFileOf(bookmark.url);
   if (media && !page.html) {
-    meta = { ...meta, title: titleFromFileName(bookmark.url), image: media === 'gif' ? bookmark.url : undefined };
+    meta = { ...meta, title: titleFromFileName(bookmark.url), image: media === 'gif' ? bookmark.url : posterOf(bookmark.url) };
   }
 
   const platform = detectPlatform(page.finalUrl, meta as PageMeta) ?? detectPlatform(bookmark.url);

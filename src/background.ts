@@ -86,11 +86,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     // Players on YouTube and the like hand out a blob: address that only works in the page, so save the page instead.
     const url = isSaveableUrl(info.srcUrl) ? info.srcUrl : info.pageUrl ?? tab.url;
     if (!isSaveableUrl(url)) return;
-    const { bookmark, created } = await saveBookmark({ url, title: url === info.pageUrl ? tab.title : undefined, source: 'context-menu' });
+    const video = tab.id !== undefined ? await readVideo({ tabId: tab.id, frameIds: [info.frameId ?? 0] }, info.srcUrl) : undefined;
+    const title = video?.caption || (url === info.pageUrl ? tab.title : undefined);
+    const { bookmark, created } = await saveBookmark({ url, title, source: 'context-menu' });
     await setLastSave({ bookmarkId: bookmark.id, url, created, at: Date.now() });
     if (tab.id !== undefined) flashBadge(tab.id, created);
     if (created) {
-      await saveVideoPreview(bookmark.id, info, tab);
+      await saveVideoPreview(bookmark.id, video, tab);
       enrichBookmark(bookmark.id);
     }
   } else if (info.menuItemId === MENU_SAVE_QUOTE && tab?.id !== undefined) {
@@ -136,24 +138,49 @@ async function saveImage(srcUrl: string, info: chrome.contextMenus.OnClickData, 
   }
 }
 
-// A preview for a video you right-clicked: the frame it's showing right now, or, when the site
-// doesn't let the page read its video, a screenshot of the tab. The site's own image still fills in
-// later for pages that have one.
-async function saveVideoPreview(bookmarkId: string, info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
-  if (tab.id !== undefined) {
-    const frame = await runInPage({ tabId: tab.id, frameIds: [info.frameId ?? 0] }, (src: string | undefined) => {
-      const videos = [...document.querySelectorAll('video')].filter((v) => v.videoWidth > 0);
-      const video = videos.find((v) => src && (v.currentSrc === src || v.src === src)) ?? videos.find((v) => !v.paused) ?? videos[0];
-      if (!video) return '';
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d')!.drawImage(video, 0, 0);
-      // Throws for videos from other sites that don't allow it; the caller falls back to a screenshot.
-      return canvas.toDataURL('image/jpeg', 0.85);
-    }, info.srcUrl);
-    const thumbnail = frame ? await makeThumbnail(await (await fetch(frame)).blob(), 800) : undefined;
-    if (thumbnail) return void (await savePreview(bookmarkId, 'screenshot', thumbnail));
+interface VideoRead {
+  // The frame on screen, as a data: URL. Missing when the site doesn't let the page read its video.
+  frame?: string;
+  // The still the site shows before the video plays.
+  poster?: string;
+  // The post it's in, on X (a GIF's file name is just an id).
+  caption?: string;
+}
+
+// Reads the video you right-clicked: what it's showing, its poster, and the post around it.
+async function readVideo(target: chrome.scripting.InjectionTarget, srcUrl: string | undefined): Promise<VideoRead | undefined> {
+  return runInPage(target, (src: string | undefined) => {
+    const videos = [...document.querySelectorAll('video')];
+    const video = videos.find((v) => src && (v.currentSrc === src || v.src === src)) ?? videos.find((v) => !v.paused) ?? videos[0];
+    if (!video) return {};
+    const caption = (video.closest('article')?.querySelector('[data-testid="tweetText"]') as HTMLElement | null)?.innerText;
+    let frame: string | undefined;
+    if (video.videoWidth > 0) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d')!.drawImage(video, 0, 0);
+        frame = canvas.toDataURL('image/jpeg', 0.85);
+      } catch {
+        // Videos from other sites that don't allow it can't be read.
+      }
+    }
+    return { frame, poster: video.poster || undefined, caption: caption?.replace(/\s+/g, ' ').trim().slice(0, 300) || undefined };
+  }, srcUrl);
+}
+
+// A preview for a video you right-clicked: the frame it's showing right now, else the site's
+// poster for it, else a screenshot of the tab. The site's own image still fills in later for pages that have one.
+async function saveVideoPreview(bookmarkId: string, video: VideoRead | undefined, tab: chrome.tabs.Tab) {
+  for (const source of [video?.frame, video?.poster]) {
+    if (!source) continue;
+    try {
+      const thumbnail = await makeThumbnail(await (await fetch(source, { credentials: 'omit' })).blob(), 800);
+      if (thumbnail) return savePreview(bookmarkId, 'screenshot', thumbnail);
+    } catch {
+      // Try the next one.
+    }
   }
   if (tab.windowId !== undefined && !(tab.url && isProtectedPage(tab.url))) await captureScreenshot(bookmarkId, tab.windowId);
 }
