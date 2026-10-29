@@ -93,6 +93,8 @@ export interface TagMeta {
   lastUsedAt?: number;
   // Set by tidy-up. Archived tags stay on items but leave the index.
   archivedAt?: number;
+  // When it was last archived or brought back, so sync can tell which came last (lib/sync.ts).
+  archiveChangedAt?: number;
 }
 
 // Preview images live in their own table so loading the bookmark list stays fast.
@@ -110,11 +112,18 @@ export interface PageText {
   savedAt: number;
 }
 
+// Settings that can't live in chrome.storage, like the sync folder's handle (lib/sync.ts).
+export interface Setting {
+  key: string;
+  [field: string]: unknown;
+}
+
 export const db = new Dexie('bookmark-manager') as Dexie & {
   bookmarks: EntityTable<Bookmark, 'id'>;
   previews: Dexie.Table<Preview, [string, PreviewKind]>;
   tagMeta: EntityTable<TagMeta, 'tag'>;
   pageTexts: EntityTable<PageText, 'bookmarkId'>;
+  settings: EntityTable<Setting, 'key'>;
 };
 
 db.version(1).stores({
@@ -149,6 +158,10 @@ db.version(4)
 
 db.version(5).stores({
   pageTexts: 'bookmarkId',
+});
+
+db.version(6).stores({
+  settings: 'key',
 });
 
 export function kindOf(b: Pick<Bookmark, 'kind'>): ItemKind {

@@ -17,6 +17,7 @@ import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
 import { BROWSER_SAVES } from '../lib/browserKind';
 import { idsWithText } from '../lib/pageText';
+import { syncSupported } from '../lib/sync';
 import { pickForgotten } from '../lib/resurface';
 import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, toggleTagSelection, unarchiveTags } from '../lib/tags';
 import { THEMES, ThemeContext, useThemeSetting, type Theme } from '../lib/theme';
@@ -41,10 +42,12 @@ import { PostDialog } from './PostDialog';
 import { LibraryLoading } from './LibraryLoading';
 import { Rack, RackLoading } from './Rack';
 import { Sheet } from './Sheet';
+import { SyncDialog } from './SyncDialog';
 import { lookupFor, slotStyle, TagLookContext, useTagLook } from './tagLook';
 import { TagIndex } from './TagIndex';
 import { TagStrip } from './TagStrip';
 import { TrashDialog } from './TrashDialog';
+import { useSync } from './useSync';
 
 type Sort = 'newest' | 'oldest' | 'recently-opened' | 'never-opened';
 
@@ -138,6 +141,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   // null when closed. Without a file, the browser's own bookmarks are imported.
   const [importing, setImporting] = useState<{ file?: File } | null>(null);
   const [viewingTrash, setViewingTrash] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [addingFromPost, setAddingFromPost] = useState(false);
   // Look ahead: months from today, 0 to 24. Never saved and never written to the database; a reload goes back to today.
   const [lookAheadMonths, setLookAheadMonths] = useState(0);
@@ -160,6 +164,15 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
 
   // The tag index. Colour slots are handed out as tags come and go, and then kept.
   const tagMeta = useLiveQuery(() => db.tagMeta.toArray(), []);
+  // Sync with the other browsers, through a folder you picked (lib/sync.ts). Any change here is worth passing on.
+  const syncChange = useMemo(() => (bookmarks && tagMeta ? [bookmarks, tagMeta] : undefined), [bookmarks, tagMeta]);
+  const sync = useSync(syncChange);
+  // After a browser restart, Chrome and Edge usually want a click before the folder can be used again.
+  useEffect(() => {
+    if (sync.outcome?.status === 'needs-permission') {
+      showToast({ message: 'Sync is paused until you allow the folder again', action: { label: 'Allow', run: () => sync.run(true) } });
+    }
+  }, [sync.outcome?.status]);
   const stats = useMemo(() => tagStats(bookmarks ?? []), [bookmarks]);
   useEffect(() => {
     if (!bookmarks || !tagMeta) return;
@@ -503,6 +516,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                     { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
                     { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
                     { label: 'Restore', run: () => restoreInput.current?.click() },
+                    ...(syncSupported() ? [{ label: 'Sync…', run: () => setSyncing(true) }] : []),
                     ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system') }] : []),
                     ...THEMES.map(({ id, label }, i) => ({
                       label,
@@ -796,6 +810,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
             )}
             {importing && <ImportDialog file={importing.file} onClose={() => setImporting(null)} />}
             {viewingTrash && <TrashDialog onClose={() => setViewingTrash(false)} />}
+            {syncing && <SyncDialog outcome={sync.outcome} run={sync.run} onClose={() => setSyncing(false)} />}
             {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
             <ToastView toast={toast} onDone={hideToast} />
           </div>

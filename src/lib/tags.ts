@@ -277,7 +277,7 @@ async function patchMeta(tags: string[], patch: (current: TagMeta) => TagMeta): 
 // Picking a tag as a filter uses it. Adding it to something also brings it back if it was archived:
 // archived tags aren't suggested, so typing one in is deliberate.
 export function markTagsUsed(tags: string[], { revive = false, now = Date.now() } = {}): Promise<void> {
-  return patchMeta(tags, (m) => ({ ...m, lastUsedAt: now, ...(revive && { archivedAt: undefined }) }));
+  return patchMeta(tags, (m) => ({ ...m, lastUsedAt: now, ...(revive && m.archivedAt && { archivedAt: undefined, archiveChangedAt: now }) }));
 }
 
 // Writes only the colour of each changed record, so a use or archive written meanwhile isn't undone.
@@ -289,17 +289,18 @@ export function applyColorSlots(changes: TagMeta[]): Promise<void> {
 // Archives the tags and frees their colours. Resolves to an undo that puts every record back as it was.
 export async function archiveTags(tags: string[], now = Date.now()): Promise<() => Promise<void>> {
   const before = await db.tagMeta.bulkGet(tags);
-  await patchMeta(tags, (m) => ({ ...m, archivedAt: now, colorSlot: undefined }));
+  await patchMeta(tags, (m) => ({ ...m, archivedAt: now, archiveChangedAt: now, colorSlot: undefined }));
   return async () => {
     await db.transaction('rw', db.tagMeta, async () => {
       await db.tagMeta.bulkDelete(tags.filter((_, i) => !before[i]));
-      await db.tagMeta.bulkPut(before.filter((m): m is TagMeta => !!m));
+      // Stamped as a change of its own, so a synced copy of the archive doesn't win over the undo.
+      await db.tagMeta.bulkPut(before.filter((m): m is TagMeta => !!m).map((m) => ({ ...m, archiveChangedAt: Date.now() })));
     });
   };
 }
 
 export function unarchiveTags(tags: string[]): Promise<void> {
-  return patchMeta(tags, (m) => ({ ...m, archivedAt: undefined }));
+  return patchMeta(tags, (m) => ({ ...m, archivedAt: undefined, archiveChangedAt: Date.now() }));
 }
 
 // The filter's tag selection after picking `tag`. "Untagged" excludes every real tag, so picking it clears

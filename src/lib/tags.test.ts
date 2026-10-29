@@ -187,10 +187,11 @@ describe('tag writes', () => {
   it('archives with an undo that restores every record as it was', async () => {
     await db.tagMeta.put({ tag: 'a', colorSlot: 3, lastUsedAt: 5 });
     const undo = await archiveTags(['a', 'b'], NOW);
-    expect(await db.tagMeta.get('a')).toEqual({ tag: 'a', lastUsedAt: 5, archivedAt: NOW, colorSlot: undefined });
+    expect(await db.tagMeta.get('a')).toEqual({ tag: 'a', lastUsedAt: 5, archivedAt: NOW, archiveChangedAt: NOW, colorSlot: undefined });
     expect((await db.tagMeta.get('b'))?.archivedAt).toBe(NOW);
     await undo();
-    expect(await db.tagMeta.get('a')).toEqual({ tag: 'a', colorSlot: 3, lastUsedAt: 5 });
+    // Back as it was, stamped so sync treats the undo as the latest change.
+    expect(await db.tagMeta.get('a')).toEqual({ tag: 'a', colorSlot: 3, lastUsedAt: 5, archiveChangedAt: expect.any(Number) });
     expect(await db.tagMeta.get('b')).toBeUndefined();
   });
 });

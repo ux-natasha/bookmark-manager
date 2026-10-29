@@ -20,6 +20,8 @@ When you save something, the extension stores in your browser's local storage (I
 
 This data never leaves your device through the extension, except as described below. Uninstalling the extension deletes it. You can export a backup (a JSON file saved where you choose) and restore it later.
 
+If you turn on Sync, the extension writes a copy of your library (everything above except previews, pictures and saved page text) to a folder you choose on your computer, and reads the copies other browsers have written there. If that folder is synced by a service such as Dropbox or Google Drive, that service's own terms cover the copies it holds. The extension never sends them anywhere itself.
+
 ## Network requests the extension makes
 
 The extension makes requests only to carry out features you use:

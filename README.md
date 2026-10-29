@@ -61,6 +61,7 @@ The Firefox version is the same extension with three differences: the panel open
 | *Add from a post* in the library | Paste a post's link or text; the sites it mentions are listed for you to tag and save |
 | *Find links in this post* in the side panel | Same, read straight from the post you have open (works for logged-in-only posts) |
 | *Back up* / *Restore* | Exports or merges a JSON backup |
+| *Sync…* (Chrome and Edge) | Keeps the library the same in each browser you use, through a folder you already sync. See below |
 | *Check links* in the library | Re-checks every link in the background and flags ones that seem dead |
 
 **Back up regularly:** uninstalling the extension deletes its library.
@@ -80,6 +81,16 @@ The Firefox version is the same extension with three differences: the panel open
 - **Platform** (Substack, X, YouTube, GitHub…) is detected from the address, and from clues in the page for platforms on custom domains (Substack, Medium, Ghost, WordPress).
 - **Saved copies:** the readable text of each page is kept when it's saved (from the live page when you save the tab you're on, otherwise fetched once in the background), up to about 10,000 words. Search looks inside it, and *Edit* shows it, so a link that dies still has its words. The first copy is kept; later checks don't replace it. Backups include it.
 - **Dead links:** a link counts as dead if the site says the page doesn't exist (404/410), or if it doesn't answer in two checks at least six hours apart. Sites that block bots aren't flagged, because we can't tell.
+
+## Sync
+
+There's no account. Instead, pick a folder you already sync (Dropbox, iCloud Drive, Google Drive, OneDrive…) under *More → Sync…*, and pick the same folder in each browser. Each browser writes the whole library to its own file in a `Bookmark Manager sync` folder there, and reads the others' files; no file is ever written by two browsers, so the sync service never has conflicting edits to sort out.
+
+- **Merging:** for each item, the browser that changed it last wins what a person edits (title, note, tags, text, the chosen preview, and deleting it). Use adds up: the open count and last-opened date take the higher of the two. A link saved in two browsers before they ever synced becomes one item. For tags, the latest archive or un-archive wins, and each browser keeps its own tag colours.
+- **Not synced:** previews, pictures and the saved copies of pages. Each browser reads its own, so new items fill in a moment after they arrive.
+- **When:** while the library is open: when it opens or comes back to the front, every five minutes, and 15 seconds after a change. Closing the library pauses it.
+- **Permission:** after a browser restart, Chrome and Edge usually ask once before the library can use the folder again. The library shows *Allow* when they do.
+- Firefox doesn't let extensions use a folder like this, so Sync isn't in the Firefox version. Backups still move a library between browsers.
 
 ## Links from posts
 
