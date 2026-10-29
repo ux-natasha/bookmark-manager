@@ -110,32 +110,56 @@
   .bar .install { margin-left: auto; color: var(--olive-deep); font-weight: 500; }
 
   /* ---------- Hero ---------- */
-  .hero { padding: clamp(48px, 7.5vw, 104px) 0 clamp(36px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 28px 64px; align-items: end; }
-  .hero h1 { font-size: clamp(2.7rem, 6.2vw, 5.8rem); line-height: 0.97; letter-spacing: -0.03em; }
+  .hero { padding: clamp(48px, 7vw, 96px) 0 clamp(48px, 6vw, 80px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px clamp(40px, 6vw, 88px); align-items: center; }
+  .hero h1 { font-size: clamp(2.6rem, 5.4vw, 5.2rem); line-height: 0.97; letter-spacing: -0.03em; text-wrap: balance; }
   .hero h1 em { color: var(--olive); }
-  .hero h1 .n { font-variant-numeric: lining-nums; }
-  .hero .lede { max-width: 38ch; }
-  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 28px; }
+  .hero .lede { max-width: 40ch; margin-top: 24px; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 30px; }
+  .actions .btn[aria-disabled="true"] { opacity: 0.55; cursor: default; transform: none; box-shadow: none; }
+  .kbd { color: var(--ink-2); }
+  .kbd kbd { font: inherit; padding: 3px 6px; border-radius: 4px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-strong), 0 1px 0 var(--line-strong); color: var(--ink); }
   .facts { margin-top: 22px; color: var(--ink-2); }
-  .done-msg { font: italic 400 clamp(19px, 1.7vw, 23px)/1.35 var(--serif); color: var(--olive-deep); margin-top: 14px; min-height: 1.35em; }
+  .done-msg { font: italic 400 clamp(19px, 1.7vw, 23px)/1.35 var(--serif); color: var(--olive-deep); margin-top: 14px; min-height: 2.7em; }
+  /* Keeping the page: a flash, then what you were looking at flies down into the library */
+  .flash { position: fixed; inset: 0; z-index: calc(var(--z-head) + 2); background: #fffdf8; pointer-events: none; opacity: 0; }
+  .capture { position: fixed; left: 0; top: 0; z-index: calc(var(--z-head) + 1); overflow: hidden; transform-origin: 0 0; background: var(--paper); box-shadow: 0 30px 60px -20px rgba(43, 39, 34, 0.55); pointer-events: none; }
+  .mini { position: absolute; left: 0; top: 0; overflow: hidden; transform-origin: 0 0; background: var(--paper); pointer-events: none; }
+  .mini-page { position: absolute; left: 0; right: 0; }
 
-  /* The shelf the tabs land on */
-  .shelf { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(10px, 1.6vw, 22px); padding: 0 0 18px; position: relative; }
-  .shelf::after { content: ""; position: absolute; left: calc(-1 * var(--gutter) / 2); right: calc(-1 * var(--gutter) / 2); bottom: 0; height: 10px; background: linear-gradient(#b9a47c, #9c875f); box-shadow: 0 12px 16px -10px rgba(43, 39, 34, 0.6); }
-  .slot { aspect-ratio: 3 / 4; border: 1px dashed var(--line-strong); position: relative; }
-  .slot:first-child::before { content: "Your library"; position: absolute; left: 10px; top: 10px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
-  .hero h1 .n.counting { display: inline-block; text-align: right; font-variant-numeric: lining-nums tabular-nums; }
-  /* Unfiling lifts the cards back off the shelf, last one first, quicker than they landed */
-  .k { position: absolute; inset: -1px; display: flex; flex-direction: column; overflow: hidden; background: var(--card); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 16px 24px -16px rgba(43, 39, 34, 0.65); opacity: 0; transform: translateY(-36px) rotate(var(--r, 0deg)) scale(0.96); transition: opacity 0.35s var(--ease), transform 0.5s var(--ease); transition-delay: calc((5 - var(--i)) * 35ms); }
-  .filed .k { opacity: 1; transform: rotate(var(--r, 0deg)); transition: opacity 0.6s var(--ease), transform 0.9s var(--ease); transition-delay: calc(0.35s + var(--i) * 60ms); }
-  .k .pic { flex: 1; background: var(--c); background-size: cover; background-position: 50% 30%; }
-  .k .lbl { padding: 8px 9px 10px; font: 400 clamp(12px, 1.05vw, 15px)/1.15 var(--serif); }
-  .k .lbl small { display: block; font: 500 9px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 4px; }
-  .k.cover .pic { padding: 10%; display: flex; align-items: flex-end; color: #f6ecd8; font: italic 400 clamp(13px, 1.25vw, 18px)/1.05 var(--serif); }
-  .k.quote { background: var(--rose-pale); padding: 12%; justify-content: center; font: italic 400 clamp(13px, 1.2vw, 17px)/1.25 var(--serif); }
-  .k.quote::before { content: "\201C"; font-size: 2.2em; line-height: 0.5; color: var(--rose-ink); }
-  .k.more { background: var(--olive-deep); color: var(--cream); padding: 12%; justify-content: flex-end; font: 300 clamp(26px, 3vw, 44px)/1 var(--serif); }
-  .k.more small { font: 400 clamp(12px, 1vw, 14px)/1.3 var(--sans); color: var(--leaf); margin-top: 8px; }
+  /* A small library beside the copy. Every card carries --t from 0 (today) to 1 (forgotten), the same as the extension. */
+  .desk { --aged-ink: #6b5c42; background: var(--stock); border-radius: 6px; padding: clamp(16px, 2vw, 26px); box-shadow: inset 0 0 0 1px var(--line); }
+  .lib { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 1.5vw, 20px); align-items: start; }
+  .lc { position: relative; min-width: 0; padding: 7px 7px 9px; background: color-mix(in oklab, var(--card), var(--aged) calc(var(--t) * 80%)); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 14px 22px -16px rgba(43, 39, 34, 0.7); transform: rotate(calc(var(--r) * var(--t) * 1deg)); transition: transform 0.6s var(--ease), background-color 0.6s var(--ease), box-shadow 0.6s var(--ease); }
+  .lc::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--specks); background-size: 64px 64px; opacity: calc(var(--t) * 0.9); transition: opacity 0.6s var(--ease); }
+  .lc img, .lc .cv, .lc .kshot { width: 100%; display: block; filter: sepia(calc(var(--t) * 0.85)) saturate(calc(1 - var(--t) * 0.5)) contrast(calc(1 - var(--t) * 0.1)); transition: filter 0.6s var(--ease); }
+  .lc .cv { aspect-ratio: 4 / 5; box-shadow: none; background: var(--bg); padding: 12%; display: flex; align-items: flex-end; color: #f6ecd8; font: italic 400 clamp(13px, 1.2vw, 17px)/1.05 var(--serif); }
+  .lc .t { margin-top: 7px; font: 400 clamp(12px, 1vw, 14px)/1.2 var(--serif); color: color-mix(in oklab, var(--ink), var(--aged-ink) calc(var(--t) * 100%)); }
+  .lc .age { display: block; margin-top: 4px; font: 500 9.5px/1.2 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: color-mix(in oklab, var(--ink-2), var(--aged-ink) calc(var(--t) * 100%)); }
+  .lc.q, .lc.note { padding: 14px 12px 10px; font: italic 400 clamp(13px, 1.1vw, 16px)/1.3 var(--serif); color: color-mix(in oklab, var(--ink), var(--aged-ink) calc(var(--t) * 100%)); }
+  .lc.q { background: color-mix(in oklab, var(--rose-pale), var(--aged) calc(var(--t) * 80%)); }
+  .lc.back { box-shadow: 0 0 0 2px var(--olive), 0 14px 22px -16px rgba(43, 39, 34, 0.7); }
+  /* This page, as Folia keeps it: a copy of what you were looking at, at the shape of your window */
+  .lc.here { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .lc.here > * { grid-area: 1 / 1; }
+  .desk:not(.kept) .lc.here { background: transparent; box-shadow: none; padding: 0; }
+  .slot-here { aspect-ratio: 4 / 5; border: 1px dashed var(--line-strong); padding: 10px; font: 500 10px/1.35 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .kept .slot-here { display: none; }
+  .keptcard { visibility: hidden; }
+  .kept .keptcard { visibility: visible; }
+  .kshot { position: relative; overflow: hidden; aspect-ratio: 16 / 10; background: var(--paper); box-shadow: inset 0 0 0 1px var(--line); }
+  /* Sepia leaves white paper white, so the copy also takes on the aged paper colour */
+  .kshot::after { content: ""; position: absolute; inset: 0; background: var(--aged); mix-blend-mode: multiply; opacity: calc(var(--t) * 0.55); transition: opacity 0.6s var(--ease); pointer-events: none; }
+  /* The dial: drag time forward, up to two years */
+  .timebar { display: flex; align-items: center; gap: 14px; margin-top: 14px; color: var(--ink-2); }
+  .timebar output { min-width: 10ch; color: var(--ink); }
+  .dial { --p: 0%; -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 44px; margin: 0; background: transparent; cursor: pointer; }
+  .dial:disabled { opacity: 0.45; cursor: default; }
+  .dial:focus-visible { outline: 2px solid var(--olive); outline-offset: 2px; }
+  .dial::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(to right, #c9a86a var(--p), var(--line-strong) var(--p)); }
+  .dial::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px; border-radius: 50%; background: var(--olive-deep); box-shadow: 0 0 0 3px var(--stock), 0 0 0 4px var(--line-strong); }
+  .dial::-moz-range-track { height: 2px; background: var(--line-strong); }
+  .dial::-moz-range-progress { height: 2px; background: #c9a86a; }
+  .dial::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--olive-deep); box-shadow: 0 0 0 3px var(--stock), 0 0 0 4px var(--line-strong); }
 
   /* ---------- Ageing: four screens of scroll, one pinned table ---------- */
   .ageing { --t: 0; background: color-mix(in oklab, var(--paper), var(--aged) calc(var(--t) * 60%)); border-top: 1px solid var(--line); }
@@ -524,9 +548,8 @@
   }
   @media (max-width: 859px) {
     .head, .hero, .privacy-grid, .post-grid, .qa-grid, .install-grid { grid-template-columns: minmax(0, 1fr); }
-    .shelf { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 16px; }
-    .shelf .slot:nth-child(n + 4):not(:last-child) { display: none; }
-    .shelf .slot:nth-child(3) { display: none; }
+    .lib { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .lc.note { font-size: 12px; }
     .addr .arrows { display: none; }
     /* The ageing table stacks under its copy */
     .scene { height: 320vh; }
@@ -610,22 +633,26 @@
 </header>
 
 <main>
-  <!-- Hero: start from the tabs you can't close -->
+  <!-- Hero: keep the page you're on, for real, then turn the dial and watch it age -->
   <div class="wrap">
     <div class="hero">
-      <h1><span class="n" id="n">42</span> <span id="tw">tabs</span> open, <em id="why">because closing one feels like losing it.</em></h1>
       <div>
-        <p class="lede">Folia keeps every one, saved the way it looked, in a library inside your browser. Then it does what bookmarks never do: it shows you which ones you’ve forgotten.</p>
+        <h1>Keep this page. <em>Then see what a year does to it.</em></h1>
+        <p class="lede">Folia keeps a page exactly as you’re seeing it, in a library inside your browser. Then it shows you, month by month, what you never came back to.</p>
         <div class="actions">
-          <button class="btn" type="button" id="keep">Keep them and close</button>
-          <a class="textlink" href="#install">How to install</a>
+          <button class="btn" type="button" id="keep">Keep this page</button>
+          <span class="kbd mono">or press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></span>
         </div>
         <p class="done-msg" id="msg" aria-live="polite"></p>
         <p class="facts mono">Free · Open source · No account · Chrome &amp; Edge</p>
       </div>
+      <div class="desk" id="desk">
+        <div class="lib" id="lib" role="group" aria-label="A small library, with an empty place where this page will be kept"></div>
+        <div class="timebar mono"><output id="tb-when" for="dial">Today</output><input class="dial" id="dial" type="range" min="0" max="24" step="1" value="0" disabled aria-label="Months since you kept this page"><span aria-hidden="true">2 yrs</span></div>
+      </div>
     </div>
-    <div class="shelf" id="shelf" role="group" aria-label="Your library"></div>
   </div>
+  <div class="flash" id="flash" aria-hidden="true"></div>
 
   <!-- Links from posts -->
   <section id="posts" class="posts pad" aria-labelledby="posts-h">
@@ -965,77 +992,193 @@
   }
   tabsEl.insertAdjacentHTML('beforeend', '<div class="tab add">+</div>');
 
-  // Five of the forty-one on the shelf, then the rest.
-  const kept = [
-    ['cover', 'Lnk·014', 'Why we still use pencils', '#c99a3c', -1.5],
-    ['pic', 'Pic·003', 'The Swing', 'url(img/art/swing.jpg)', 1],
-    ['cover', 'Lnk·021', 'Night trains of Europe', '#2f3b8f', 0.5],
-    ['quote', '', 'Make the thing you wish you’d found.', '', -1],
-    ['pic', 'Pic·012', 'The Oxbow', 'url(img/art/oxbow.jpg)', 0.5],
+  // [kind, title, image, colour, months unopened, tilt as it ages]. 'here' is where this page lands.
+  const shelved = [
+    ['pic', 'Primavera, Botticelli', 'img/art/primavera.jpg', '', 6, -4],
+    ['here', 'This page', '', '', 0, 3],
+    ['q', 'Make the thing you wish you’d found.', '', '', 3, 4],
+    ['note', 'Kitchen shelf: oak, not pine. Ask about the brass brackets.', '', '', 9, -3],
+    ['cv', 'Why we still use pencils', '', '#c99a3c', 1, 2],
+    ['pic', 'The Oxbow', 'img/art/oxbow.jpg', '', 0, -2],
   ];
-  const shelf = document.getElementById('shelf');
-  const slot = (html, cls, i, r) => `<div class="slot"><div class="k ${cls}" style="--i:${i};--r:${r}deg">${html}</div></div>`;
-  shelf.innerHTML = kept.map(([kind, code, title, c, r], i) => {
-    if (kind === 'quote') return slot(title, 'quote', i, r);
-    if (kind === 'pic') return slot(`<div class="pic" style="--c:${c}"></div><div class="lbl"><small>${code}</small>${title}</div>`, '', i, r);
-    return slot(`<div class="pic" style="--c:${c}">${title}</div><div class="lbl"><small>${code}</small>kept today</div>`, 'cover', i, r);
-  }).join('') + slot('+36<small>more, each saved the way it looked</small>', 'more', 5, 0);
+  const libT = (m) => Math.min(1, m / 18).toFixed(2);
+  const sinceKept = (m) => m === 0 ? 'opened this week' : m === 1 ? 'opened last month' : `untouched ${m} mo.`;
+  const lib = document.getElementById('lib');
+  const desk = document.getElementById('desk');
+  lib.innerHTML = shelved.map(([kind, title, src, c, m, r], i) => {
+    const style = `--t:${libT(m)};--r:${r}`;
+    const age = `<span class="age">${sinceKept(m)}</span>`;
+    if (kind === 'here') return `<div class="lc here" style="--t:0;--r:${r}" data-i="${i}"><div class="slot-here">This page lands here</div><div class="keptcard"><div class="kshot" id="shot"></div><span class="age">folia · kept just now</span></div></div>`;
+    if (kind === 'q') return `<div class="lc q" style="${style}" data-i="${i}">“${title}”${age}</div>`;
+    if (kind === 'note') return `<div class="lc note" style="${style}" data-i="${i}">${title}${age}</div>`;
+    const media = kind === 'pic' ? `<img src="${src}" alt="">` : `<div class="cv" style="--bg:${c}">${title}</div>`;
+    return `<div class="lc" style="${style}" data-i="${i}">${media}${kind === 'pic' ? `<div class="t">${title}</div>` : ''}${age}</div>`;
+  }).join('');
+  // Tabs open one after another along the strip.
+  if (!reduced) [...tabsEl.children].forEach((t, i) => t.animate([{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+    { duration: 420, delay: 80 + i * 12, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'backwards' }));
 
   const keep = document.getElementById('keep');
   const msg = document.getElementById('msg');
-  const n = document.getElementById('n');
-  const tw = document.getElementById('tw');
-  const why = document.getElementById('why');
-  const ease = 'cubic-bezier(0.16, 1, 0.3, 1)';
-  let filed = false;
-  let tick;
-  // Tabs open one after another along the strip while the count climbs with them.
-  // The number is held at the width of "42" so the headline doesn't rewrap as it counts.
-  const pileIn = (tabs, gap) => {
-    tabs.forEach((t, i) => t.animate([{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }],
-      { duration: 420, delay: 80 + i * gap, easing: ease, fill: 'backwards' }));
-    clearInterval(tick);
-    n.textContent = '42';
-    n.style.minWidth = `${n.getBoundingClientRect().width}px`;
-    n.classList.add('counting');
-    let k = 1;
-    n.textContent = k;
-    tick = setInterval(() => {
-      k = Math.min(42, k + 2);
-      n.textContent = k;
-      if (k === 42) { clearInterval(tick); n.classList.remove('counting'); n.style.minWidth = ''; }
-    }, (tabs.length * gap) / 21);
+  const flash = document.getElementById('flash');
+  const dial = document.getElementById('dial');
+  const tbWhen = document.getElementById('tb-when');
+  const shot = document.getElementById('shot');
+  const hereCard = lib.querySelector(':scope > .here');
+  const hereAge = hereCard.querySelector('.keptcard .age');
+
+  // A copy of exactly what's in the window right now: the tabs, the bar and the hero, at your scroll position.
+  const snapshot = () => {
+    const w = document.documentElement.clientWidth;
+    const h = innerHeight;
+    const mini = document.createElement('div');
+    mini.className = 'mini';
+    mini.style.cssText = `width:${w}px;height:${h}px`;
+    mini.inert = true;
+    mini.setAttribute('aria-hidden', 'true');
+    const page = document.createElement('div');
+    page.className = 'mini-page';
+    page.style.top = `${-scrollY}px`;
+    page.append(document.getElementById('top').cloneNode(true), document.querySelector('main > .wrap').cloneNode(true));
+    page.querySelectorAll('[id], [data-i]').forEach((el) => { el.removeAttribute('id'); el.removeAttribute('data-i'); });
+    mini.append(page);
+    return { mini, w, h };
   };
-  if (!reduced) pileIn([...tabsEl.children], 12);
+  let shotW = 1;
+  const fitShot = () => {
+    const mini = shot.firstElementChild;
+    if (mini) mini.style.transform = `scale(${shot.clientWidth / shotW})`;
+  };
+  new ResizeObserver(fitShot).observe(shot);
+  const putInShot = ({ mini, w, h }) => {
+    shotW = w;
+    shot.replaceChildren(mini);
+    shot.style.aspectRatio = `${w} / ${h}`;
+    fitShot();
+  };
+
+  // Time since keeping, on the dial. The other things in the library were already ageing before.
+  const STORE = 'folia-hero-kept';
+  let kept = false;
+  let openedAt = 0;
+  let keptDays = null;
+  let stage = -1;
+  let autoplay;
+  const stages = [
+    [0, 'Kept, exactly as it looked, down to the tabs you had open.'],
+    [1, 'Still fresh. You meant to come back to it.'],
+    [4, 'It’s started to yellow. You haven’t opened it since.'],
+    [9, 'About a year. You’d forgotten you kept it, and now you can see that.'],
+    [16, 'Faded and dusty. Refresh my memory would bring it to the front.'],
+    [24, 'Two years, fully aged. Nothing is deleted for being old.'],
+  ];
+  const daysText = (d) => d === 0 ? 'earlier today' : d === 1 ? 'yesterday' : `${d} days ago`;
+  const show = () => {
+    const on = +dial.value;
+    const since = Math.max(0, on - openedAt);
+    shelved.forEach(([kind, , , , m], i) => {
+      const el = lib.querySelector(`:scope > [data-i="${i}"]`);
+      if (kind === 'here') {
+        el.style.setProperty('--t', libT(since));
+        hereAge.textContent = since ? `folia · untouched ${since} mo.` : openedAt ? 'folia · opened just now' : `folia · kept ${keptDays === null ? 'just now' : daysText(keptDays)}`;
+        return;
+      }
+      el.style.setProperty('--t', libT(m + on));
+      el.querySelector('.age').textContent = sinceKept(m + on);
+    });
+    const when = on === 0 ? 'Today' : on === 12 ? 'A year on' : on === 24 ? 'Two years on' : `${on} mo. on`;
+    tbWhen.textContent = when;
+    dial.setAttribute('aria-valuetext', when);
+    dial.style.setProperty('--p', `${(on / 24) * 100}%`);
+    hereCard.classList.toggle('back', openedAt > 0 && since === 0);
+    if (!kept) return;
+    keep.textContent = since ? 'Bring it back' : 'Start again';
+    // Say each stage once as the dial passes it, rather than every month.
+    const s = stages.reduce((k, [from], j) => (since >= from ? j : k), 0);
+    if (s !== stage && !(openedAt && since === 0)) { stage = s; msg.textContent = stages[s][1]; }
+  };
+  const settle = () => {
+    kept = true;
+    dial.disabled = false;
+    keep.removeAttribute('aria-disabled');
+    desk.classList.add('kept');
+    show();
+  };
+  const play = (to) => {
+    clearInterval(autoplay);
+    autoplay = setInterval(() => {
+      if (+dial.value >= to) return clearInterval(autoplay);
+      dial.value = +dial.value + 1;
+      show();
+    }, 230);
+  };
+  ['pointerdown', 'keydown'].forEach((ev) => dial.addEventListener(ev, () => clearInterval(autoplay)));
+  dial.addEventListener('input', show);
+
+  const keepPage = () => {
+    if (kept || keep.getAttribute('aria-disabled')) return;
+    try { localStorage.setItem(STORE, String(Date.now())); } catch {}
+    keptDays = null;
+    const snap = snapshot();
+    putInShot(snapshot());
+    if (reduced) { settle(); dial.value = 12; show(); return; }
+    keep.setAttribute('aria-disabled', 'true');
+    // Fly the copy from the whole window down to its card.
+    const to = shot.getBoundingClientRect();
+    const frame = document.createElement('div');
+    frame.className = 'capture';
+    frame.style.cssText = `width:${snap.w}px;height:${snap.h}px`;
+    frame.append(snap.mini);
+    document.body.append(frame);
+    flash.animate([{ opacity: 0 }, { opacity: 0.8, offset: 0.2 }, { opacity: 0 }], { duration: 380, easing: 'ease-out' });
+    frame.animate([{ transform: 'none', borderRadius: '0px' }, { transform: `translate(${to.left}px, ${to.top}px) scale(${to.width / snap.w})`, borderRadius: `${(4 * snap.w) / to.width}px` }],
+      { duration: 950, delay: 260, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' }).finished.then(() => {
+      frame.remove();
+      settle();
+      setTimeout(() => play(12), 700);
+    });
+  };
   keep.addEventListener('click', () => {
-    const tabs = [...tabsEl.querySelectorAll('.tab:not(.on):not(.add)')];
-    clearInterval(tick);
-    if (!filed) {
-      root.classList.add('filing');
-      // Tabs drop off the strip from the end, as if pulled down onto the shelf.
-      tabs.reverse().forEach((t, i) => {
-        if (reduced) { t.hidden = true; return; }
-        t.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(90px) scale(0.7)', opacity: 0 }],
-          { duration: 420, delay: i * 14, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' }).finished.then(() => { t.hidden = true; });
-      });
-      let k = 42;
-      const land = () => { n.textContent = '1'; tw.textContent = 'tab'; why.textContent = 'and the other 41 are kept.'; };
-      if (reduced) land();
-      else tick = setInterval(() => { k -= 3; if (k <= 1) { clearInterval(tick); land(); } else n.textContent = k; }, 30);
-      setTimeout(() => root.classList.add('filed'), reduced ? 0 : 250);
-      msg.textContent = 'Closed, and kept. Every one saved the way it looked.';
-      keep.textContent = 'Open them all again';
-    } else {
-      tabs.forEach((t) => { t.getAnimations().forEach((a) => a.cancel()); t.hidden = false; });
-      root.classList.remove('filing', 'filed');
-      tw.textContent = 'tabs'; why.textContent = 'because closing one feels like losing it.';
-      if (reduced) n.textContent = '42';
-      else pileIn(tabs, 9);
-      msg.textContent = '';
-      keep.textContent = 'Keep them and close';
+    if (!kept) return keepPage();
+    if (keep.getAttribute('aria-disabled')) return;
+    const since = +dial.value - openedAt;
+    if (since > 0) {
+      // Bring it back: it's fresh from this point on the dial, while everything else keeps its age.
+      clearInterval(autoplay);
+      openedAt = +dial.value;
+      show();
+      msg.textContent = 'Back on top, as fresh as the day you kept it. Drag on and it ages again.';
+      return;
     }
-    filed = !filed;
+    // Start again
+    clearInterval(autoplay);
+    try { localStorage.removeItem(STORE); } catch {}
+    kept = false; openedAt = 0; stage = -1; keptDays = null;
+    dial.value = 0; dial.disabled = true;
+    desk.classList.remove('kept');
+    hereCard.classList.remove('back');
+    shot.replaceChildren();
+    show();
+    msg.textContent = '';
+    keep.textContent = 'Keep this page';
   });
+  // The extension's own shortcut works here too. With Folia installed, the browser sends it to the extension instead.
+  addEventListener('keydown', (e) => {
+    if (e.altKey && e.shiftKey && e.code === 'KeyS' && !kept) { e.preventDefault(); keepPage(); }
+  });
+  // Kept on an earlier visit: it's still in the library, aged by the real time since.
+  // (The copy is taken again now, since only the date is remembered.)
+  let keptAt = null;
+  try { keptAt = Number(localStorage.getItem(STORE)) || null; } catch {}
+  if (keptAt) {
+    const days = Math.max(0, Math.floor((Date.now() - keptAt) / 864e5));
+    keptDays = days;
+    putInShot(snapshot());
+    dial.value = Math.min(24, Math.floor(days / 30.4));
+    settle();
+    msg.textContent = `You kept this page ${daysText(days)}. Real time is slower than this dial: drag it to see what a year will do.`;
+    stage = stages.reduce((k, [from], j) => (+dial.value >= from ? j : k), 0);
+  }
 
   /* ---------- Ageing: scrolling through the section is time passing ---------- */
   const ageing = document.getElementById('ageing');
