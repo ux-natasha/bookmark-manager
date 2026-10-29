@@ -13,6 +13,7 @@ import { hostnameOf, isProtectedPage, isSaveableUrl } from '../lib/normalize';
 import { detectPlatform, platformById } from '../lib/platform';
 import { linksFromOpenTab, type PostLinks } from '../lib/posts';
 import { usePreviewUrl } from '../lib/previews';
+import { useLibraryLook } from './look';
 
 interface ActiveTab {
   id?: number;
@@ -64,6 +65,7 @@ function useLastSave(): LastSave | undefined {
 }
 
 export function SidePanel() {
+  useLibraryLook();
   const tab = useActiveTab();
   const lastSave = useLastSave();
   const bookmarks = useBookmarks();

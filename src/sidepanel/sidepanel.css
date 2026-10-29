@@ -134,3 +134,154 @@ button.recent-item {
   margin: 0;
   font-size: var(--text-md);
 }
+
+/* Themes. The panel takes the library's theme tokens (and the shared rules for buttons and fields);
+   these give its few structures the same voice. */
+
+/* Contact sheet: a print on the light table. Square frames, mono captions, serif titles. */
+[data-theme='contact'] .panel-header {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--text);
+}
+
+[data-theme='contact'] .panel-header h1 {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='contact'] .panel-recent h2,
+[data-theme='contact'] .panel-note h2,
+[data-theme='contact'] .page-card h2,
+[data-theme='contact'] .field > span,
+[data-theme='contact'] .save-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='contact'] .page-card {
+  border-color: var(--border-strong);
+  background: var(--surface);
+}
+
+[data-theme='contact'] .save-status.is-new {
+  color: var(--accent);
+}
+
+[data-theme='contact'] .panel-preview {
+  border: 6px solid var(--film);
+}
+
+[data-theme='contact'] .page-heading strong {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+[data-theme='contact'] .panel-recent ul {
+  counter-reset: frame;
+  border-top: 1px solid var(--border);
+}
+
+[data-theme='contact'] .recent-item {
+  counter-increment: frame;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-theme='contact'] .recent-item::before {
+  content: counter(frame, decimal-leading-zero);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* Covers: the reading room. Display type, a ribbon on fresh saves, recent titles on a shelf. */
+[data-theme='covers'] .panel-header h1 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='covers'] .panel-recent h2,
+[data-theme='covers'] .panel-note h2,
+[data-theme='covers'] .page-card h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 19px;
+}
+
+[data-theme='covers'] .page-card {
+  background: var(--note-paper);
+  box-shadow: var(--shelf-shadow);
+}
+
+[data-theme='covers'] .page-heading strong {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+[data-theme='covers'] .save-status.is-new {
+  align-self: flex-start;
+  padding: 2px var(--space-2);
+  background: var(--ribbon);
+  color: var(--ribbon-text);
+  border-radius: var(--radius-sm);
+}
+
+[data-theme='covers'] .save-status.is-new .link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+[data-theme='covers'] .panel-recent ul {
+  padding-bottom: 10px;
+  background: var(--shelf) bottom / 100% 8px no-repeat;
+}
+
+[data-theme='covers'] .recent-item {
+  font-family: var(--font-display);
+}
+
+/* Colour field: a dark room. Glass over a soft glow of the accent. */
+[data-theme='field'] body {
+  background:
+    radial-gradient(60% 40% at 15% 0%, color-mix(in srgb, var(--kind-link) 28%, transparent), transparent),
+    radial-gradient(50% 35% at 100% 30%, color-mix(in srgb, var(--kind-quote) 18%, transparent), transparent),
+    var(--bg);
+  background-attachment: fixed;
+}
+
+[data-theme='field'] .panel-header h1 {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+}
+
+[data-theme='field'] .page-card {
+  background: var(--glass);
+  border-color: var(--glass-edge);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--lift);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+[data-theme='field'] .panel-preview {
+  border-radius: var(--radius-media);
+}
+
+[data-theme='field'] .recent-item {
+  border-radius: var(--radius-bar);
+}
+
+[data-theme='field'] .save-status.is-new {
+  color: var(--kind-note);
+}
