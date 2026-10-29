@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { readImportFile } from '../lib/importFile';
 import { planImport, readFavorites, runImport, type ImportPlan } from '../lib/importer';
 import { sendToBackground } from '../lib/messages';
 
@@ -9,18 +10,28 @@ type Phase =
   | { name: 'finished'; added: number }
   | { name: 'error'; message: string };
 
-export function ImportDialog({ onClose }: { onClose: () => void }) {
+// Without a file, imports the browser's own bookmarks. With one, an export from Pocket, Raindrop or a bookmarks file.
+export function ImportDialog({ file, onClose }: { file?: File; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [phase, setPhase] = useState<Phase>({ name: 'reading' });
   const [foldersAsTags, setFoldersAsTags] = useState(true);
+  const [label, setLabel] = useState<string>();
 
   useEffect(() => {
     dialogRef.current?.showModal();
-    readFavorites()
+    const read = file
+      ? readImportFile(file).then(({ label, items }) => {
+          setLabel(label);
+          return items;
+        })
+      : readFavorites();
+    read
       .then(planImport)
       .then((plan) => setPhase({ name: 'review', plan }))
-      .catch((err: Error) => setPhase({ name: 'error', message: `Couldn't read favorites: ${err.message}` }));
-  }, []);
+      .catch((err: Error) =>
+        setPhase({ name: 'error', message: file ? `Couldn't read ${file.name}: ${err.message}` : `Couldn't read favorites: ${err.message}` }),
+      );
+  }, [file]);
 
   const start = async (plan: ImportPlan) => {
     setPhase({ name: 'importing', done: 0, total: plan.toImport.length });
@@ -44,16 +55,20 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
       // Don't let Esc close the dialog halfway through an import.
       onCancel={(e) => phase.name === 'importing' && e.preventDefault()}
     >
-      <h2>Import favorites</h2>
+      <h2>{file ? `Import from ${label ?? 'a file'}` : 'Import favorites'}</h2>
       <p className="small muted">
-        Copies your browser's bookmarks into this library. Your browser's own bookmarks aren't changed.
+        {file
+          ? 'Copies the links in this file into your library, with their tags and notes.'
+          : "Copies your browser's bookmarks into this library. Your browser's own bookmarks aren't changed."}
       </p>
 
-      {phase.name === 'reading' && <p>Reading your favorites…</p>}
+      {phase.name === 'reading' && <p>{file ? `Reading ${file.name}…` : 'Reading your favorites…'}</p>}
 
       {phase.name === 'error' && <p className="error">{phase.message}</p>}
 
-      {phase.name === 'review' && <Review plan={phase.plan} foldersAsTags={foldersAsTags} setFoldersAsTags={setFoldersAsTags} />}
+      {phase.name === 'review' && (
+        <Review plan={phase.plan} fromFile={!!file} foldersAsTags={foldersAsTags} setFoldersAsTags={setFoldersAsTags} />
+      )}
 
       {phase.name === 'importing' && (
         <div className="field">
@@ -92,18 +107,21 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
 
 interface ReviewProps {
   plan: ImportPlan;
+  fromFile: boolean;
   foldersAsTags: boolean;
   setFoldersAsTags: (value: boolean) => void;
 }
 
-function Review({ plan, foldersAsTags, setFoldersAsTags }: ReviewProps) {
+function Review({ plan, fromFile, foldersAsTags, setFoldersAsTags }: ReviewProps) {
   const extraCopies = plan.duplicateGroups.reduce((sum, g) => sum + g.length - 1, 0);
+  // Pocket has no folders, so the option would do nothing.
+  const hasFolders = [...plan.toImport, ...plan.alreadySaved].some((item) => item.folder.length > 0);
 
   return (
     <div className="import-review">
       <ul className="import-stats">
         <li>
-          <strong>{plan.total}</strong> favorites found
+          <strong>{plan.total}</strong> {fromFile ? 'links' : 'favorites'} found
         </li>
         <li>
           <strong>{plan.toImport.length}</strong> new to import
@@ -127,7 +145,7 @@ function Review({ plan, foldersAsTags, setFoldersAsTags }: ReviewProps) {
 
       {plan.duplicateGroups.length > 0 && (
         <details>
-          <summary>See the duplicates in your favorites</summary>
+          <summary>See the duplicates in {fromFile ? 'the file' : 'your favorites'}</summary>
           <ul className="duplicate-list small">
             {plan.duplicateGroups.map((group) => (
               <li key={group[0].normalizedUrl}>
@@ -143,10 +161,12 @@ function Review({ plan, foldersAsTags, setFoldersAsTags }: ReviewProps) {
         </details>
       )}
 
-      <label className="checkbox">
-        <input type="checkbox" checked={foldersAsTags} onChange={(e) => setFoldersAsTags(e.target.checked)} />
-        Turn folder names into tags
-      </label>
+      {hasFolders && (
+        <label className="checkbox">
+          <input type="checkbox" checked={foldersAsTags} onChange={(e) => setFoldersAsTags(e.target.checked)} />
+          Turn folder names into tags
+        </label>
+      )}
     </div>
   );
 }

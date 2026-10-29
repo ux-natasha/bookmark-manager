@@ -9,6 +9,9 @@ export interface FavoriteItem {
   // Where it lives in Edge, including the built-in container, e.g. "Favorites bar / Design".
   location: string;
   dateAdded?: number;
+  // Tags and a note, from an export file (importFile.ts). The browser's own bookmarks have neither.
+  tags?: string[];
+  note?: string;
   normalizedUrl: string;
 }
 
@@ -99,7 +102,8 @@ export async function runImport(
       title: item.title,
       source: 'import',
       importedFolder: item.folder,
-      tags: options.foldersAsTags ? folderTags(item.folder) : [],
+      tags: [...(options.foldersAsTags ? folderTags(item.folder) : []), ...(item.tags ?? [])],
+      note: item.note,
       createdAt: item.dateAdded,
       dustedAt: importedAt,
     });

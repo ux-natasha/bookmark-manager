@@ -13,7 +13,7 @@ A visual bookmark manager that makes you want to look at your bookmarks. A brows
 - **Pull every link out of a post.** Paste a post's link or text (X, Bluesky, Mastodon, Reddit, Hacker News, LinkedIn…) and review the links it mentions before saving.
 - **Look ahead and ageing.** Bookmarks you haven't opened fade, and *Refresh my memory* brings old ones back.
 - **Four themes**, each in light and dark.
-- **Import, back up and restore.** Bring in Edge favorites, export JSON backups, and check for dead links in the background.
+- **Import, back up and restore.** Bring in Edge favorites, a Pocket or Raindrop export or any bookmarks file, export JSON backups, and check for dead links in the background.
 
 ## Screenshots
 
@@ -50,6 +50,7 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 | *Open library ↗* in the side panel | Opens the full library in a tab |
 | *Refresh my memory* in the library | Shows a few old bookmarks you haven't opened in a long time |
 | *Import favorites* | Copies Edge favorites in, skipping duplicates. Edge's own favorites aren't changed |
+| *Import from Pocket or a file* | Reads a Pocket or Raindrop CSV export, or a bookmarks HTML file from any browser, Raindrop or Pinboard, with its folders, tags and notes. Unzip Pocket's export first |
 | *Add from a post* in the library | Paste a post's link or text; the sites it mentions are listed for you to tag and save |
 | *Find links in this post* in the side panel | Same, read straight from the post you have open (works for logged-in-only posts) |
 | *Back up* / *Restore* | Exports or merges a JSON backup |

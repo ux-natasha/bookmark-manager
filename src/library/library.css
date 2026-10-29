@@ -357,7 +357,14 @@
   font-size: 14px;
 }
 
-.empty .primary {
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.empty-actions button {
   min-height: var(--control-h);
   padding: 0 18px;
 }

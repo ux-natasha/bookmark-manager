@@ -133,7 +133,8 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   // null when closed; otherwise the text the New note dialog opens with.
   const [writingNote, setWritingNote] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [importing, setImporting] = useState(false);
+  // null when closed. Without a file, the browser's own bookmarks are imported.
+  const [importing, setImporting] = useState<{ file?: File } | null>(null);
   const [viewingTrash, setViewingTrash] = useState(false);
   const [addingFromPost, setAddingFromPost] = useState(false);
   // Look ahead: months from today, 0 to 24. Never saved and never written to the database; a reload goes back to today.
@@ -147,6 +148,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const [scrollToGrid, setScrollToGrid] = useState(0);
   const [arrivedIds, setArrivedIds] = useState<Set<string>>(() => new Set());
   const restoreInput = useRef<HTMLInputElement>(null);
+  const importInput = useRef<HTMLInputElement>(null);
   const [indexOpen, setIndexOpen] = useState(false);
   const [tagQuery, setTagQuery] = useState('');
   const { threshold, setThreshold } = useTidyThreshold();
@@ -477,7 +479,8 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                 <MoreMenu
                   items={[
                     { label: 'New note', run: () => setWritingNote('') },
-                    { label: 'Import favorites', run: () => setImporting(true) },
+                    { label: 'Import favorites', run: () => setImporting({}) },
+                    { label: 'Import from Pocket or a file', run: () => importInput.current?.click() },
                     { label: 'Recently deleted', run: () => setViewingTrash(true) },
                     { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
                     { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
@@ -505,6 +508,17 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                 hidden
                 onChange={(e) => {
                   handleRestore(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              <input
+                ref={importInput}
+                type="file"
+                accept=".csv,.html,.htm,text/csv,text/html,.zip"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) setImporting({ file });
                   e.target.value = '';
                 }}
               />
@@ -604,9 +618,12 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                   Right-click a link to save it without opening it, a picture to keep it, or selected text to save it as a
                   quote.
                 </p>
-                <button className="primary" onClick={() => setImporting(true)}>
-                  Import your browser bookmarks
-                </button>
+                <div className="empty-actions">
+                  <button className="primary" onClick={() => setImporting({})}>
+                    Import your browser bookmarks
+                  </button>
+                  <button onClick={() => importInput.current?.click()}>Import from Pocket, Raindrop or a file</button>
+                </div>
               </section>
             ) : !bookmarks ? (
               theme === 'covers' ? <RackLoading /> : <LibraryLoading theme={theme} />
@@ -759,7 +776,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                 }}
               />
             )}
-            {importing && <ImportDialog onClose={() => setImporting(false)} />}
+            {importing && <ImportDialog file={importing.file} onClose={() => setImporting(null)} />}
             {viewingTrash && <TrashDialog onClose={() => setViewingTrash(false)} />}
             {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
             <ToastView toast={toast} onDone={hideToast} />
