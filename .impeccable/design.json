@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-29T00:00:00Z",
+  "title": "Design System: Folia",
+  "extensions": {
+    "colorMeta": {
+      "ground": { "role": "neutral", "displayName": "Warm Paper", "canonical": "#f5f1e8", "tonalRamp": ["#2a271f", "#4a4436", "#6e6650", "#948b72", "#b8af96", "#d6cfbb", "#ebe5d6", "#f5f1e8"] },
+      "surface": { "role": "neutral", "displayName": "Fresh Sheet", "canonical": "#fffdf8" },
+      "ink": { "role": "neutral", "displayName": "Studio Ink", "canonical": "#1f1d1a", "tonalRamp": ["#1f1d1a", "#36332e", "#4d4943", "#5f5a4f", "#7d776c", "#9c968b", "#c4bfb4", "#e8e4dc"] },
+      "ink-muted": { "role": "neutral", "displayName": "Faded Ink", "canonical": "#5f5a4f" },
+      "accent-slate": { "role": "primary", "displayName": "Slate Ink", "canonical": "#2f4a6b", "tonalRamp": ["#141f2d", "#1f3149", "#2f4a6b", "#46648a", "#6581a6", "#8ea4c2", "#b9c8db", "#e3e9f1"] },
+      "night-accent": { "role": "primary", "displayName": "Lamplight Yellow", "canonical": "#ede48a" },
+      "aged-paper": { "role": "tertiary", "displayName": "Aged Paper", "canonical": "#eadbb8" },
+      "aged-ink": { "role": "tertiary", "displayName": "Aged Ink", "canonical": "#6b5c42" },
+      "age-done": { "role": "tertiary", "displayName": "Spent Gold", "canonical": "#c9a86a" },
+      "danger-rust": { "role": "tertiary", "displayName": "Rust", "canonical": "#8a2f1c" },
+      "night-ground": { "role": "neutral", "displayName": "Night Room", "canonical": "#0d121a" },
+      "tag-terracotta": { "role": "secondary", "displayName": "Terracotta", "canonical": "#c47a52" },
+      "tag-blue": { "role": "secondary", "displayName": "Blue", "canonical": "#4d6fa3" },
+      "tag-rose": { "role": "secondary", "displayName": "Rose", "canonical": "#c4688a" },
+      "tag-teal": { "role": "secondary", "displayName": "Teal", "canonical": "#5f98a8" },
+      "tag-ochre": { "role": "secondary", "displayName": "Ochre", "canonical": "#b4893f" },
+      "tag-moss": { "role": "secondary", "displayName": "Moss", "canonical": "#6f8a3e" },
+      "tag-stone": { "role": "secondary", "displayName": "Stone", "canonical": "#8a857a" },
+      "tag-periwinkle": { "role": "secondary", "displayName": "Periwinkle", "canonical": "#7b93c4" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The one library headline; last word italic." },
+      "headline": { "displayName": "Headline", "purpose": "Look ahead month; index letters at 64px italic 300." },
+      "title": { "displayName": "Card title", "purpose": "Card titles, three lines max." },
+      "quote": { "displayName": "Quote", "purpose": "Quote cards; 21px past 60 characters." },
+      "body": { "displayName": "Body", "purpose": "Dialogs, explainers, settings." },
+      "control": { "displayName": "Control", "purpose": "Buttons, pills, selects." },
+      "label": { "displayName": "Label", "purpose": "Card meta and age text; uppercase only in the hero summary." }
+    },
+    "shadows": [
+      { "name": "popover", "value": "0 4px 16px rgb(0 0 0 / 0.12)", "purpose": "Tag suggestions and dropdowns." },
+      { "name": "menu", "value": "0 10px 30px rgb(0 0 0 / 0.14)", "purpose": "The More menu." },
+      { "name": "toast", "value": "0 4px 16px rgb(0 0 0 / 0.2)", "purpose": "Undo toast." },
+      { "name": "media-ring", "value": "inset 0 0 0 1px var(--border)", "purpose": "Edge on card media and notes; not a lift." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.2, 0.7, 0.2, 1)", "purpose": "State changes: lifts, fades, colour." },
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Arrivals." },
+      { "name": "dur-fast", "value": "220ms", "purpose": "Hover lift and small state changes." },
+      { "name": "dur-age", "value": "600ms", "purpose": "Patina transitions when --t changes." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "479px" },
+      { "name": "small", "value": "719px" },
+      { "name": "hero-wrap", "value": "859px" },
+      { "name": "wide", "value": "1099px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "The default for every button.",
+      "html": "<button class=\"ds-btn-ghost\">More</button>",
+      "css": ".ds-btn-ghost { font: 500 13px/1 Geist, system-ui, sans-serif; color: var(--text, #1f1d1a); background: transparent; border: 1px solid var(--border-strong, rgba(31,29,26,.26)); border-radius: 999px; min-height: 44px; padding: 4px 16px; cursor: pointer; transition: background-color 220ms cubic-bezier(.2,.7,.2,1); } .ds-btn-ghost:hover { background: var(--hover, rgba(31,29,26,.06)); } .ds-btn-ghost:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "One per view at most.",
+      "html": "<button class=\"ds-btn-primary\">Add from a post</button>",
+      "css": ".ds-btn-primary { font: 500 13px/1 Geist, system-ui, sans-serif; color: var(--solid-text, #f5f1e8); background: var(--solid-bg, #1f1d1a); border: 1px solid var(--solid-bg, #1f1d1a); border-radius: 999px; min-height: 44px; padding: 4px 16px; cursor: pointer; } .ds-btn-primary:hover { filter: brightness(1.07); } .ds-btn-primary:focus-visible { outline: 2px solid var(--solid-bg, #1f1d1a); outline-offset: 3px; }"
+    },
+    {
+      "name": "Kind Pills",
+      "kind": "chip",
+      "refersTo": "pill-kind",
+      "description": "Filter row; the selected pill inverts to solid.",
+      "html": "<div class=\"ds-pills\"><button class=\"ds-pill\" aria-pressed=\"true\">Everything 18</button><button class=\"ds-pill\" aria-pressed=\"false\">Quotes 3</button></div>",
+      "css": ".ds-pills { display: flex; gap: 8px; flex-wrap: wrap; } .ds-pill { font: 500 13px/1 Geist, system-ui, sans-serif; color: var(--text, #1f1d1a); background: transparent; border: 1px solid var(--border-strong, rgba(31,29,26,.26)); border-radius: 999px; height: 38px; padding: 0 14px; cursor: pointer; } .ds-pill:hover { background: var(--hover, rgba(31,29,26,.06)); } .ds-pill[aria-pressed=true] { background: var(--solid-bg, #1f1d1a); color: var(--solid-text, #f5f1e8); border-color: var(--solid-bg, #1f1d1a); } .ds-pill:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Library search, a 50px pill on the surface.",
+      "html": "<input class=\"ds-search\" type=\"search\" placeholder=\"Search links, quotes, notes\">",
+      "css": ".ds-search { font: 400 14px/1.45 Geist, system-ui, sans-serif; color: var(--text, #1f1d1a); background: var(--surface, #fffdf8); border: 1px solid var(--border-strong, rgba(31,29,26,.26)); border-radius: 999px; height: 50px; padding: 0 20px; width: 100%; max-width: 420px; } .ds-search::placeholder { color: var(--text-muted, #5f5a4f); } .ds-search:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }"
+    },
+    {
+      "name": "Note Card",
+      "kind": "card",
+      "refersTo": "card-note",
+      "description": "The only boxed card.",
+      "html": "<article class=\"ds-note\"><p class=\"ds-note-meta\">your note · Oct 22</p><p class=\"ds-note-body\">Ask Sam about the paper stock for the zine.</p></article>",
+      "css": ".ds-note { background: var(--note-paper, #fffdf8); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--border, rgba(31,29,26,.12)); padding: 18px 18px 16px; max-width: 260px; transition: transform 220ms cubic-bezier(.2,.7,.2,1); } .ds-note:hover { transform: translateY(-4px); } .ds-note-meta { margin: 0 0 8px; font: 400 11px/1.4 'Geist Mono', ui-monospace, monospace; color: var(--text-muted, #5f5a4f); } .ds-note-body { margin: 0; font: italic 400 19px/1.35 Newsreader, Georgia, serif; color: var(--text, #1f1d1a); }"
+    },
+    {
+      "name": "Quote Card",
+      "kind": "card",
+      "refersTo": "card-quote",
+      "description": "No box; a hanging quote mark in the accent.",
+      "html": "<article class=\"ds-quote\"><span class=\"ds-quote-mark\" aria-hidden=\"true\">“</span><p class=\"ds-quote-text\">The details are not the details. They make the design.</p><p class=\"ds-quote-meta\">quote · untouched 9 mo.</p></article>",
+      "css": ".ds-quote { position: relative; max-width: 280px; padding-top: 30px; } .ds-quote-mark { position: absolute; top: -10px; left: -4px; font: 400 70px/1 Newsreader, Georgia, serif; color: var(--accent, #2f4a6b); } .ds-quote-text { margin: 0; font: 400 25px/1.24 Newsreader, Georgia, serif; color: var(--text, #1f1d1a); text-wrap: pretty; } .ds-quote-meta { margin: 10px 0 0; font: 400 11px/1.4 'Geist Mono', ui-monospace, monospace; color: var(--text-muted, #5f5a4f); }"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Bottom-centre undo toast.",
+      "html": "<div class=\"ds-toast\">Archived 6 tags <button class=\"ds-toast-action\">Undo</button></div>",
+      "css": ".ds-toast { display: inline-flex; gap: 12px; align-items: center; background: var(--solid-bg, #1f1d1a); color: var(--solid-text, #f5f1e8); font: 400 13px/1.4 Geist, system-ui, sans-serif; padding: 10px 18px; border-radius: 999px; box-shadow: 0 4px 16px rgb(0 0 0 / .2); } .ds-toast-action { font: inherit; font-weight: 500; color: inherit; background: none; border: none; padding: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; } .ds-toast-action:hover { text-decoration-thickness: 2px; }"
+    },
+    {
+      "name": "Dead-link Stamp",
+      "kind": "custom",
+      "refersTo": "stamp-dead",
+      "description": "The one rotated label in the system.",
+      "html": "<span class=\"ds-stamp\">May be dead</span>",
+      "css": ".ds-stamp { display: inline-block; font: 500 10px/1 'Geist Mono', ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--danger, #8a2f1c); background: var(--surface, #fffdf8); border: 1.5px solid var(--danger, #8a2f1c); border-radius: 4px; padding: 4px 6px; transform: rotate(4deg); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Studio Shelf",
+    "overview": "The library is a shelf in someone's own studio: pictures pinned at their natural shape, quotes set like type, notes on slips of paper, all of it slowly yellowing where nobody has touched it. The page is warm paper and dark ink, set in a book serif. The furniture is quiet so the things on it can be loud. Pictures carry the colour, and the chrome stays neutral. Time is the one design element that belongs to this product alone. Everything saved carries a single age value, and that value drives sepia on images, dust specks, paper turning from note-paper to aged-paper, ink fading to aged-ink, and a slight tilt.",
+    "keyCharacteristics": [
+      "Warm paper ground, near-black ink, one slate accent used sparingly.",
+      "Book serif for anything you'd read (titles, quotes, notes, headlines), Geist for controls, and Geist Mono for meta and counts.",
+      "A masonry grid of media at natural aspect ratios, with no card chrome on links, pictures or quotes.",
+      "Patina driven by --t from 0 to 1, transitioned over 600ms.",
+      "Pill-shaped ghost controls 44px tall, with one solid button per view at most.",
+      "Light and dark on every theme, through data-appearance on <html> or the system setting.",
+      "Motion is felt rather than watched: lifts, fades, an ease-out-expo, no bounce. Reduced motion switches all of it off."
+    ],
+    "rules": [
+      { "name": "The Pictures Carry the Colour Rule", "body": "Chrome stays neutral, so the saved images and the tag inks are the only saturated things on screen. Don't tint panels, buttons or headers with a brand hue.", "section": "colors" },
+      { "name": "The Patina Is Data Rule", "body": "Sepia, dust, aged paper and tilt come only from --t. Never use them for decoration, for empty states or for \"warmth\".", "section": "colors" },
+      { "name": "The Eight Inks Rule", "body": "Only the eight most-used tags get a colour. Every other tag is plain ink. Don't add a ninth slot.", "section": "colors" },
+      { "name": "The Read It or Click It Rule", "body": "Serif is for things you read, sans is for things you click, mono is for things you scan. A button is never serif, and a quote is never sans.", "section": "typography" },
+      { "name": "The One Uppercase Line Rule", "body": "The hero summary is the only uppercase tracked text in the library. Don't add eyebrows above sections.", "section": "typography" },
+      { "name": "The Halo Not Shadow Rule", "body": "A card lifts by moving 4px up while its own-colour halo brightens 2.2×. Never add a grey drop shadow to a card.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do take every colour, radius and length from the custom properties in src/styles/base.css, so the Contact sheet, Covers and Colour field themes can swap them.",
+      "Do let saved media keep its natural aspect ratio. Clamp it (4:5 to 2:1 for links) rather than crop it to a uniform tile.",
+      "Do drive every sign of age from --t, and always say the same thing in words in the meta row (\"untouched 14 mo.\").",
+      "Do keep text at 4.5:1 or better in every theme, both appearances and every age, including aged-ink on aged-paper and muted ink on Colour field glass.",
+      "Do make every clickable thing at least 44×44px, or at least 8px from its neighbours where a row forces it smaller.",
+      "Do write controls in Geist and anything worth reading in Newsreader (or the theme's display serif)."
+    ],
+    "donts": [
+      "Don't make it look like productivity SaaS: no dashboards, no streaks, no nudges, no upsell banners, and no big number with a small label as a hero.",
+      "Don't turn the library into a database: no tables, folder trees, zebra rows or column headers.",
+      "Don't put the same box around every card. Only notes get a box.",
+      "Don't use border-left or border-right over 1px as a coloured stripe. Quotes are marked by the hanging quote mark.",
+      "Don't add drop shadows to cards, or blurred glass outside the Colour field theme.",
+      "Don't use sepia, dust, tilt or aged paper as decoration on anything fresh, on empty states or on marketing frames that aren't showing ageing.",
+      "Don't use gradient text, bounce or elastic easing, or animate width, height or position.",
+      "Don't add uppercase tracked eyebrows above sections. The hero summary line is the only one.",
+      "Don't give a tag a colour outside the eight inks, or tint the chrome with a brand hue."
+    ]
+  }
+}
