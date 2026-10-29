@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { BROWSER_SAVES } from '../lib/browserKind';
 import { readImportFile } from '../lib/importFile';
 import { planImport, readFavorites, runImport, type ImportPlan } from '../lib/importer';
 import { sendToBackground } from '../lib/messages';
@@ -29,7 +30,7 @@ export function ImportDialog({ file, onClose }: { file?: File; onClose: () => vo
       .then(planImport)
       .then((plan) => setPhase({ name: 'review', plan }))
       .catch((err: Error) =>
-        setPhase({ name: 'error', message: file ? `Couldn't read ${file.name}: ${err.message}` : `Couldn't read favorites: ${err.message}` }),
+        setPhase({ name: 'error', message: file ? `Couldn't read ${file.name}: ${err.message}` : `Couldn't read your ${BROWSER_SAVES}: ${err.message}` }),
       );
   }, [file]);
 
@@ -55,14 +56,14 @@ export function ImportDialog({ file, onClose }: { file?: File; onClose: () => vo
       // Don't let Esc close the dialog halfway through an import.
       onCancel={(e) => phase.name === 'importing' && e.preventDefault()}
     >
-      <h2>{file ? `Import from ${label ?? 'a file'}` : 'Import favorites'}</h2>
+      <h2>{file ? `Import from ${label ?? 'a file'}` : `Import ${BROWSER_SAVES}`}</h2>
       <p className="small muted">
         {file
           ? 'Copies the links in this file into your library, with their tags and notes.'
           : "Copies your browser's bookmarks into this library. Your browser's own bookmarks aren't changed."}
       </p>
 
-      {phase.name === 'reading' && <p>{file ? `Reading ${file.name}…` : 'Reading your favorites…'}</p>}
+      {phase.name === 'reading' && <p>{file ? `Reading ${file.name}…` : `Reading your ${BROWSER_SAVES}…`}</p>}
 
       {phase.name === 'error' && <p className="error">{phase.message}</p>}
 
@@ -121,7 +122,7 @@ function Review({ plan, fromFile, foldersAsTags, setFoldersAsTags }: ReviewProps
     <div className="import-review">
       <ul className="import-stats">
         <li>
-          <strong>{plan.total}</strong> {fromFile ? 'links' : 'favorites'} found
+          <strong>{plan.total}</strong> {fromFile ? 'links' : BROWSER_SAVES} found
         </li>
         <li>
           <strong>{plan.toImport.length}</strong> new to import
@@ -145,7 +146,7 @@ function Review({ plan, fromFile, foldersAsTags, setFoldersAsTags }: ReviewProps
 
       {plan.duplicateGroups.length > 0 && (
         <details>
-          <summary>See the duplicates in {fromFile ? 'the file' : 'your favorites'}</summary>
+          <summary>See the duplicates in {fromFile ? 'the file' : `your ${BROWSER_SAVES}`}</summary>
           <ul className="duplicate-list small">
             {plan.duplicateGroups.map((group) => (
               <li key={group[0].normalizedUrl}>

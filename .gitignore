@@ -1,5 +1,6 @@
 node_modules
 dist
+dist-firefox
 *.log
 .claude/
 .impeccable/live/sessions/

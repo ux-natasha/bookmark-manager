@@ -99,7 +99,7 @@ export function isSaveableUrl(input: string | undefined): input is string {
   }
 }
 
-// The browser blocks all extensions from screenshotting or reading the extension stores,
+// The browser blocks all extensions from screenshotting or reading the add-on stores,
 // so we don't try (and don't offer "Retake screenshot") there.
 export function isProtectedPage(input: string): boolean {
   try {
@@ -107,7 +107,8 @@ export function isProtectedPage(input: string): boolean {
     return (
       hostname === 'chromewebstore.google.com' ||
       (hostname === 'chrome.google.com' && pathname.startsWith('/webstore')) ||
-      (hostname === 'microsoftedge.microsoft.com' && pathname.startsWith('/addons'))
+      (hostname === 'microsoftedge.microsoft.com' && pathname.startsWith('/addons')) ||
+      hostname === 'addons.mozilla.org'
     );
   } catch {
     return false;

@@ -165,7 +165,7 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
 
         <p className="small muted">
           Saved {formatDate(bookmark.createdAt)}
-          {bookmark.importedFolder?.length ? ` · from favorites folder “${bookmark.importedFolder.join(' / ')}”` : ''}
+          {bookmark.importedFolder?.length ? ` · imported from folder “${bookmark.importedFolder.join(' / ')}”` : ''}
           {bookmark.foundInUrl && (
             <>
               {' · found in '}

@@ -38,6 +38,13 @@ While working on it, `npm run dev` rebuilds `dist/` on every change. After a reb
 
 To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 
+## Load it in Firefox
+
+1. `npm run build:firefox`. This creates the `dist-firefox/` folder (Firefox 140 or later).
+2. Open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on…** and pick `dist-firefox/manifest.json`. Firefox forgets temporary add-ons when it closes.
+
+The Firefox version is the same extension with three differences: the panel opens in Firefox's sidebar, the background runs as an event page instead of a service worker, and cards show no site icons, because Firefox has no icon cache that extensions can read and asking each site for its icon would tell them what you keep. If pages stop getting previews, check that the add-on still has permission to access websites (`about:addons` → Bookmark Manager → Permissions).
+
 ## How it works
 
 | Action | What happens |

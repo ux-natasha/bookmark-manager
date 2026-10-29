@@ -15,6 +15,7 @@ import { plateNumbers } from '../lib/covers';
 import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } from '../lib/linksShow';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
+import { BROWSER_SAVES } from '../lib/browserKind';
 import { idsWithText } from '../lib/pageText';
 import { pickForgotten } from '../lib/resurface';
 import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, toggleTagSelection, unarchiveTags } from '../lib/tags';
@@ -496,7 +497,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                 <MoreMenu
                   items={[
                     { label: 'New note', run: () => setWritingNote('') },
-                    { label: 'Import favorites', run: () => setImporting({}) },
+                    { label: `Import ${BROWSER_SAVES}`, run: () => setImporting({}) },
                     { label: 'Import from Pocket or a file', run: () => importInput.current?.click() },
                     { label: 'Recently deleted', run: () => setViewingTrash(true) },
                     { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },

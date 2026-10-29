@@ -1,4 +1,5 @@
 import { purgeOldTrash, saveBookmark } from './lib/bookmarks';
+import { IS_FIREFOX } from './lib/browserKind';
 import { db, type BookmarkSource } from './lib/db';
 import { captureScreenshot, enrichBookmark, makeThumbnail, readLiveHead, readLiveText, savePicture, savePreview } from './lib/enrich';
 import { setLastSave, type BackgroundRequest } from './lib/messages';
@@ -15,7 +16,7 @@ const ENRICH_ALARM = 'enrich';
 
 chrome.runtime.onInstalled.addListener(() => {
   // We open the panel ourselves on click, so the click can also save the page.
-  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
+  if (!IS_FIREFOX) chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
 
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
@@ -64,10 +65,16 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === ENRICH_ALARM) processPending();
 });
 
+interface FirefoxApis {
+  sidebarAction: { open(): Promise<void> };
+}
+
 // Fires for the toolbar icon and for the Alt+Shift+S shortcut.
 chrome.action.onClicked.addListener((tab) => {
-  // sidePanel.open must run before any await, while the browser still counts this as a user click.
-  if (tab.windowId !== undefined) chrome.sidePanel.open({ windowId: tab.windowId });
+  // Opening the panel must happen before any await, while the browser still counts this as a user click.
+  // Firefox has a sidebar instead of a side panel.
+  if (IS_FIREFOX) (chrome as unknown as FirefoxApis).sidebarAction.open();
+  else if (tab.windowId !== undefined) chrome.sidePanel.open({ windowId: tab.windowId });
   savePage(tab, 'panel');
 });
 
