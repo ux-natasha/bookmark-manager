@@ -114,6 +114,28 @@ export function isProtectedPage(input: string): boolean {
   }
 }
 
+// Links straight to a GIF or video file (".../funny.gif", ".../clip.mp4"). There's no page to read
+// details from, so the file name stands in for the title and a GIF can serve as its own preview.
+export function mediaFileOf(input: string): 'gif' | 'video' | undefined {
+  try {
+    const ext = new URL(input).pathname.match(/\.([a-z0-9]+)$/i)?.[1].toLowerCase();
+    if (ext === 'gif' || ext === 'gifv') return 'gif';
+    if (ext && ['mp4', 'webm', 'mov', 'm4v', 'mkv', 'ogv'].includes(ext)) return 'video';
+  } catch {
+    // Not a URL; not a media file.
+  }
+  return undefined;
+}
+
+export function titleFromFileName(input: string): string | undefined {
+  try {
+    const name = decodeURIComponent(new URL(input).pathname.split('/').pop() ?? '').replace(/\.[a-z0-9]+$/i, '');
+    return name.replace(/[-_+]+/g, ' ').replace(/\s+/g, ' ').trim() || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function hostnameOf(input: string): string {
   try {
     return new URL(input).hostname.replace(/^www\./, '');

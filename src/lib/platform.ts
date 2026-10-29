@@ -21,6 +21,8 @@ const BY_HOST: [string[], Platform][] = [
   [['pinterest.com', 'pin.it'], { id: 'pinterest', label: 'Pinterest' }],
   [['youtube.com', 'youtu.be'], { id: 'youtube', label: 'YouTube' }],
   [['vimeo.com'], { id: 'vimeo', label: 'Vimeo' }],
+  [['giphy.com'], { id: 'giphy', label: 'GIPHY' }],
+  [['tenor.com'], { id: 'tenor', label: 'Tenor' }],
   [['substack.com'], { id: 'substack', label: 'Substack' }],
   [['medium.com'], { id: 'medium', label: 'Medium' }],
   [['dev.to'], { id: 'devto', label: 'DEV' }],

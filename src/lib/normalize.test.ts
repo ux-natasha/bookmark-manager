@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isProtectedPage, normalizeUrl } from './normalize';
+import { isProtectedPage, mediaFileOf, normalizeUrl, titleFromFileName } from './normalize';
 
 const same = (a: string, b: string) => expect(normalizeUrl(a)).toBe(normalizeUrl(b));
 const different = (a: string, b: string) => expect(normalizeUrl(a)).not.toBe(normalizeUrl(b));
@@ -41,5 +41,25 @@ describe('normalizeUrl', () => {
   it('drops plain anchors but keeps single-page-app hash routes', () => {
     same('https://example.com/doc#section-2', 'https://example.com/doc');
     different('https://app.example.com/#/inbox', 'https://app.example.com/#/settings');
+  });
+});
+
+describe('mediaFileOf', () => {
+  it('recognises GIF and video files by extension', () => {
+    expect(mediaFileOf('https://i.giphy.com/abc/funny.gif')).toBe('gif');
+    expect(mediaFileOf('https://example.com/clip.MP4?x=1')).toBe('video');
+    expect(mediaFileOf('https://example.com/clip.webm')).toBe('video');
+  });
+
+  it('ignores ordinary pages', () => {
+    expect(mediaFileOf('https://example.com/article')).toBeUndefined();
+    expect(mediaFileOf('not a url')).toBeUndefined();
+  });
+});
+
+describe('titleFromFileName', () => {
+  it('turns a file name into readable words', () => {
+    expect(titleFromFileName('https://example.com/a/cat-falls_off%20table.gif')).toBe('cat falls off table');
+    expect(titleFromFileName('https://example.com/')).toBeUndefined();
   });
 });

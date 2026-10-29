@@ -4,6 +4,7 @@
 import { updateColor } from './colorPass';
 import { db, kindOf, type Bookmark, type LinkStatus, type PreviewKind } from './db';
 import { decodeEntities, MAX_HTML_BYTES, parseHtmlMeta, type PageMeta } from './metadata';
+import { mediaFileOf, titleFromFileName } from './normalize';
 import { detectPlatform } from './platform';
 
 const FETCH_TIMEOUT_MS = 15_000;
@@ -192,6 +193,12 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
   let meta: Partial<PageMeta> = page.html && page.status === 'ok' ? parseHtmlMeta(page.html, page.finalUrl) : {};
   const known = await fetchKnownDetails(bookmark.url);
   if (known) meta = { ...meta, ...Object.fromEntries(Object.entries(known).filter(([, v]) => v)) };
+
+  // A link straight to a file has no page to read: use the file name as the title, and a GIF as its own preview.
+  const media = mediaFileOf(bookmark.url);
+  if (media && !page.html) {
+    meta = { ...meta, title: titleFromFileName(bookmark.url), image: media === 'gif' ? bookmark.url : undefined };
+  }
 
   const platform = detectPlatform(page.finalUrl, meta as PageMeta) ?? detectPlatform(bookmark.url);
   const now = Date.now();

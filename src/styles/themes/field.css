@@ -399,7 +399,11 @@ button.swatch[aria-pressed='true'] {
     background-color 240ms ease-out;
 }
 
-[data-theme='field'] .card:hover .card-link {
+[data-theme='field'] .card-kind-image:hover .card-link {
+  transform: translateY(-3px);
+}
+
+[data-theme='field'] .card:not(.card-kind-image):hover .card-link {
   transform: translateY(-3px);
   background: var(--glass-hover);
 }
@@ -412,7 +416,7 @@ button.swatch[aria-pressed='true'] {
 }
 
 /* Blur only where it's cheap: past 60 cards the card glass goes solid (8.3). */
-[data-theme='field'] .grid.is-crowded .card-link {
+[data-theme='field'] .grid.is-crowded .card:not(.card-kind-image) .card-link {
   background: var(--glass-solid);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;

@@ -1,6 +1,6 @@
 import { purgeOldTrash, saveBookmark } from './lib/bookmarks';
 import { db, type BookmarkSource } from './lib/db';
-import { captureScreenshot, enrichBookmark, readLiveHead, savePicture } from './lib/enrich';
+import { captureScreenshot, enrichBookmark, makeThumbnail, readLiveHead, savePicture, savePreview } from './lib/enrich';
 import { setLastSave, type BackgroundRequest } from './lib/messages';
 import { isProtectedPage, isSaveableUrl, normalizeUrl } from './lib/normalize';
 import { detectPlatform } from './lib/platform';
@@ -9,6 +9,7 @@ import { processPending, recheckAll } from './lib/queue';
 const MENU_SAVE_LINK = 'save-link';
 const MENU_SAVE_PAGE = 'save-page';
 const MENU_SAVE_IMAGE = 'save-image';
+const MENU_SAVE_VIDEO = 'save-video';
 const MENU_SAVE_QUOTE = 'save-quote';
 const ENRICH_ALARM = 'enrich';
 
@@ -31,6 +32,11 @@ chrome.runtime.onInstalled.addListener(() => {
       id: MENU_SAVE_IMAGE,
       title: 'Save picture to Bookmark Manager',
       contexts: ['image'],
+    });
+    chrome.contextMenus.create({
+      id: MENU_SAVE_VIDEO,
+      title: 'Save video to Bookmark Manager',
+      contexts: ['video'],
     });
     chrome.contextMenus.create({
       id: MENU_SAVE_QUOTE,
@@ -76,6 +82,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     savePage(tab, 'context-menu');
   } else if (info.menuItemId === MENU_SAVE_IMAGE && info.srcUrl && tab?.id !== undefined) {
     saveImage(info.srcUrl, info, tab);
+  } else if (info.menuItemId === MENU_SAVE_VIDEO && tab) {
+    // Players on YouTube and the like hand out a blob: address that only works in the page, so save the page instead.
+    const url = isSaveableUrl(info.srcUrl) ? info.srcUrl : info.pageUrl ?? tab.url;
+    if (!isSaveableUrl(url)) return;
+    const { bookmark, created } = await saveBookmark({ url, title: url === info.pageUrl ? tab.title : undefined, source: 'context-menu' });
+    await setLastSave({ bookmarkId: bookmark.id, url, created, at: Date.now() });
+    if (tab.id !== undefined) flashBadge(tab.id, created);
+    if (created) {
+      await saveVideoPreview(bookmark.id, info, tab);
+      enrichBookmark(bookmark.id);
+    }
   } else if (info.menuItemId === MENU_SAVE_QUOTE && tab?.id !== undefined) {
     saveQuote(info, tab);
   }
@@ -117,6 +134,28 @@ async function saveImage(srcUrl: string, info: chrome.contextMenus.OnClickData, 
     // Leaves it for the background queue to try once more.
     processPending();
   }
+}
+
+// A preview for a video you right-clicked: the frame it's showing right now, or, when the site
+// doesn't let the page read its video, a screenshot of the tab. The site's own image still fills in
+// later for pages that have one.
+async function saveVideoPreview(bookmarkId: string, info: chrome.contextMenus.OnClickData, tab: chrome.tabs.Tab) {
+  if (tab.id !== undefined) {
+    const frame = await runInPage({ tabId: tab.id, frameIds: [info.frameId ?? 0] }, (src: string | undefined) => {
+      const videos = [...document.querySelectorAll('video')].filter((v) => v.videoWidth > 0);
+      const video = videos.find((v) => src && (v.currentSrc === src || v.src === src)) ?? videos.find((v) => !v.paused) ?? videos[0];
+      if (!video) return '';
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d')!.drawImage(video, 0, 0);
+      // Throws for videos from other sites that don't allow it; the caller falls back to a screenshot.
+      return canvas.toDataURL('image/jpeg', 0.85);
+    }, info.srcUrl);
+    const thumbnail = frame ? await makeThumbnail(await (await fetch(frame)).blob(), 800) : undefined;
+    if (thumbnail) return void (await savePreview(bookmarkId, 'screenshot', thumbnail));
+  }
+  if (tab.windowId !== undefined && !(tab.url && isProtectedPage(tab.url))) await captureScreenshot(bookmarkId, tab.windowId);
 }
 
 async function downloadPicture(srcUrl: string, target: chrome.scripting.InjectionTarget): Promise<Blob | undefined> {
