@@ -124,7 +124,9 @@
   .shelf::after { content: ""; position: absolute; left: calc(-1 * var(--gutter) / 2); right: calc(-1 * var(--gutter) / 2); bottom: 0; height: 10px; background: linear-gradient(#b9a47c, #9c875f); box-shadow: 0 12px 16px -10px rgba(43, 39, 34, 0.6); }
   .slot { aspect-ratio: 3 / 4; border: 1px dashed var(--line-strong); position: relative; }
   .slot:first-child::before { content: "Your library"; position: absolute; left: 10px; top: 10px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
-  .k { position: absolute; inset: -1px; display: flex; flex-direction: column; overflow: hidden; background: var(--card); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 16px 24px -16px rgba(43, 39, 34, 0.65); opacity: 0; transform: translateY(-36px) rotate(var(--r, 0deg)) scale(0.96); }
+  .hero h1 .n.counting { display: inline-block; text-align: right; font-variant-numeric: lining-nums tabular-nums; }
+  /* Unfiling lifts the cards back off the shelf, last one first, quicker than they landed */
+  .k { position: absolute; inset: -1px; display: flex; flex-direction: column; overflow: hidden; background: var(--card); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 16px 24px -16px rgba(43, 39, 34, 0.65); opacity: 0; transform: translateY(-36px) rotate(var(--r, 0deg)) scale(0.96); transition: opacity 0.35s var(--ease), transform 0.5s var(--ease); transition-delay: calc((5 - var(--i)) * 35ms); }
   .filed .k { opacity: 1; transform: rotate(var(--r, 0deg)); transition: opacity 0.6s var(--ease), transform 0.9s var(--ease); transition-delay: calc(0.35s + var(--i) * 60ms); }
   .k .pic { flex: 1; background: var(--c); background-size: cover; background-position: 50% 30%; }
   .k .lbl { padding: 8px 9px 10px; font: 400 clamp(12px, 1.05vw, 15px)/1.15 var(--serif); }
@@ -436,7 +438,10 @@
   .chip { font: 500 9.5px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 6px; border-radius: 2px; background: var(--olive-pale); color: var(--olive-deep); white-space: nowrap; }
   .chip.was { background: var(--rose-pale); color: var(--rose-ink); }
   .chip.have { background: var(--stock); color: var(--ink-2); }
-  .catch li.saved .what::after { content: " Saved."; color: var(--olive-deep); font-weight: 500; }
+  .catch li.saved .what::after { content: " Saved."; color: var(--olive-deep); font-weight: 500; animation: ink-in 0.5s var(--ease) calc(0.15s + var(--i, 0) * 90ms) backwards; }
+  .catch li.saved label { animation: filed-wash 1.4s var(--ease) calc(var(--i, 0) * 90ms) backwards; }
+  @keyframes filed-wash { from { background: rgba(93, 107, 58, 0.24); } }
+  @keyframes ink-in { from { opacity: 0; } }
   .catch footer { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 16px 20px 18px; }
   .catch .tagged { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); margin-right: auto; }
   .catch .tagged span { font: italic 400 16px/1 var(--serif); color: var(--ink); padding: 5px 9px; background: var(--card); box-shadow: inset 0 0 0 1px var(--line-strong); border-radius: 2px; }
@@ -450,7 +455,7 @@
   .privacy { background: var(--plum); color: var(--cream); overflow: hidden; }
   .privacy :focus-visible { outline-color: var(--cream); }
   .stagger { font-size: clamp(2.5rem, 5.2vw, 4.8rem); line-height: 0.98; letter-spacing: -0.025em; }
-  .stagger span { display: block; }
+  .stagger span { display: block; width: fit-content; }
   .stagger span:nth-child(2) { padding-left: clamp(0px, 3.5vw, 52px); color: var(--cream-2); }
   .stagger span:nth-child(3) { padding-left: clamp(0px, 7vw, 104px); }
   .stagger em { color: var(--rose); }
@@ -483,6 +488,14 @@
   .qa details[open] summary::after { transform: rotate(45deg); }
   .qa summary:focus-visible { outline-offset: -2px; }
   .qa details p { padding: 0 36px 22px 0; color: var(--ink-2); max-width: 64ch; }
+  /* Answers slide open where the browser can size to auto; elsewhere they snap, as before */
+  @supports (interpolate-size: allow-keywords) {
+    .qa { interpolate-size: allow-keywords; }
+    .qa details::details-content { block-size: 0; overflow: clip; transition: block-size 0.45s var(--ease), content-visibility 0.45s allow-discrete; }
+    .qa details[open]::details-content { block-size: auto; }
+    .qa details p { opacity: 0; transition: opacity 0.25s; }
+    .qa details[open] p { opacity: 1; transition: opacity 0.4s var(--ease) 0.1s; }
+  }
 
   /* ---------- Install ---------- */
   .install { background: var(--stock); }
@@ -534,7 +547,8 @@
     .door:not(.open) .modes { opacity: 0.75; }
     .door h3 { margin-top: 14px; }
     .door .body { width: 100%; margin-top: 22px; display: none; }
-    .door.open .body { display: grid; }
+    .door.open .body { display: grid; transition-delay: 0s; }
+    @starting-style { .door.open .body { opacity: 0; transform: translateY(14px); } }
     .colophon .wrap { grid-template-columns: minmax(0, 1fr); }
     .threads { display: none; }
     .post { transform: none; }
@@ -973,8 +987,27 @@
   const n = document.getElementById('n');
   const tw = document.getElementById('tw');
   const why = document.getElementById('why');
+  const ease = 'cubic-bezier(0.16, 1, 0.3, 1)';
   let filed = false;
   let tick;
+  // Tabs open one after another along the strip while the count climbs with them.
+  // The number is held at the width of "42" so the headline doesn't rewrap as it counts.
+  const pileIn = (tabs, gap) => {
+    tabs.forEach((t, i) => t.animate([{ transform: 'translateY(105%)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: 420, delay: 80 + i * gap, easing: ease, fill: 'backwards' }));
+    clearInterval(tick);
+    n.textContent = '42';
+    n.style.minWidth = `${n.getBoundingClientRect().width}px`;
+    n.classList.add('counting');
+    let k = 1;
+    n.textContent = k;
+    tick = setInterval(() => {
+      k = Math.min(42, k + 2);
+      n.textContent = k;
+      if (k === 42) { clearInterval(tick); n.classList.remove('counting'); n.style.minWidth = ''; }
+    }, (tabs.length * gap) / 21);
+  };
+  if (!reduced) pileIn([...tabsEl.children], 12);
   keep.addEventListener('click', () => {
     const tabs = [...tabsEl.querySelectorAll('.tab:not(.on):not(.add)')];
     clearInterval(tick);
@@ -996,7 +1029,9 @@
     } else {
       tabs.forEach((t) => { t.getAnimations().forEach((a) => a.cancel()); t.hidden = false; });
       root.classList.remove('filing', 'filed');
-      n.textContent = '42'; tw.textContent = 'tabs'; why.textContent = 'because closing one feels like losing it.';
+      tw.textContent = 'tabs'; why.textContent = 'because closing one feels like losing it.';
+      if (reduced) n.textContent = '42';
+      else pileIn(tabs, 9);
       msg.textContent = '';
       keep.textContent = 'Keep them and close';
     }
@@ -1148,7 +1183,7 @@
   catchForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const fresh = rows.filter((r) => r.querySelector('input').checked && !('have' in r.dataset));
-    fresh.forEach((r) => r.classList.add('saved'));
+    fresh.forEach((r, i) => { r.style.setProperty('--i', i); r.classList.add('saved'); });
     rows.forEach((r) => (r.querySelector('input').disabled = true));
     save.disabled = true;
     save.textContent = `Saved ${links(fresh.length)}`;
@@ -1211,20 +1246,43 @@
     document.getElementById('ix-back').textContent = w.back;
     cols.querySelectorAll('.ix-once b').forEach((b) => (b.textContent = w.once));
   };
+  // Archived tags slip out of their columns before the index closes up; brought back, they file in one by one.
   const archive = (on) => {
-    ix.classList.toggle('archived', on);
-    tidy.hidden = on;
-    out.hidden = !on;
-    document.getElementById(on ? 'ix-back' : 'ix-archive').focus();
+    const stale = [...cols.querySelectorAll('.ix-e.stale')];
+    const swap = () => {
+      ix.classList.toggle('archived', on);
+      tidy.hidden = on;
+      out.hidden = !on;
+      document.getElementById(on ? 'ix-back' : 'ix-archive').focus();
+      if (!reduced) (on ? out : tidy).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: ease });
+    };
+    if (reduced) return swap();
+    if (on) {
+      const leaving = stale.map((e) => e.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(-12px)' }],
+        { duration: 240, easing: 'cubic-bezier(0.5, 0, 0.75, 0)', fill: 'forwards' }));
+      // A timer, not the animations' finish, so a background tab still files them away.
+      setTimeout(() => { swap(); leaving.forEach((a) => a.cancel()); }, 240);
+    } else {
+      swap();
+      stale.forEach((e, i) => e.animate([{ opacity: 0, transform: 'translateX(-12px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 450, delay: 60 + i * 70, easing: ease, fill: 'backwards' }));
+    }
   };
   document.getElementById('ix-archive').addEventListener('click', () => archive(true));
   document.getElementById('ix-back').addEventListener('click', () => archive(false));
   const rooms = [...document.querySelectorAll('#setin [role="radio"]')];
   const pickRoom = (i, focus) => {
+    const changed = ix.dataset.room !== rooms[i].dataset.room;
     rooms.forEach((r, j) => { r.setAttribute('aria-checked', String(j === i)); r.tabIndex = j === i ? 0 : -1; });
     ix.dataset.room = rooms[i].dataset.room;
     setWords();
     if (focus) rooms[i].focus();
+    // Reprinted in the new room's type: each letter's block inks in, A to Z.
+    if (changed && !reduced) {
+      [tidy, ...cols.querySelectorAll('.ix-g')].forEach((g, j) => g.animate(
+        [{ opacity: 0, filter: 'blur(3px)', transform: 'translateY(6px)' }, { opacity: 1, filter: 'none', transform: 'none' }],
+        { duration: 480, delay: j * 35, easing: ease, fill: 'backwards' }));
+    }
   };
   rooms.forEach((r, i) => {
     r.addEventListener('click', () => pickRoom(i));
@@ -1234,6 +1292,20 @@
     });
   });
   setWords();
+
+  /* ---------- Privacy: the three refusals, said one at a time ---------- */
+  if (!reduced && 'IntersectionObserver' in window) {
+    const said = document.getElementById('privacy-h');
+    const heard = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      heard.disconnect();
+      // Inset past the box so italic overhangs and descenders aren't cut while it wipes.
+      [...said.children].forEach((s, i) => s.animate(
+        [{ clipPath: 'inset(-0.2em 100% -0.25em -0.2em)', transform: 'translateX(-0.3em)' }, { clipPath: 'inset(-0.2em -0.2em -0.25em -0.2em)', transform: 'none' }],
+        { duration: 900, delay: 100 + i * 220, easing: ease, fill: 'backwards' }));
+    });
+    heard.observe(said);
+  }
 </script>
 </body>
 </html>
