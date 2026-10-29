@@ -167,7 +167,6 @@ function LinkContent({ bookmark }: { bookmark: Bookmark }) {
           ) : (
             <div className="card-fallback" style={{ background: cover.background, color: cover.ink }}>
               <span className="card-fallback-name">{source}</span>
-              <span className="card-fallback-title">{bookmark.title}</span>
             </div>
           )}
           {platform && <span className="card-platform">{platform.label}</span>}
@@ -232,7 +231,7 @@ function QuoteContent({ bookmark }: { bookmark: Bookmark }) {
   const field = useTheme() === 'field';
   return (
     <div className="card-body">
-      <blockquote className="card-quote">{bookmark.text}</blockquote>
+      <blockquote className={`card-quote${(bookmark.text ?? '').length > 60 ? ' is-long' : ''}`}>{bookmark.text}</blockquote>
       <p className="small card-quote-title truncate">{bookmark.title}</p>
       {field && <SourceLine bookmark={bookmark} kindTag />}
       {bookmark.note && <p className="card-note small">{bookmark.note}</p>}

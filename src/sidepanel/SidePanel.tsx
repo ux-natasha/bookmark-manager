@@ -13,7 +13,9 @@ import { hostnameOf, isProtectedPage, isSaveableUrl } from '../lib/normalize';
 import { detectPlatform, platformById } from '../lib/platform';
 import { linksFromOpenTab, type PostLinks } from '../lib/posts';
 import { usePreviewUrl } from '../lib/previews';
-import { useLibraryLook } from './look';
+import { ageLabel, sourcePrefix } from '../lib/age';
+import { copyFor } from '../library/copy';
+import { useLibraryLook, usePanelTheme } from './look';
 
 interface ActiveTab {
   id?: number;
@@ -70,7 +72,7 @@ export function SidePanel() {
   const lastSave = useLastSave();
   const bookmarks = useBookmarks();
   const tagCounts = useTagCounts(bookmarks);
-  const { toast, showToast, hideToast } = useToast();
+  const { toast, showToast, hideToast, holdToast } = useToast();
   // Links found in the open post, while reviewing them; null while they're being read.
   const [found, setFound] = useState<PostLinks | null>();
   const [writingNote, setWritingNote] = useState(false);
@@ -106,10 +108,17 @@ export function SidePanel() {
     showToast({ message: 'Removed from your library' });
   };
 
+  const copy = copyFor(usePanelTheme());
+  const headline = copy.headline;
+
   return (
     <div className="panel">
       <header className="panel-header">
-        <h1>Bookmarks</h1>
+        <h1>
+          {headline[0]}
+          {copy.headlineBreak ? ' ' : ''}
+          <em>{headline[1]}</em>.
+        </h1>
         <button onClick={openLibrary} title="Open the full library in a tab">
           Open library ↗
         </button>
@@ -179,7 +188,7 @@ export function SidePanel() {
         </ul>
       </section>
 
-      <ToastView toast={toast} onDone={hideToast} />
+      <ToastView toast={toast} onDone={hideToast} onHold={holdToast} />
     </div>
   );
 }
@@ -219,6 +228,7 @@ function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot, on
   const [title, setTitle] = useState(bookmark.title);
   const [note, setNote] = useState(bookmark.note);
 
+  const age = ageLabel(bookmark, Date.now());
   const isLastSave = lastSave?.bookmarkId === bookmark.id && Date.now() - lastSave.at < JUST_SAVED_MS;
   const justCreated = isLastSave && lastSave.created;
 
@@ -233,7 +243,12 @@ function SavedPage({ bookmark, lastSave, allTags, onUndo, onRetakeScreenshot, on
             </button>
           </>
         ) : (
-          <>Already in your library · saved {formatDate(bookmark.createdAt)}</>
+          <>
+            <span className={`panel-age${age.danger ? ' is-danger' : ''}`}>
+              {sourcePrefix(bookmark)} · {age.text}
+            </span>
+            <span className="panel-saved">Saved {formatDate(bookmark.createdAt)}</span>
+          </>
         )}
       </p>
 
@@ -309,18 +324,21 @@ const RECENT_PREFIX = { link: '', image: 'Picture · ', quote: '', note: 'Note �
 
 function RecentItem({ bookmark }: { bookmark: Bookmark }) {
   const kind = kindOf(bookmark);
+  const pictureUrl = usePreviewUrl(bookmark);
+  const thumb = pictureUrl ? <img className="recent-thumb" src={pictureUrl} alt="" loading="lazy" /> : null;
   const label = kind === 'quote' ? `“${bookmark.text}”` : RECENT_PREFIX[kind] + bookmark.title;
   // Notes have no page to open, so they open in the library instead.
   if (!bookmark.url) {
     return (
       <button className="recent-item" onClick={openLibrary}>
+        {thumb}
         <span className="truncate">{label}</span>
       </button>
     );
   }
   return (
     <a href={bookmark.url} target="_blank" rel="noreferrer" onClick={() => markOpened(bookmark.id)} className="recent-item">
-      <Favicon url={bookmark.url} />
+      {thumb ?? <Favicon url={bookmark.url} />}
       <span className="truncate">{label}</span>
     </a>
   );

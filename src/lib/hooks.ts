@@ -43,12 +43,17 @@ export interface Toast {
 
 export function useToast(durationMs = 5000) {
   const [toast, setToast] = useState<Toast | null>(null);
+  // Hovering or focusing the toast holds it, so there's time to reach its action; leaving starts the clock again.
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!toast) return;
+    if (!toast) setHeld(false);
+  }, [toast]);
+  useEffect(() => {
+    if (!toast || held) return;
     const timer = setTimeout(() => setToast(null), durationMs);
     return () => clearTimeout(timer);
-  }, [toast, durationMs]);
-  return { toast, showToast: setToast, hideToast: () => setToast(null) };
+  }, [toast, held, durationMs]);
+  return { toast, showToast: setToast, hideToast: () => setToast(null), holdToast: setHeld };
 }
 
 export { formatDate } from './formatDate';

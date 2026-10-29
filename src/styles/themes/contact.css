@@ -372,12 +372,6 @@
   text-transform: none;
 }
 
-.more-menu-group {
-  padding: 10px 12px 4px;
-  font: 11px var(--font-sans);
-  color: var(--text-muted);
-}
-
 [data-theme='contact'] .more-menu-group {
   padding: 10px 16px 6px;
   border-top: 1px solid var(--border);

@@ -243,10 +243,13 @@ button.primary:hover:not(:disabled) {
 }
 
 button.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   border: none;
   background: none;
   border-radius: 0;
-  padding: 0;
+  padding: 0 var(--space-1);
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -414,13 +417,15 @@ select:focus-visible {
   background: var(--solid-bg);
   color: var(--solid-text);
   font: 13px / 1.4 var(--font-sans);
-  padding: 10px 18px;
+  padding: 0 18px;
+  min-height: 44px;
   border-radius: var(--radius-pill);
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
   z-index: var(--z-toast);
 }
 
 .toast button.link {
+  min-height: 44px;
   color: inherit;
   font-weight: 500;
   text-decoration: underline;

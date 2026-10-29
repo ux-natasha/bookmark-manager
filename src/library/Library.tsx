@@ -120,7 +120,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const platformCounts = usePlatformCounts(bookmarks);
   const kindCounts = useKindCounts(bookmarks);
   const progress = useEnrichProgress();
-  const { toast, showToast, hideToast } = useToast();
+  const { toast, showToast, hideToast, holdToast } = useToast();
   const contact = theme === 'contact';
   const covers = theme === 'covers';
   const field = theme === 'field';
@@ -198,6 +198,15 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const fadedCount = useMemo(() => (bookmarks ?? []).filter((b) => isFaded(b, now)).length, [bookmarks, now]);
   // What Refresh my memory can bring back: anything that isn't a dead link.
   const bringable = useMemo(() => (bookmarks ?? []).filter((b) => !isDeadLink(b)), [bookmarks]);
+  // Forgotten things lead the grid when the library opens, still faded and still waiting to be brought back.
+  // Picked once per visit, from today's date rather than a Look ahead preview, so the order doesn't shuffle under you.
+  const [surfacedIds, setSurfacedIds] = useState<string[] | null>(null);
+  useEffect(() => {
+    if (surfacedIds || !bookmarks) return;
+    const today = Date.now();
+    const faded = bringable.filter((b) => isFaded(b, today));
+    setSurfacedIds(pickForgotten(faded, REFRESH_COUNT, today).map((b) => b.id));
+  }, [bookmarks, bringable, surfacedIds]);
   const tagLook = useMemo(() => {
     const slots = new Map<string, number>();
     const archived = new Set<string>();
@@ -293,12 +302,15 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
           return result;
       }
     })();
-    if (!refreshedIds.length) return sorted;
+    // The plain view (no search, filter or sort) leads with what was forgotten.
+    const plain = sort === 'newest' && !kindFilter && matching.length === (bookmarks?.length ?? 0);
+    const frontIds = plain && surfacedIds ? [...refreshedIds, ...surfacedIds.filter((id) => !refreshedIds.includes(id))] : refreshedIds;
+    if (!frontIds.length) return sorted;
     // Brought back by Refresh my memory: first, in the order they came, whatever the sort.
-    const rank = new Map(refreshedIds.map((id, i) => [id, i]));
+    const rank = new Map(frontIds.map((id, i) => [id, i]));
     const front = sorted.filter((b) => rank.has(b.id)).sort((a, b) => rank.get(a.id)! - rank.get(b.id)!);
     return [...front, ...sorted.filter((b) => !rank.has(b.id))];
-  }, [matching, kindFilter, sort, refreshedIds]);
+  }, [matching, bookmarks, kindFilter, sort, refreshedIds, surfacedIds]);
 
   // Looked up from the live list so the dialog updates when details are refreshed.
   const editing = editingId ? bookmarks?.find((b) => b.id === editingId) : undefined;
@@ -509,19 +521,19 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
               <div className="header-actions">
                 <MoreMenu
                   items={[
-                    { label: 'New note', run: () => setWritingNote('') },
+                    { label: 'New note', run: () => setWritingNote(''), groupLabel: 'Add' },
                     { label: `Import ${BROWSER_SAVES}`, run: () => setImporting({}) },
                     { label: 'Import from Pocket or a file', run: () => importInput.current?.click() },
-                    { label: 'Recently deleted', run: () => setViewingTrash(true) },
+                    { label: 'Recently deleted', run: () => setViewingTrash(true), groupLabel: 'Look after' },
                     { label: 'Check links', run: recheckLinks, disabled: !bookmarks?.length || progress?.running },
-                    { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length },
+                    { label: 'Back up', run: exportBackup, disabled: !bookmarks?.length, groupLabel: 'Keep a copy' },
                     { label: 'Restore', run: () => restoreInput.current?.click() },
                     ...(syncSupported() ? [{ label: 'Sync…', run: () => setSyncing(true) }] : []),
-                    ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system') }] : []),
+                    ...(appearance !== 'system' ? [{ label: 'Match system', run: () => setAppearance('system'), groupLabel: 'Look' }] : []),
                     ...THEMES.map(({ id, label }, i) => ({
                       label,
                       ariaLabel: `Theme: ${label}`,
-                      groupLabel: i === 0 ? 'Theme' : undefined,
+                      groupLabel: i === 0 && appearance === 'system' ? 'Look' : undefined,
                       checked: theme === id,
                       run: () => setTheme(id),
                     })),
@@ -663,7 +675,10 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
               bookmarks && (
                 <main className="library-main">
                   {tagCounts.length > 0 && (
-                    <section className="tags" aria-label="Tags">
+                    <section className="tags" aria-labelledby="tags-heading">
+                      <h2 id="tags-heading" className="visually-hidden">
+                        Tags
+                      </h2>
                       <TagStrip
                         mostUsed={tagIndex.mostUsed}
                         liveCount={tagIndex.liveCount}
@@ -694,6 +709,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                     </section>
                   )}
 
+                  <h2 className="visually-hidden">Everything you saved</h2>
                   <div className="filter-row">
                     {kindCounts.length > 1 && (
                       <div className="kind-pills" role="group" aria-label="Kinds">
@@ -812,7 +828,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
             {viewingTrash && <TrashDialog onClose={() => setViewingTrash(false)} />}
             {syncing && <SyncDialog outcome={sync.outcome} run={sync.run} onClose={() => setSyncing(false)} />}
             {addingFromPost && <PostDialog allTags={allTags} onClose={() => setAddingFromPost(false)} />}
-            <ToastView toast={toast} onDone={hideToast} />
+            <ToastView toast={toast} onDone={hideToast} onHold={holdToast} />
           </div>
         </AgeContext.Provider>
       </ItemColorContext.Provider>

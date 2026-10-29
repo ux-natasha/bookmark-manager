@@ -83,6 +83,21 @@
   background: var(--hover);
 }
 
+/* A heading and a hairline start each group of items. */
+.more-menu-group {
+  margin-top: 6px;
+  padding: 10px 12px 4px;
+  border-top: 1px solid var(--border);
+  font: 11px var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.more-menu-list > .more-menu-group:first-child {
+  margin-top: 0;
+  border-top: none;
+}
+
 /* 6.2 Hero */
 .hero {
   display: flex;
@@ -529,8 +544,8 @@
   display: block;
 }
 
-/* No preview: the site's colour, its name bottom-left and the title over it. The colours are set inline,
-   with the ink chosen by the same contrast rule as Covers. */
+/* No preview: the site's colour with its name bottom-left. The title is set under the card, so it isn't repeated here.
+   The colours are set inline, with the ink chosen by the same contrast rule as Covers. */
 .card-fallback {
   display: flex;
   flex-direction: column;
@@ -547,15 +562,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 11px var(--font-mono);
-}
-
-.card-fallback-title {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font: 500 19px / 1.15 var(--font-serif);
-  text-wrap: pretty;
 }
 
 /* Video platforms: a play badge in the middle of the preview. */
@@ -617,9 +623,10 @@
 
 .card-title {
   margin: 0;
-  font-size: var(--text-md);
+  font: 500 19px / 1.22 var(--font-serif);
+  text-wrap: pretty;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -680,10 +687,28 @@ kbd {
 .dialog {
   width: min(520px, calc(100vw - 32px));
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-panel);
   background: var(--surface);
   color: var(--text);
-  padding: var(--space-5);
+  padding: var(--space-6);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.35);
+}
+
+.dialog[open] {
+  animation: dialog-in 220ms var(--ease-out-expo);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] {
+    animation: none;
+  }
 }
 
 .dialog-wide {
@@ -691,12 +716,19 @@ kbd {
 }
 
 .dialog::backdrop {
-  background: rgb(0 0 0 / 0.35);
+  background: color-mix(in srgb, var(--text) 38%, transparent);
 }
 
+/* Dialog titles are read, so they are set in the book serif like every other title. */
 .dialog h2 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-lg);
+  margin: 0 0 var(--space-3);
+  font: 400 28px / 1.2 var(--font-serif);
+  text-wrap: balance;
+}
+
+.dialog .dialog-actions {
+  justify-content: flex-end;
+  margin-top: var(--space-5);
 }
 
 .dialog form,
@@ -831,6 +863,7 @@ button.card-link:hover {
   /* Pictures keep more of their shape than links: from 2:3 to 5:2. */
   aspect-ratio: var(--ratio, 4 / 3);
   background: var(--surface-muted);
+  border-radius: var(--radius-media);
   overflow: hidden;
 }
 
@@ -844,13 +877,17 @@ button.card-link:hover {
 .card-quote {
   margin: 0 0 var(--space-1);
   padding-top: 30px;
-  font-size: var(--text-lg);
-  line-height: 1.5;
+  font: 400 25px / 1.24 var(--font-serif);
+  text-wrap: pretty;
   white-space: pre-line;
   display: -webkit-box;
   -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.card-quote.is-long {
+  font-size: 21px;
 }
 
 .card-quote-title {
@@ -1069,8 +1106,8 @@ button.card-link:hover {
 /* 6.4 The button on a faded item: Dust off, or the theme's word for it. */
 .dust-button {
   flex: none;
-  height: 30px;
-  min-height: 30px;
+  height: 32px;
+  min-height: 32px;
   padding: 0 10px;
   font: 12px var(--font-sans);
   white-space: nowrap;
@@ -1078,8 +1115,20 @@ button.card-link:hover {
 
 .card-meta {
   align-items: center;
-  gap: 8px;
-  min-height: 30px;
+  gap: 4px 8px;
+  min-height: 32px;
+}
+
+/* Fingers get the full 44px. */
+@media (pointer: coarse) {
+  .card-meta {
+    min-height: 44px;
+  }
+
+  .card-meta .link,
+  .dust-button {
+    min-height: 44px;
+  }
 }
 
 /* Edit shows on hover or focus; on touch it's always there, a little quieter. */
@@ -1107,9 +1156,9 @@ button.card-link:hover {
 .card-age {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* The age is the point of the card, so it wraps rather than being cut with an ellipsis. */
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .library-grid {
