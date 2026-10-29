@@ -3,3 +3,4 @@ dist
 *.log
 .claude/
 .impeccable/live/sessions/
+docs/what-sets-folia-apart.md
