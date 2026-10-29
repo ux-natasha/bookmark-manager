@@ -15,6 +15,7 @@ import { plateNumbers } from '../lib/covers';
 import { LINKS_SHOW, LinksShowContext, useLinksShowSetting, type LinksShow } from '../lib/linksShow';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
+import { idsWithText } from '../lib/pageText';
 import { pickForgotten } from '../lib/resurface';
 import { applyColorSlots, archiveTags, assignColorSlots, buildTagIndex, hasTag, markTagsUsed, tagName, tagStats, toggleTagSelection, unarchiveTags } from '../lib/tags';
 import { THEMES, ThemeContext, useThemeSetting, type Theme } from '../lib/theme';
@@ -221,10 +222,26 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
   const roomFreshness = colourItems.length ? colourItems.reduce((sum, item) => sum + item.freshness, 0) / colourItems.length : 1;
   const colourOn = field && colourFilter !== null;
 
+  const words = useMemo(() => query.toLowerCase().split(/\s+/).filter(Boolean), [query]);
+  // Search also looks inside saved pages. That's a read of every page's words, so it waits for a pause in typing.
+  const [inPages, setInPages] = useState<{ key: string; ids: Set<string> }>({ key: '', ids: new Set() });
+  const wordsKey = words.join(' ');
+  useEffect(() => {
+    if (!wordsKey) return;
+    let stale = false;
+    const timer = setTimeout(() => {
+      idsWithText(wordsKey.split(' ')).then((ids) => !stale && setInPages({ key: wordsKey, ids }));
+    }, 200);
+    return () => {
+      stale = true;
+      clearTimeout(timer);
+    };
+  }, [wordsKey, bookmarks?.length]);
+  const pageMatches = inPages.key === wordsKey ? inPages.ids : undefined;
+
   // Everything but the kind filter, so the kind pills can count what each kind would show.
   const matching = useMemo(() => {
     if (!bookmarks) return [];
-    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     return bookmarks.filter((b) => {
       if (selectedTags.includes(UNTAGGED) && b.tags.length > 0) return false;
       if (!selectedTags.every((t) => t === UNTAGGED || hasTag(b, t))) return false;
@@ -238,9 +255,9 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
       const tagText = b.tags.join(' ');
       const haystack =
         `${b.title} ${b.url} ${b.note} ${b.text ?? ''} ${tagText} ${tagText.replace(/-/g, ' ')} ${b.description ?? ''} ${b.siteName ?? ''} ${b.author ?? ''} ${b.foundInTitle ?? ''} ${platformLabel}`.toLowerCase();
-      return words.every((w) => haystack.includes(w));
+      return words.every((w) => haystack.includes(w)) || !!pageMatches?.has(b.id);
     });
-  }, [bookmarks, query, selectedTags, platformFilter, deadOnly, colourOn, colourBuckets, colourFilter]);
+  }, [bookmarks, words, pageMatches, selectedTags, platformFilter, deadOnly, colourOn, colourBuckets, colourFilter]);
 
   const matchingKindCounts = useMemo(() => {
     const counts = new Map<ItemKind, number>();

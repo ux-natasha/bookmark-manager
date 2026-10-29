@@ -8,7 +8,7 @@ A visual bookmark manager that makes you want to look at your bookmarks. A brows
 
 - **Save in one click** (`Alt+Shift+S`), or right-click a link, picture or selected text to keep it without leaving the page.
 - **Visual by default.** Every bookmark gets a preview, either a screenshot or the site's own image, so you recognise things by how they looked.
-- **Links, quotes, pictures and notes** live together in one library, filterable by kind and searchable by text.
+- **Links, quotes, pictures and notes** live together in one library, filterable by kind and searchable by text, including the words of every saved page.
 - **Find it by colour.** Pick a colour and see everything that looked like it.
 - **Pull every link out of a post.** Paste a post's link or text (X, Bluesky, Mastodon, Reddit, Hacker News, LinkedIn…) and review the links it mentions before saving.
 - **Look ahead and ageing.** Bookmarks you haven't opened fade, and *Refresh my memory* brings old ones back.
@@ -71,6 +71,7 @@ To change the keyboard shortcut, go to `edge://extensions/shortcuts`.
 - **Imported and right-clicked links** are fetched in the background, a few at a time and no more than one request per site every 1.5 seconds. The library shows progress. Anything unfinished resumes when Edge starts, and the extension retries hourly.
 - **Two kinds of preview** are kept: the screenshot and the site's own preview image. Cards show the image for regular sites and the screenshot for social posts, and you can pick the other in *Edit*. Pages with neither get a colored card in the site's brand color.
 - **Platform** (Substack, X, YouTube, GitHub…) is detected from the address, and from clues in the page for platforms on custom domains (Substack, Medium, Ghost, WordPress).
+- **Saved copies:** the readable text of each page is kept when it's saved (from the live page when you save the tab you're on, otherwise fetched once in the background), up to about 10,000 words. Search looks inside it, and *Edit* shows it, so a link that dies still has its words. The first copy is kept; later checks don't replace it. Backups include it.
 - **Dead links:** a link counts as dead if the site says the page doesn't exist (404/410), or if it doesn't answer in two checks at least six hours apart. Sites that block bots aren't flagged, because we can't tell.
 
 ## Links from posts

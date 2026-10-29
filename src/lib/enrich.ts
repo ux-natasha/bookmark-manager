@@ -5,6 +5,7 @@ import { updateColor } from './colorPass';
 import { db, kindOf, type Bookmark, type LinkStatus, type PreviewKind } from './db';
 import { decodeEntities, MAX_HTML_BYTES, parseHtmlMeta, type PageMeta } from './metadata';
 import { mediaFileOf, titleFromFileName } from './normalize';
+import { MAX_TEXT_LENGTH, readableText, savePageText } from './pageText';
 import { detectPlatform } from './platform';
 
 const FETCH_TIMEOUT_MS = 15_000;
@@ -182,6 +183,8 @@ export interface EnrichOptions {
   // The <head> of the live page, when saving the page you're on. Better than a fetch:
   // it includes what you see while logged in, after the site's JavaScript has run.
   liveHead?: string;
+  // The live page's words, for the same reason.
+  liveText?: string;
 }
 
 export async function enrichBookmark(id: string, options: EnrichOptions = {}): Promise<void> {
@@ -191,9 +194,12 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
   // Quotes and notes are your own words: nothing to fetch.
   if (kindOf(bookmark) !== 'link') return;
 
+  // The whole page is read until its words are kept; after that, the <head> is enough.
+  const wantText = !bookmark.textSavedAt;
+  const hasLiveText = wantText && (await savePageText(id, options.liveText));
   const page: FetchedPage = options.liveHead
     ? { status: 'ok', finalUrl: bookmark.url, html: options.liveHead }
-    : await fetchPage(bookmark.url);
+    : await fetchPage(bookmark.url, { full: wantText });
 
   // Error and "checking your browser" pages have their own titles and descriptions; those aren't the page's.
   let meta: Partial<PageMeta> = page.html && page.status === 'ok' ? parseHtmlMeta(page.html, page.finalUrl) : {};
@@ -220,6 +226,11 @@ export async function enrichBookmark(id: string, options: EnrichOptions = {}): P
   };
   // When a check fails, keep whatever details we already had.
   if (!failed) {
+    // A live page with too few words (still loading, or an app) leaves it for the background queue to fetch whole.
+    if (wantText && page.status === 'ok' && (hasLiveText || !options.liveHead)) {
+      if (!hasLiveText && page.html) await savePageText(id, readableText(page.html));
+      patch.textSavedAt = now;
+    }
     Object.assign(patch, {
       description: meta.description ?? bookmark.description,
       siteName: meta.siteName ?? bookmark.siteName,
@@ -258,6 +269,24 @@ export async function captureScreenshot(bookmarkId: string, windowId: number): P
   } catch {
     // Some pages can't be captured (browser pages, the extension store, PDFs).
     return false;
+  }
+}
+
+// Reads the words of the tab you're on, as you see them. Fails quietly on pages extensions can't touch.
+export async function readLiveText(tabId: number): Promise<string | undefined> {
+  try {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (max: number) => {
+        const article = document.querySelectorAll('article');
+        const root = article.length === 1 ? article[0] : document.querySelector('main') ?? document.body;
+        return root ? root.innerText.slice(0, max) : '';
+      },
+      args: [MAX_TEXT_LENGTH],
+    });
+    return (result?.result as string | undefined) || undefined;
+  } catch {
+    return undefined;
   }
 }
 

@@ -14,6 +14,7 @@ When you save something, the extension stores in your browser's local storage (I
 
 - the page address (URL), title, description and preview image;
 - a screenshot of the page, if you saved the page you were viewing;
+- the readable text of saved pages, so you can search them and read them if they disappear;
 - pictures and quotes you saved, and notes you wrote;
 - your tags and your interface preferences.
 

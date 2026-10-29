@@ -1,9 +1,10 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
 import { TagInput } from '../components/TagInput';
 import { DISCARD_MESSAGE } from '../components/NoteForm';
 import { retitleNote, setPreviewPreference, updateBookmark } from '../lib/bookmarks';
 import { coverFor } from '../lib/covers';
-import { isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind, type PreviewPreference } from '../lib/db';
+import { db, isDeadLink, kindOf, type Bookmark, type ItemKind, type PreviewKind, type PreviewPreference } from '../lib/db';
 import { formatDate } from '../lib/hooks';
 import { sendToBackground } from '../lib/messages';
 import { platformById } from '../lib/platform';
@@ -132,6 +133,8 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
           </div>
         )}
 
+        {kind === 'link' && <SavedCopy bookmark={bookmark} />}
+
         <label className="field">
           <span className="small muted">Title</span>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus={kind !== 'note'} />
@@ -201,6 +204,29 @@ export function EditDialog({ bookmark, allTags, onClose, onDelete }: Props) {
         </div>
       </form>
     </dialog>
+  );
+}
+
+// The page's words as they were when it was saved, folded away until asked for.
+function SavedCopy({ bookmark }: { bookmark: Bookmark }) {
+  const page = useLiveQuery(() => db.pageTexts.get(bookmark.id), [bookmark.id]);
+  if (!page) return null;
+  const words = page.text.split(/\s+/).length;
+  return (
+    <details className="saved-copy small">
+      <summary>
+        {isDeadLink(bookmark) ? 'Read the copy kept of this page' : 'Saved copy of the page'}
+        <span className="muted">
+          {' · '}
+          {words.toLocaleString()} words, kept {formatDate(page.savedAt)}
+        </span>
+      </summary>
+      <div className="saved-copy-text">
+        {page.text.split('\n').map((line, i) => (
+          <p key={i}>{line}</p>
+        ))}
+      </div>
+    </details>
   );
 }
 

@@ -18,6 +18,8 @@ export function needsEnrichment(b: Bookmark, now = Date.now()): boolean {
   if (kind === 'quote' || kind === 'note') return false;
   if (!b.enrichedAt) return true;
   if (kind === 'image') return false;
+  // Links saved before page text was kept get it on their next visit. Pages that refused us aren't asked again.
+  if (b.linkStatus === 'ok' && !b.textSavedAt) return true;
   return (
     b.linkStatus === 'unreachable' &&
     (b.checkFailures ?? 0) < 2 &&

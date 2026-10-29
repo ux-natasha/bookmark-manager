@@ -1,6 +1,6 @@
 import { purgeOldTrash, saveBookmark } from './lib/bookmarks';
 import { db, type BookmarkSource } from './lib/db';
-import { captureScreenshot, enrichBookmark, makeThumbnail, readLiveHead, savePicture, savePreview } from './lib/enrich';
+import { captureScreenshot, enrichBookmark, makeThumbnail, readLiveHead, readLiveText, savePicture, savePreview } from './lib/enrich';
 import { setLastSave, type BackgroundRequest } from './lib/messages';
 import { isProtectedPage, isSaveableUrl, normalizeUrl } from './lib/normalize';
 import { detectPlatform } from './lib/platform';
@@ -240,9 +240,11 @@ async function savePage(tab: chrome.tabs.Tab, source: BookmarkSource) {
   const isProtected = isProtectedPage(tab.url);
   const hasScreenshot = await db.previews.get([bookmark.id, 'screenshot']);
   if (!hasScreenshot && !isProtected && tab.windowId !== undefined) await captureScreenshot(bookmark.id, tab.windowId);
-  if (created || !bookmark.enrichedAt) {
-    const liveHead = tab.id !== undefined && !isProtected ? await readLiveHead(tab.id) : undefined;
-    await enrichBookmark(bookmark.id, { liveHead });
+  if (created || !bookmark.enrichedAt || !bookmark.textSavedAt) {
+    const live = tab.id !== undefined && !isProtected;
+    const liveHead = live ? await readLiveHead(tab.id!) : undefined;
+    const liveText = live ? await readLiveText(tab.id!) : undefined;
+    await enrichBookmark(bookmark.id, { liveHead, liveText });
   }
 }
 

@@ -50,6 +50,8 @@ export interface Bookmark {
   // Extra details some covers use, read where they're cheap to get. Every template works without them.
   details?: BookmarkDetails;
   enrichedAt?: number;
+  // Set once the page's words have been looked for (lib/pageText.ts), whether or not there were any to keep.
+  textSavedAt?: number;
 
   linkStatus?: LinkStatus;
   lastCheckedAt?: number;
@@ -101,10 +103,18 @@ export interface Preview {
   createdAt: number;
 }
 
+// A page's readable words, kept apart like previews: they're big, and only search and the saved copy need them.
+export interface PageText {
+  bookmarkId: string;
+  text: string;
+  savedAt: number;
+}
+
 export const db = new Dexie('bookmark-manager') as Dexie & {
   bookmarks: EntityTable<Bookmark, 'id'>;
   previews: Dexie.Table<Preview, [string, PreviewKind]>;
   tagMeta: EntityTable<TagMeta, 'tag'>;
+  pageTexts: EntityTable<PageText, 'bookmarkId'>;
 };
 
 db.version(1).stores({
@@ -136,6 +146,10 @@ db.version(4)
         if (tags.length !== b.tags?.length || tags.some((t, i) => t !== b.tags[i])) b.tags = tags;
       }),
   );
+
+db.version(5).stores({
+  pageTexts: 'bookmarkId',
+});
 
 export function kindOf(b: Pick<Bookmark, 'kind'>): ItemKind {
   return b.kind ?? 'link';

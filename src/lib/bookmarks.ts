@@ -186,9 +186,10 @@ export async function liveBookmarks(): Promise<Bookmark[]> {
 
 export async function purgeOldTrash(): Promise<number> {
   const cutoff = Date.now() - TRASH_RETENTION_MS;
-  return db.transaction('rw', db.bookmarks, db.previews, async () => {
+  return db.transaction('rw', db.bookmarks, db.previews, db.pageTexts, async () => {
     const ids = await db.bookmarks.where('deletedAt').below(cutoff).primaryKeys();
     await db.previews.where('bookmarkId').anyOf(ids).delete();
+    await db.pageTexts.bulkDelete(ids);
     return db.bookmarks.bulkDelete(ids).then(() => ids.length);
   });
 }

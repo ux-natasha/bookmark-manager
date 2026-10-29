@@ -44,7 +44,7 @@ describe('link status', () => {
   it('retries an unreachable site later, but not straight away', () => {
     const now = 100 * HOUR;
     expect(needsEnrichment(bookmark(), now)).toBe(true);
-    expect(needsEnrichment(bookmark({ enrichedAt: 1, linkStatus: 'ok' }), now)).toBe(false);
+    expect(needsEnrichment(bookmark({ enrichedAt: 1, textSavedAt: 1, linkStatus: 'ok' }), now)).toBe(false);
     const failedOnce = { enrichedAt: 1, linkStatus: 'unreachable' as const, checkFailures: 1 };
     expect(needsEnrichment(bookmark({ ...failedOnce, lastCheckedAt: now - HOUR }), now)).toBe(false);
     expect(needsEnrichment(bookmark({ ...failedOnce, lastCheckedAt: now - 7 * HOUR }), now)).toBe(true);
