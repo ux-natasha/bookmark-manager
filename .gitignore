@@ -3,7 +3,6 @@ dist
 *.log
 .claude/
 .impeccable/live/sessions/
-docs/what-sets-folia-apart.md
 docs/landing-story.md
 site/hero-keep-this-page.html
 site/hero-pinboard-shelf.html
