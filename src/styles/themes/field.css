@@ -645,6 +645,7 @@ button.swatch[aria-pressed='true'] {
 }
 
 [data-theme='field'] .tag-strip-tag[aria-pressed='true'] .tag-strip-name {
+  color: var(--mark-text, var(--text));
   background: none;
 }
 

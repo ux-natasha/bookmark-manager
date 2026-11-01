@@ -60,7 +60,7 @@ Single centred column, max width **1280px**, side padding `clamp(16px, 3vw, 36px
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│ Bookmarks                                   [More ▾] [☾] [Add from a post] │  6.1 header
+│ folia                                       [More ▾] [☾] [Add from a post] │  6.1 header
 │                                                                            │
 │ 18 KEPT · 8 LINKS · 3 QUOTES · 4 PICTURES · 3 NOTES      ┌───────────────┐ │  6.2 hero
 │ Everything you kept.                                     │ Your library  │ │
@@ -118,7 +118,7 @@ Replace the placeholder tokens in `src/styles/base.css`. Keep the existing names
 | `--halo-strength` | `0.22` | `0.32` | Opacity of the blurred colour halo behind media |
 | `--stale-tint` | `rgba(201,160,80,0.18)` | `rgba(235,212,150,0.10)` | Shading behind stale tags (6.7) |
 | `--tidy-bar` | `rgba(201,160,80,0.20)` | `rgba(235,212,150,0.12)` | Tidy-up bar fill |
-| `--age-done` | `#C9A86A` | `#C9A86A` | Look ahead ticks already passed |
+| `--age-done` | `#A07B3A` | `#C9A86A` | Look ahead ticks already passed (3.8:1 / 7.5:1 on surface) |
 
 `--accent-text`, `--surface-muted` and `--success` stay for dialogs that aren't restyled yet (map `--surface-muted` to `--hover`).
 
@@ -137,7 +137,7 @@ Eight colours, given to the eight most-used top-level tags (assignment rules in 
 | 7 stone | `#8a857a` | `#5C584F` | `#C2BCAF` |
 | 8 periwinkle | `#7b93c4` | `#4B63A0` | `#A9BCE6` |
 
-Expose as `--tag-1` … `--tag-8` and `--tag-1-text` … `--tag-8-text`. Highlight behind a selected tag: the mark colour at 40% alpha (`#RRGGBB66`) in a band from 55% to 92% of the line height (a highlighter stroke, not a full box).
+Expose as `--tag-1` … `--tag-8` and `--tag-1-text` … `--tag-8-text`. Highlight behind a selected tag: the mark colour at 40% alpha (`#RRGGBB66`) in a band from 55% to 92% of the line height (a highlighter stroke, not a full box). A selected strip name turns `--text` on the band: the tag colour over its own band is under 4.5:1 in light mode.
 
 ### 4.3 Type
 
@@ -151,7 +151,7 @@ Self-host the fonts as woff2 in `public/fonts/` (extension pages shouldn't depen
 
 | Role | Spec |
 |---|---|
-| Wordmark | serif 26px, 400 |
+| Wordmark | "folia", lowercase, Bodoni Moda italic 30px 500 (`--font-wordmark`), in every theme |
 | Headline | serif `clamp(50px, 6.4vw, 84px)`, line-height 0.93, letter-spacing -0.025em; "kept." italic |
 | Summary line | mono 11px, uppercase, letter-spacing 0.1em, `--text-muted` |
 | Card title | serif 19px, 500, line-height 1.22, `text-wrap: pretty`, max 3 lines |

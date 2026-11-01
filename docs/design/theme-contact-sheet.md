@@ -63,7 +63,7 @@ Cormorant sets small for its size, so every size below is larger than its Defaul
 
 | Role | Spec |
 |---|---|
-| Wordmark | serif 30px 500, centred in the header |
+| Wordmark | "folia", Bodoni Moda italic 32px 500, centred in the header |
 | Headline | serif 500, `clamp(56px, 6.4vw, 84px)`, line-height 0.9: "Everything you kept," then on a new line, italic, "on one sheet." |
 | Cell title | serif 31px 500, line-height 1 |
 | Quote | serif `clamp(36px, 3.8vw, 52px)`, line-height 1, `text-wrap: balance`, wrapped in curly quotes |

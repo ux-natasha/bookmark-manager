@@ -21,6 +21,11 @@
 }
 
 /* Segmented control: the tidy-up threshold here, "Links show" in Covers. */
+/* A picked strip tag goes to ink: the tag's own colour on its band is under 4.5:1 in light mode. */
+.tag-strip-tag[aria-pressed='true'] .tag-strip-name {
+  color: var(--text);
+}
+
 .segmented {
   display: inline-flex;
   padding: 3px;

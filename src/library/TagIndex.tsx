@@ -204,7 +204,7 @@ export function TagIndex({ id, index, query, onQuery, threshold, onThreshold, un
           {body}
           {archived}
           <footer className="ix-folio" aria-hidden="true">
-            <span>Bookmarks · Index</span>
+            <span>Folia · Index</span>
             <span>— {300 + index.groups.length} —</span>
           </footer>
         </div>

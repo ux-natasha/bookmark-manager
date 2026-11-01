@@ -46,7 +46,7 @@ Overrides under `:root[data-theme="covers"]`.
 | `--border-strong` | `rgba(31,29,26,0.28)` | `rgba(231,236,243,0.30)` | Buttons, inputs |
 | `--solid-bg` / `--solid-text` | `#1F1D1A` / `#ECE9E2` | `#E7ECF3` / `#0D121A` | |
 | `--danger` | `#8a2f1c` | `#F2A08F` | Dead-link text |
-| `--ribbon` | `#A3302A` | `#D9604F` | Bookmark ribbons and the "Back in print" band; band text `#FBF8F1` (6.57:1) |
+| `--ribbon` | `#A3302A` | `#D9604F` | Bookmark ribbons and the "Back in print" band; band text `#FBF8F1` in light (6.57:1), `#16120F` in dark (5.09:1) |
 | `--shelf` | `linear-gradient(180deg, #d8cfbd, #c6bba5)` | `linear-gradient(180deg, #2a3342, #1c2330)` | 12px ledge with `0 10px 14px -8px` shadow |
 | `--erratum` | `#F3E9CF` | `#2B2719` | Erratum slips (tidy bar, toast); text `#3E3424` (10.09:1), label `#5A4C33` (6.9:1) |
 
@@ -62,7 +62,7 @@ Overrides under `:root[data-theme="covers"]`.
 
 | Role | Spec |
 |---|---|
-| Masthead wordmark | Bodoni 600 54px, letter-spacing 0.02em, all caps "BOOKMARKS", between a 3px double rule above and a 1px rule below |
+| Masthead wordmark | "folia", Bodoni italic 500 60px, lowercase, letter-spacing -0.01em, between a 3px double rule above and a 1px rule below |
 | Dateline | mono 10px, letter-spacing 0.1em: "VOL. 1 · OCTOBER 2026" left, counts right, with a 1px rule below |
 | Headline | Newsreader 400, `clamp(50px, 6vw, 76px)`: "Everything you *kept.*" |
 | Cover title under the cover | Newsreader 17px 500 |
@@ -205,7 +205,7 @@ Its own component, `TagIndexPage.tsx`. Data and behaviour are the Default spec's
     - "31 tags marked † haven't been used in a year. Leave them out of the next edition?", or the Look ahead form.
     - A solid "Leave out 31" button.
   - **Archived tags** are listed after the last letter as "Out of print:" plus a run-in of names, each clickable to bring it back, and "Bring them all back".
-  - **Folio:** a footer with "BOOKMARKS · INDEX" left and "— 323 —" right in mono 10px (the number is decorative: 300 + letter count).
+  - **Folio:** a footer with "FOLIA · INDEX" left and "— 323 —" right in mono 10px (the number is decorative: 300 + letter count).
 
 ### 6.7 Buttons, menu, toast
 

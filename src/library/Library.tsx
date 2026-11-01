@@ -188,6 +188,20 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
+  // "/" jumps to search from anywhere but a field or an open dialog.
+  const searchInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+      const inField = e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]');
+      if (inField || document.querySelector('dialog[open]')) return;
+      if (!searchInput.current) return;
+      e.preventDefault();
+      searchInput.current.focus();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
   const now = useMemo(() => addMonths(Date.now(), lookAheadMonths), [stats, tagMeta, lookAheadMonths, visibleAgain]);
   const lookingAhead = lookAheadMonths > 0;
   const tagIndex = useMemo(
@@ -502,13 +516,18 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
         <AgeContext.Provider value={{ now, lookingAhead, revived, playing, onDust: dustOne }}>
           {field && !isEmpty && <Field colors={roomColors} freshness={roomFreshness} />}
           <div className="library">
+            {bookmarks && filtered.length > 0 && (
+              <a className="skip-link" href="#library-items">
+                Skip to your library
+              </a>
+            )}
             <header className="library-header">
               {contact && (
                 <p className="header-summary">
                   {bookmarks?.length ?? 0} kept{fetching > 0 && ` · ${fetching} fetching`}
                 </p>
               )}
-              <p className="wordmark">Bookmarks</p>
+              <p className="wordmark">folia</p>
               {covers && (
                 <p className="dateline">
                   <span>{volumeLine(bookmarks)}</span>
@@ -596,8 +615,10 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                       <path d="m20 20-3.5-3.5" />
                     </svg>
                     <input
+                      ref={searchInput}
                       type="search"
                       aria-label="Search everything you kept"
+                      aria-keyshortcuts="/"
                       placeholder="Search links, quotes, pictures, notes…"
                       value={query}
                       onChange={(e) => {
@@ -758,6 +779,13 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                     </div>
                   </div>
 
+                  {/* Always in the page, so screen readers hear each new count as search and filters change. */}
+                  <p className="visually-hidden" role="status">
+                    {(filtersActive || searching) &&
+                      (filtered.length > 0
+                        ? `${filtered.length} ${countNoun(filtered.length, kindFilter, kindCounts.length > 1, copy.itemNoun)}`
+                        : copy.noResults)}
+                  </p>
                   {(filtersActive || searching) && filtered.length > 0 && (
                     <p className="result-count">
                       {filtered.length} {countNoun(filtered.length, kindFilter, kindCounts.length > 1, copy.itemNoun)}
@@ -791,7 +819,7 @@ function LibraryPage({ theme, setTheme, linksShow, setLinksShow }: PageProps) {
                       </button>
                     </div>
                   ) : (
-                    <div className="library-grid" ref={gridTop}>
+                    <div className="library-grid" ref={gridTop} id="library-items" tabIndex={-1}>
                       {renderItems(filtered.slice(0, visible))}
                     </div>
                   )}

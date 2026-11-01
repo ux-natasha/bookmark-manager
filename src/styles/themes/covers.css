@@ -2,23 +2,6 @@
    Token overrides first, then the rules that only exist in this theme. Everything else is the Default's.
    Cover text is sized in cqi against a 230px cover (1px = 0.435cqi), so the typesetting holds at any width. */
 
-/* Only fetched when something in this theme uses the family. */
-@font-face {
-  font-family: 'Bodoni Moda';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('/fonts/bodoni-moda-latin-opsz-normal.woff2') format('woff2-variations');
-}
-
-@font-face {
-  font-family: 'Bodoni Moda';
-  font-style: italic;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('/fonts/bodoni-moda-latin-opsz-italic.woff2') format('woff2-variations');
-}
-
 :root[data-theme='covers'] {
   --bg: #ece9e2;
   --surface: #fbf8f1;
@@ -122,9 +105,8 @@
   border-top: 3px double var(--text);
   border-bottom: 1px solid var(--text);
   text-align: center;
-  font: 600 54px / 1 var(--font-display);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font: italic 500 60px / 1 var(--font-wordmark);
+  letter-spacing: -0.01em;
 }
 
 .dateline {
@@ -1132,6 +1114,7 @@ button.rack-link:hover:not(:disabled) {
 }
 
 [data-theme='covers'] .tag-strip-tag[aria-pressed='true'] .tag-strip-name {
+  color: var(--mark-text, var(--text));
   background-image: none;
   text-decoration: underline;
   text-decoration-thickness: 1px;

@@ -4,6 +4,23 @@
    Breakpoints (media queries can't read custom properties, so they live here): every query is written
    max-width one below the step, i.e. 479px, 719px, 859px, 1099px. */
 
+/* Bodoni Moda sets the folia wordmark in every theme, and the Covers display type. */
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/bodoni-moda-latin-opsz-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: italic;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('/fonts/bodoni-moda-latin-opsz-italic.woff2') format('woff2-variations');
+}
+
 @font-face {
   font-family: 'Newsreader';
   font-style: normal;
@@ -54,7 +71,7 @@
   --halo-strength: 0.22;
   --stale-tint: rgba(201, 160, 80, 0.18);
   --tidy-bar: rgba(201, 160, 80, 0.2);
-  --age-done: #c9a86a;
+  --age-done: #a07b3a;
 
   /* Kept for dialogs that aren't restyled yet. */
   --surface-muted: var(--hover);
@@ -81,6 +98,7 @@
   --font-serif: 'Newsreader', Georgia, serif;
   --font-sans: 'Geist', system-ui, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-wordmark: 'Bodoni Moda', Didot, Georgia, serif;
   --font: var(--font-sans);
 
   --gap-section: 26px;
@@ -143,6 +161,7 @@
   --halo-strength: 0.32;
   --stale-tint: rgba(235, 212, 150, 0.1);
   --tidy-bar: rgba(235, 212, 150, 0.12);
+  --age-done: #c9a86a;
   --accent-text: #0d121a;
   --success: #8fd19e;
   --tag-1-text: #e8a985;
@@ -175,6 +194,7 @@
     --halo-strength: 0.32;
     --stale-tint: rgba(235, 212, 150, 0.1);
     --tidy-bar: rgba(235, 212, 150, 0.12);
+    --age-done: #c9a86a;
     --accent-text: #0d121a;
     --success: #8fd19e;
     --tag-1-text: #e8a985;

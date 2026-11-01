@@ -138,7 +138,7 @@
 [data-theme='contact'] .wordmark {
   grid-column: 2;
   margin: 0;
-  font: 500 30px / 1 var(--font-serif);
+  font: italic 500 32px / 1 var(--font-wordmark);
 }
 
 .header-actions {

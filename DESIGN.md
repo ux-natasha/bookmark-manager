@@ -16,7 +16,7 @@ colors:
   note-paper: "#fffdf8"
   aged-paper: "#eadbb8"
   aged-ink: "#6b5c42"
-  age-done: "#c9a86a"
+  age-done: "#a07b3a"
   night-ground: "#0d121a"
   night-surface: "#161d28"
   night-ink: "#e7ecf3"
@@ -159,7 +159,7 @@ A warm paper and ink palette held almost entirely in neutrals. The colour comes 
 - **Slate Ink** (`accent-slate`): the hanging quote mark, focus accents and the tag-input focus ring. In dark mode it becomes **Lamplight Yellow** (`night-accent`). It covers well under 5% of any screen.
 
 ### Secondary
-- **The eight tag inks** (`tag-terracotta` through `tag-periwinkle`): each mark colour has a darker text variant (`--tag-N-text`) that passes 4.5:1 on the ground in its mode. They go to the eight most-used top-level tags and nothing else. A selected tag gets a highlighter band in its mark colour at 40% alpha, running from 55% to 92% of the line height. It is a stroke, not a box.
+- **The eight tag inks** (`tag-terracotta` through `tag-periwinkle`): each mark colour has a darker text variant (`--tag-N-text`) that passes 4.5:1 on the ground in its mode. They go to the eight most-used top-level tags and nothing else. A selected tag gets a highlighter band in its mark colour at 40% alpha, running from 55% to 92% of the line height. It is a stroke, not a box, and the selected name turns ink on it so it keeps 4.5:1.
 
 ### Tertiary
 - **Aged Paper** (`aged-paper`) and **Aged Ink** (`aged-ink`): the colours a thing turns when it's left alone. They are mixed in with `color-mix()` by `--t`, never applied as flat states. Aged ink on aged paper holds 4.74:1 (6.29:1 in dark).
